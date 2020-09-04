@@ -28,12 +28,15 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
+    private LeptonCamera camera;
+
     private enum UsbPermission { Unknown, Requested, Granted, Denied };
 
     private static final String INTENT_ACTION_GRANT_USB = BuildConfig.APPLICATION_ID + ".GRANT_USB";
 
     private TextView txtView;
     private Button scanBtn;
+    private Button analysisBtn;
 
     private UsbPermission usbPermission = UsbPermission.Unknown;
     private SerialInputOutputManager usbIoManager;
@@ -46,8 +49,12 @@ public class MainActivity extends AppCompatActivity {
 
         txtView = (TextView) findViewById(R.id.textView);
         scanBtn = (Button) findViewById(R.id.scanBtn);
+        analysisBtn = (Button) findViewById(R.id.analysisBtn);
 
-        scanBtn.setOnClickListener(v -> connectCamera(v));
+        camera = new LeptonCamera(this);
+
+        scanBtn.setOnClickListener(v -> camera.connect());
+        analysisBtn.setOnClickListener(v -> camera.toggleAnalysisMode());
     }
 
     private void connectCamera(View v) {
