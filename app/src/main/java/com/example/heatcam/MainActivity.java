@@ -37,10 +37,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtView;
     private Button scanBtn;
     private Button analysisBtn;
+    private Button testBtn;
 
     private UsbPermission usbPermission = UsbPermission.Unknown;
     private SerialInputOutputManager usbIoManager;
     private UsbSerialPort usbSerialPort;
+    private TestFileReader testFileReader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,11 +52,18 @@ public class MainActivity extends AppCompatActivity {
         txtView = (TextView) findViewById(R.id.textView);
         scanBtn = (Button) findViewById(R.id.scanBtn);
         analysisBtn = (Button) findViewById(R.id.analysisBtn);
+        testBtn = (Button) findViewById(R.id.testBtn);
 
         camera = new LeptonCamera(this);
+        testFileReader = new TestFileReader(this, camera);
 
         scanBtn.setOnClickListener(v -> camera.connect());
         analysisBtn.setOnClickListener(v -> camera.toggleAnalysisMode());
+        testBtn.setOnClickListener(v -> sendTestData());
+    }
+
+    private void sendTestData(){
+        testFileReader.readTestFile("data.txt");
     }
 
     private void connectCamera(View v) {

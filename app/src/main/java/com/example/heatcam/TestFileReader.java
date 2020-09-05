@@ -1,0 +1,42 @@
+package com.example.heatcam;
+
+import android.content.Context;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+public class TestFileReader {
+    private Context context;
+    private LeptonCamera camera;
+    public TestFileReader(Context context, LeptonCamera camera){
+        this.context = context;
+        this.camera = camera;
+    }
+
+    protected void readTestFile(String filu) {
+        try {
+            InputStream is = context.getApplicationContext().getAssets().open(filu);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            String line;
+
+            while ((line = reader.readLine()) != null){
+                //jokainen line on framen yksi vaakarivi
+                String[] palat = line.split(" ");
+                byte[] tavut = new byte[palat.length];
+                for(int i = 0; i < palat.length; i++){
+                    try {
+                        tavut[i] = Byte.parseByte(palat[i]);
+                    } catch (NumberFormatException e) {
+                        continue;
+                    }
+                }
+                camera.onNewData(tavut);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
