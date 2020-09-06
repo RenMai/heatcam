@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestFileReader {
     private Context context;
@@ -16,27 +18,32 @@ public class TestFileReader {
     }
 
     protected void readTestFile(String filu) {
-        try {
-            InputStream is = context.getApplicationContext().getAssets().open(filu);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            String line;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    InputStream is = context.getApplicationContext().getAssets().open(filu);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                    String line;
 
-            while ((line = reader.readLine()) != null){
-                //jokainen line on framen yksi vaakarivi
-                String[] palat = line.split(" ");
-                byte[] tavut = new byte[palat.length];
-                for(int i = 0; i < palat.length; i++){
-                    try {
-                        tavut[i] = Byte.parseByte(palat[i]);
-                    } catch (NumberFormatException e) {
-                        continue;
+                    while ((line = reader.readLine()) != null){
+                        //jokainen line on framen yksi vaakarivi
+                        String[] palat = line.split(" ");
+                        byte[] tavut = new byte[palat.length];
+                        for(int i = 0; i < palat.length; i++){
+                            try {
+                                tavut[i] = Byte.parseByte(palat[i]);
+                            } catch (NumberFormatException e) {
+                                continue;
+                            }
+                        }
+                        camera.onNewData(tavut);
+                        Thread.sleep(2);
                     }
+                } catch (IOException | InterruptedException e ) {
+                    e.printStackTrace();
                 }
-                camera.onNewData(tavut);
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        }).start();
     }
 }
