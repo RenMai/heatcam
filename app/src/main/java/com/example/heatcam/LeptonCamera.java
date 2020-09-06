@@ -17,8 +17,8 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.Executors;
 
 
@@ -50,6 +50,8 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
 
     private boolean analysisMode;
 
+    private Vector<Integer> colorTable;
+
     public LeptonCamera(Activity a) {
         this.activity = a;
         this.width = 160;
@@ -59,8 +61,31 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         this.analysisMode = false;
         this.txtView = (TextView) a.findViewById(R.id.textView);
         this.imgView = (ImageView) a.findViewById(R.id.imageView);
+        this.colorTable = createColorTable();
     }
 
+    // vois siirtää tän joskus johki utility luokkaa
+    private Vector<Integer> createColorTable() {
+        Vector<Integer> table = new Vector<>();
+        double a, b;
+        int R, G, B;
+        for(int i = 0; i < 256; i++){
+            a = i * 0.01236846501;
+            b = Math.cos(a - 1);
+            R = (int)(Math.pow(2, Math.sin(a - 1.6)) * 200);
+            G = (int) (Math.atan(a) * b * 155 + 100.0);
+            B = (int) (b * 255);
+
+            R   = Math.min(R, 255);
+            G = Math.min(G, 255);
+            B  = Math.min(B, 255);
+            R  = Math.max(R, 0);
+            G = Math.max(G, 0);
+            B = Math.max(B, 0);
+            table.add(0xff << 24 | (R & 0xff)  << 16 | (G & 0xff) << 8 | (B & 0xff));
+        }
+        return table;
+    }
     @Override
     public void onNewData(byte[] data) {
         // TODO: implementation
@@ -86,7 +111,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
                 for(int j = 0; j < width; j++) {
                     int dataInd = i+j+4;
                     if(dataInd < bytesRead) {
-                        rawFrame[lineNumber][j] = data[dataInd];
+                        rawFrame[lineNumber][j] = colorTable.elementAt(data[dataInd] & 0xff);
                     }
                 }
             }
@@ -200,13 +225,13 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
 
     // https://stackoverflow.com/a/18784216
     public static Bitmap bitmapFromArray(int[][] pixels2d){
-        int imgWidth = pixels2d.length;
-        int imgHeight = pixels2d[0].length;
+        int imgHeight = pixels2d.length;
+        int imgWidth = pixels2d[0].length;
         int[] pixels = new int[imgWidth * imgHeight];
         int pixelsIndex = 0;
-        for (int i = 0; i < imgWidth; i++)
+        for (int i = 0; i < imgHeight; i++)
         {
-            for (int j = 0; j < imgHeight; j++)
+            for (int j = 0; j < imgWidth; j++)
             {
                 pixels[pixelsIndex] = pixels2d[i][j];
                 pixelsIndex ++;
