@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -62,6 +63,16 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         this.rawTelemetry = new int [50];
         this.analysisMode = false;
         this.colorTable = createColorTable();
+    }
+
+    public void clickedHeatMapCoordinate(float xTouch, float yTouch, float xImg, float yImg){
+        float xScale = (float)this.width/xImg;
+        float yScale = (float)this.height/yImg;
+
+        int xPiste = (int)(xTouch*xScale);
+        int yPiste = (int)(yTouch*yScale);
+
+        System.out.println(rawFrame[yPiste][xPiste]);
     }
 
     // vois siirtää tän joskus johki utility luokkaa
