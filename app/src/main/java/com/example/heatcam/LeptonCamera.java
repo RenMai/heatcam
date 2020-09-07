@@ -53,6 +53,16 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         this.analysisMode = false;
     }
 
+    public void clickedHeatMapCoordinate(float xTouch, float yTouch, float xImg, float yImg){
+        float xScale = (float)this.width/xImg;
+        float yScale = (float)this.height/yImg;
+
+        int xPiste = (int)(xTouch*xScale);
+        int yPiste = (int)(yTouch*yScale);
+
+        System.out.println(rawFrame[yPiste][xPiste]);
+    }
+
     @Override
     public void onNewData(byte[] data) {
         // check if data is last row

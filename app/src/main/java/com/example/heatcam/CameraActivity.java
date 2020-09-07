@@ -1,5 +1,6 @@
 package com.example.heatcam;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -28,6 +29,7 @@ public class CameraActivity extends Fragment implements CameraListener {
 
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -46,6 +48,11 @@ public class CameraActivity extends Fragment implements CameraListener {
         scanBtn.setOnClickListener(v -> camera.connect());
         analysisBtn.setOnClickListener(v -> camera.toggleAnalysisMode());
         testBtn.setOnClickListener(v -> testFileReader.readTestFile("data.txt"));
+
+        imgView.setOnTouchListener((v, event) -> {
+            camera.clickedHeatMapCoordinate(event.getX(), event.getY(), imgView.getWidth(), imgView.getHeight());
+            return false;
+        });
 
         return view;
     }
