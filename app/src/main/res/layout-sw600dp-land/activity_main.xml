@@ -6,64 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/scanBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Scan"
+    <fragment
+        android:id="@+id/fragment"
+        android:name="com.example.heatcam.CameraActivity"
+        android:layout_width="1022dp"
+        android:layout_height="598dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.477"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.106" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="187dp"
-        android:layout_height="108dp"
-        android:text="TextView"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.21"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scanBtn"
-        app:layout_constraintVertical_bias="0.321" />
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="492dp"
-        android:layout_height="492dp"
-        android:layout_marginTop="53dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.878"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/analysisBtn"
-        app:layout_constraintVertical_bias="0.25"
-        app:srcCompat="@drawable/ic_launcher_background" />
-
-    <Button
-        android:id="@+id/analysisBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Analysis"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.326"
-        app:layout_constraintStart_toEndOf="@+id/scanBtn"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.106" />
-
-    <Button
-        android:id="@+id/testBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Test"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/scanBtn"
-        app:layout_constraintHorizontal_bias="0.618"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.106" />
+        tools:layout="@layout/activity_camera_fragment" />
 </androidx.constraintlayout.widget.ConstraintLayout>

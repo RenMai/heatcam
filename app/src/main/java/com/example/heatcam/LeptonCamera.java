@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,6 +35,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
     // raw data arrays
     private int rawFrame[][];
     private int rawTelemetry[];
+    private CameraListener listener;
 
     private enum UsbPermission { Unknown, Requested, Granted, Denied };
 
@@ -46,7 +48,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
     private Activity activity;
 
     private TextView txtView;
-    private ImageView imgView;
+
 
     private boolean analysisMode;
 
@@ -59,8 +61,6 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         this.rawFrame = new int[120][160];
         this.rawTelemetry = new int [50];
         this.analysisMode = false;
-        this.txtView = (TextView) a.findViewById(R.id.textView);
-        this.imgView = (ImageView) a.findViewById(R.id.imageView);
         this.colorTable = createColorTable();
     }
 
@@ -105,7 +105,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
             lineNumber = data[i+3];
 
             int finalLineNumber = lineNumber;
-            activity.runOnUiThread(() -> { txtView.setText(String.valueOf(finalLineNumber));});
+          //  activity.runOnUiThread(() -> { txtView.setText(String.valueOf(finalLineNumber));});
 
             if(lineNumber < height){ // picture
                 for(int j = 0; j < width; j++) {
@@ -192,9 +192,10 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
     public void toggleAnalysisMode(){
         // TODO: don't think this works
         if (!analysisMode) {
+
             try {
-                usbSerialPort.write("B".getBytes(), 1);
-                usbSerialPort.write("8".getBytes(), 1);
+               usbSerialPort.write("B".getBytes(), 1);
+               usbSerialPort.write(new byte[]{0x08}, 1);
                 analysisMode = true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -202,7 +203,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         } else {
             try {
                 usbSerialPort.write("B".getBytes(), 1);
-                usbSerialPort.write("2".getBytes(), 1);
+               usbSerialPort.write(new byte[]{0x02}, 1);
                 analysisMode = false;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -218,7 +219,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         // TODO: convert rawFrame[][] to Bitmap
         // update image with listener
         Bitmap camImage = bitmapFromArray(rawFrame);
-        activity.runOnUiThread(() -> { imgView.setImageBitmap(camImage);});
+        listener.updateImage(camImage);
 
 
     }
@@ -238,5 +239,9 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
             }
         }
         return Bitmap.createBitmap(pixels, imgWidth, imgHeight, Bitmap.Config.ARGB_8888);
+    }
+
+    public void setListener(CameraListener listener) {
+        this.listener = listener;
     }
 }
