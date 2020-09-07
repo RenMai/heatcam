@@ -7,15 +7,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
-import android.util.Log;
-import android.widget.ImageView;
-import android.widget.TextView;
-
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -28,31 +23,26 @@ import java.util.concurrent.Executors;
 // TODO: tests
 public class LeptonCamera implements SerialInputOutputManager.Listener {
 
+    private Vector<Integer> colorTable = ImageUtils.createColorTable();
+
     // max width and height of image
     private int width;
     private int height;
 
     // raw data arrays
-    private int rawFrame[][];
-    private int rawTelemetry[];
+    private int[][] rawFrame;
+    private int[] rawTelemetry;
+
+    private Activity activity;
     private CameraListener listener;
 
     private enum UsbPermission { Unknown, Requested, Granted, Denied };
-
     private static final String INTENT_ACTION_GRANT_USB = BuildConfig.APPLICATION_ID + ".GRANT_USB";
-
     private UsbPermission usbPermission = UsbPermission.Unknown;
-
     private UsbSerialPort usbSerialPort;
     private SerialInputOutputManager usbIoManager;
-    private Activity activity;
-
-    private TextView txtView;
-
 
     private boolean analysisMode;
-
-    private Vector<Integer> colorTable;
 
     public LeptonCamera(Activity a) {
         this.activity = a;
@@ -61,37 +51,25 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         this.rawFrame = new int[120][160];
         this.rawTelemetry = new int [50];
         this.analysisMode = false;
-        this.colorTable = createColorTable();
     }
 
-    // vois siirtää tän joskus johki utility luokkaa
-    private Vector<Integer> createColorTable() {
-        Vector<Integer> table = new Vector<>();
-        double a, b;
-        int R, G, B;
-        for(int i = 0; i < 256; i++){
-            a = i * 0.01236846501;
-            b = Math.cos(a - 1);
-            R = (int)(Math.pow(2, Math.sin(a - 1.6)) * 200);
-            G = (int) (Math.atan(a) * b * 155 + 100.0);
-            B = (int) (b * 255);
-
-            R   = Math.min(R, 255);
-            G = Math.min(G, 255);
-            B  = Math.min(B, 255);
-            R  = Math.max(R, 0);
-            G = Math.max(G, 0);
-            B = Math.max(B, 0);
-            table.add(0xff << 24 | (R & 0xff)  << 16 | (G & 0xff) << 8 | (B & 0xff));
-        }
-        return table;
-    }
     @Override
     public void onNewData(byte[] data) {
-        // TODO: implementation
-        // data = 1 row of image (164 bytes)
-        // basically should do the same as ::onReadyRead() in LeptonCamDemo thermalcamera.cpp
+        // check if data is last row
+        if(parseData(data)) {
+            int maxRaw, minRaw;
+            maxRaw = rawTelemetry[18] + rawTelemetry[19]*256;
+            minRaw = rawTelemetry[21] + rawTelemetry[22]*256;
 
+            // TODO: convert rawFrame[][] to Bitmap
+            // update image with listener
+            Bitmap camImage = ImageUtils.bitmapFromArray(rawFrame);
+            listener.updateImage(camImage);
+        }
+    }
+
+    // parse byte data into rawFrame 2d array
+    private boolean parseData(byte[] data) {
         int bytesRead = data.length;
         int byteindx = 0;
         int lineNumber;
@@ -101,33 +79,25 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         String pattern = new String(startBytes, StandardCharsets.UTF_8);
         byteindx = rowBytes.indexOf(pattern);
 
-        for (i= byteindx; i < bytesRead; i += (width+4)) {
-            lineNumber = data[i+3];
+        for (i = byteindx; i < bytesRead; i += (width+4)) {
+            lineNumber = data[i + 3];
 
-            int finalLineNumber = lineNumber;
-          //  activity.runOnUiThread(() -> { txtView.setText(String.valueOf(finalLineNumber));});
-
-            if(lineNumber < height){ // picture
-                for(int j = 0; j < width; j++) {
-                    int dataInd = i+j+4;
-                    if(dataInd < bytesRead) {
+            if (lineNumber < height) { // picture
+                for (int j = 0; j < width; j++) {
+                    int dataInd = i + j + 4;
+                    if (dataInd < bytesRead) {
                         rawFrame[lineNumber][j] = colorTable.elementAt(data[dataInd] & 0xff);
                     }
                 }
-            }
-            if(lineNumber == height) { // telemetry
-                for(int j = 0; j < 48; j++) {
-                    rawTelemetry[j] = data[i+4+j];
+            } else if (lineNumber == height) { // telemetry
+                for (int j = 0; j < 48; j++) {
+                    rawTelemetry[j] = data[i + 4 + j];
+
                 }
-                onNewFrame();
-                //break;
-            }
-            if(lineNumber > height) { // invalid camera selected
-                continue;
+                return true;
             }
         }
-
-        //activity.runOnUiThread(() -> { txtView.setText(Arrays.toString(data));});
+        return false;
     }
 
     @Override
@@ -209,36 +179,6 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void onNewFrame() {
-        int maxRaw, minRaw;
-        maxRaw = rawTelemetry[18] + rawTelemetry[19]*256;
-        minRaw = rawTelemetry[21] + rawTelemetry[22]*256;
-
-        // TODO: convert rawFrame[][] to Bitmap
-        // update image with listener
-        Bitmap camImage = bitmapFromArray(rawFrame);
-        listener.updateImage(camImage);
-
-
-    }
-
-    // https://stackoverflow.com/a/18784216
-    public static Bitmap bitmapFromArray(int[][] pixels2d){
-        int imgHeight = pixels2d.length;
-        int imgWidth = pixels2d[0].length;
-        int[] pixels = new int[imgWidth * imgHeight];
-        int pixelsIndex = 0;
-        for (int i = 0; i < imgHeight; i++)
-        {
-            for (int j = 0; j < imgWidth; j++)
-            {
-                pixels[pixelsIndex] = pixels2d[i][j];
-                pixelsIndex ++;
-            }
-        }
-        return Bitmap.createBitmap(pixels, imgWidth, imgHeight, Bitmap.Config.ARGB_8888);
     }
 
     public void setListener(CameraListener listener) {
