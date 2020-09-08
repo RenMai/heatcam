@@ -131,11 +131,19 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
 
         // Open a connection to the first available driver.
         UsbSerialDriver driver = availableDrivers.get(0);
+        String deviceInfo = driver.getDevice().getProductName() + " - " + driver.getDevice().getManufacturerName() +
+                " - " + driver.getDevice().getProductId() + " - " + driver.getDevice().getVendorId();
+        listener.updateText(deviceInfo);
         UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
-        if (connection == null) {
+        if (connection == null && usbPermission == UsbPermission.Unknown && !manager.hasPermission(driver.getDevice())) {
             usbPermission = UsbPermission.Requested;
             PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(activity.getBaseContext(), 0, new Intent(INTENT_ACTION_GRANT_USB), 0);
             manager.requestPermission(driver.getDevice(), usbPermissionIntent);
+            return;
+        }
+
+        if(connection == null) {
+            //failed
             return;
         }
 
@@ -143,6 +151,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         try {
             usbSerialPort.open(connection);
             usbSerialPort.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+            calibrate();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -157,6 +166,8 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         }
         usbIoManager = null;
         usbSerialPort.close();
+        usbPermission = UsbPermission.Unknown;
+        listener.updateText("Disconnected");
     }
 
     // Calibration

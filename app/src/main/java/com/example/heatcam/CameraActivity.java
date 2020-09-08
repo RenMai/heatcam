@@ -86,7 +86,7 @@ public class CameraActivity extends Fragment implements CameraListener {
     }
 
     @Override
-    public void updateText() {
-
+    public void updateText(String text) {
+        getActivity().runOnUiThread(() -> {txtView.setText(text);});
     }
 }

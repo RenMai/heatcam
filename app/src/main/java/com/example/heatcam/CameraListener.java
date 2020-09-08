@@ -5,6 +5,6 @@ import android.graphics.Bitmap;
 public interface CameraListener {
 
     void updateImage(Bitmap image);
-    void updateText();
+    void updateText(String text);
 
 }
