@@ -30,7 +30,6 @@ import java.util.concurrent.Executors;
 public class LeptonCamera implements SerialInputOutputManager.Listener {
 
     private Vector<Integer> colorTable = ImageUtils.createColorTable();
-    static int testCounter = 0;
 
     // max width and height of image
     private int width;
@@ -177,7 +176,6 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
 
             usbIoManager = new SerialInputOutputManager(usbSerialPort, this);
             Executors.newSingleThreadExecutor().submit(usbIoManager);
-            listener.updateText(String.valueOf(testCounter));
         } else {
             listener.updateText("Unauthorized Device");
         }

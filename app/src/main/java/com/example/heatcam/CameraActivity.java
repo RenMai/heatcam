@@ -3,6 +3,7 @@ package com.example.heatcam;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +14,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 public class CameraActivity extends Fragment implements CameraListener {
@@ -34,7 +37,6 @@ public class CameraActivity extends Fragment implements CameraListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         final View view = inflater.inflate(R.layout.activity_camera_fragment, container, false);
-
         txtView = (TextView) view.findViewById(R.id.textView);
         scanBtn = (Button) view.findViewById(R.id.scanBtn);
         analysisBtn = (Button) view.findViewById(R.id.analysisBtn);
@@ -56,7 +58,6 @@ public class CameraActivity extends Fragment implements CameraListener {
 
         return view;
     }
-
 
     /*
     @Override
@@ -88,5 +89,17 @@ public class CameraActivity extends Fragment implements CameraListener {
     @Override
     public void updateText(String text) {
         getActivity().runOnUiThread(() -> {txtView.setText(text);});
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            imgView.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            imgView.getLayoutParams().width = 0;
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            imgView.getLayoutParams().height = 0;
+            imgView.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+        }
     }
 }
