@@ -7,13 +7,19 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
+
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 
@@ -24,6 +30,7 @@ import java.util.concurrent.Executors;
 public class LeptonCamera implements SerialInputOutputManager.Listener {
 
     private Vector<Integer> colorTable = ImageUtils.createColorTable();
+    static int testCounter = 0;
 
     // max width and height of image
     private int width;
@@ -41,6 +48,10 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
     private UsbPermission usbPermission = UsbPermission.Unknown;
     private UsbSerialPort usbSerialPort;
     private SerialInputOutputManager usbIoManager;
+    final int ID_VENDOR_TEENSY = 5824;
+    final int ID_PRODUC_TEENSY = 1155;
+    final Vector<Integer> ALLOWED_VENDORS = new Vector<>(Arrays.asList(ID_VENDOR_TEENSY));
+    final Vector<Integer> ALLOWED_PRODUCTS = new Vector<>(Arrays.asList(ID_PRODUC_TEENSY));
 
     private boolean analysisMode;
 
@@ -123,41 +134,54 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
     public void connect() {
         // TODO: implementation
         // Find all available drivers from attached devices.
+        if(usbIoManager != null) {
+            listener.updateText("already exists");
+            return;
+        }
         UsbManager manager = (UsbManager) activity.getSystemService(Context.USB_SERVICE);
-        List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
+        List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(Objects.requireNonNull(manager));
         if (availableDrivers.isEmpty()) {
             return;
         }
 
         // Open a connection to the first available driver.
         UsbSerialDriver driver = availableDrivers.get(0);
+        int prodID = driver.getDevice().getProductId();
+        int vendID = driver.getDevice().getVendorId();
         String deviceInfo = driver.getDevice().getProductName() + " - " + driver.getDevice().getManufacturerName() +
-                " - " + driver.getDevice().getProductId() + " - " + driver.getDevice().getVendorId();
-        listener.updateText(deviceInfo);
-        UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
-        if (connection == null && usbPermission == UsbPermission.Unknown && !manager.hasPermission(driver.getDevice())) {
-            usbPermission = UsbPermission.Requested;
-            PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(activity.getBaseContext(), 0, new Intent(INTENT_ACTION_GRANT_USB), 0);
-            manager.requestPermission(driver.getDevice(), usbPermissionIntent);
-            return;
+                " - " + prodID + " - " + vendID;
+        if(ALLOWED_PRODUCTS.contains(prodID) && ALLOWED_VENDORS.contains(vendID)){
+            listener.updateText(deviceInfo);
+            UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
+
+            if (connection == null && usbPermission == UsbPermission.Unknown && !manager.hasPermission(driver.getDevice())) {
+                usbPermission = UsbPermission.Requested;
+                PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(activity.getBaseContext(), 0, new Intent(INTENT_ACTION_GRANT_USB), 0);
+                manager.requestPermission(driver.getDevice(), usbPermissionIntent);
+                return;
+            }
+
+            if(connection == null) {
+                //failed
+                return;
+            }
+
+            usbSerialPort = driver.getPorts().get(0); // Most devices have just one port (port 0)
+            try {
+                usbSerialPort.open(connection);
+                usbSerialPort.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+                calibrate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            usbIoManager = new SerialInputOutputManager(usbSerialPort, this);
+            Executors.newSingleThreadExecutor().submit(usbIoManager);
+            listener.updateText(String.valueOf(testCounter));
+        } else {
+            listener.updateText("Unauthorized Device");
         }
 
-        if(connection == null) {
-            //failed
-            return;
-        }
-
-        usbSerialPort = driver.getPorts().get(0); // Most devices have just one port (port 0)
-        try {
-            usbSerialPort.open(connection);
-            usbSerialPort.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-            calibrate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        usbIoManager = new SerialInputOutputManager(usbSerialPort, this);
-        Executors.newSingleThreadExecutor().submit(usbIoManager);
     }
 
     public void disconnect() throws IOException {
