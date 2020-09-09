@@ -4,7 +4,10 @@ import android.graphics.Bitmap;
 
 public interface CameraListener {
 
+    void setConnectingImage();
+    void setNoFeedImage();
     void updateImage(Bitmap image);
     void updateText(String text);
+    void disconnect();
 
 }

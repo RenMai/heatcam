@@ -18,9 +18,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.io.IOException;
+import java.util.Objects;
+
 public class CameraActivity extends Fragment implements CameraListener {
 
     private LeptonCamera camera;
+    SerialPortModel sModel;
 
     private TextView txtView;
     private Button scanBtn;
@@ -43,12 +47,14 @@ public class CameraActivity extends Fragment implements CameraListener {
         testBtn = (Button) view.findViewById(R.id.testBtn);
         imgView = (ImageView) view.findViewById(R.id.imageView);
 
-       camera = new LeptonCamera((Activity) view.getContext());
-       camera.setListener(this);
+        camera = new LeptonCamera(this);
+        sModel = new SerialPortModel(this, camera);
+
+        // camera.setListener(this);
         testFileReader = new TestFileReader(view.getContext(), camera);
 
-        scanBtn.setOnClickListener(v -> camera.connect());
-        analysisBtn.setOnClickListener(v -> camera.toggleAnalysisMode());
+        scanBtn.setOnClickListener(v -> sModel.scanDevices(Objects.requireNonNull(getContext())));
+        analysisBtn.setOnClickListener(v -> sModel.toggleAnalysisMode());
         testBtn.setOnClickListener(v -> testFileReader.readTestFile("data.txt"));
 
         imgView.setOnTouchListener((v, event) -> {
@@ -59,26 +65,22 @@ public class CameraActivity extends Fragment implements CameraListener {
         return view;
     }
 
-    /*
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        Activity a = null;
-        if (context instanceof Activity) {
-            a = (Activity) context;
-        }
-
-        Log.i("asd", a.toString());
-
-        camera = new LeptonCamera(getActivity());
-        testFileReader = new TestFileReader(context, camera);
-
-    }
-
-*/
-
     private void sendTestData(){
         testFileReader.readTestFile("data.txt");
+    }
+
+    @Override
+    public void setConnectingImage() {
+        getActivity().runOnUiThread(() -> {
+            imgView.setImageResource(R.drawable.connecting);
+        });
+    }
+
+    @Override
+    public void setNoFeedImage() {
+        getActivity().runOnUiThread(() -> {
+            imgView.setImageResource(R.drawable.noimage);
+        });
     }
 
     @Override
@@ -89,6 +91,16 @@ public class CameraActivity extends Fragment implements CameraListener {
     @Override
     public void updateText(String text) {
         getActivity().runOnUiThread(() -> {txtView.setText(text);});
+    }
+
+    @Override
+    public void disconnect() {
+        try {
+            sModel.disconnect();
+            setNoFeedImage();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
