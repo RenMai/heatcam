@@ -9,5 +9,7 @@ public interface CameraListener {
     void updateImage(Bitmap image);
     void updateText(String text);
     void disconnect();
+    void maxCelsiusValue(double max);
+    void minCelsiusValue(double min);
 
 }

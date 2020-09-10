@@ -104,6 +104,16 @@ public class CameraActivity extends Fragment implements CameraListener {
     }
 
     @Override
+    public void maxCelsiusValue(double max) {
+
+    }
+
+    @Override
+    public void minCelsiusValue(double min) {
+
+    }
+
+    @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {

@@ -74,7 +74,13 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
             // update image with listener
             Bitmap camImage = ImageUtils.bitmapFromArray(rawFrame);
             listener.updateImage(camImage);
+            listener.maxCelsiusValue(kelvinToCelsius(maxRaw));
+            listener.minCelsiusValue(kelvinToCelsius(minRaw));
         }
+    }
+
+    private double kelvinToCelsius(int luku){
+        return Math.round((luku/100 - 273.15)*100.0)/100.0;//kahden desimaalin pyöristys
     }
 
     // parse byte data into rawFrame 2d array
