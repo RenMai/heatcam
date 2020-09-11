@@ -1,8 +1,6 @@
 package com.example.heatcam;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -15,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.io.IOException;
@@ -55,7 +52,7 @@ public class CameraActivity extends Fragment implements CameraListener {
 
         scanBtn.setOnClickListener(v -> sModel.scanDevices(Objects.requireNonNull(getContext())));
         analysisBtn.setOnClickListener(v -> sModel.toggleAnalysisMode());
-        testBtn.setOnClickListener(v -> testFileReader.readTestFile("data.txt"));
+        testBtn.setOnClickListener(v -> testFileReader.readTestFile("dataFace.txt"));
 
         imgView.setOnTouchListener((v, event) -> {
             camera.clickedHeatMapCoordinate(event.getX(), event.getY(), imgView.getWidth(), imgView.getHeight());
