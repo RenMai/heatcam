@@ -11,5 +11,6 @@ public interface CameraListener {
     void disconnect();
     void maxCelsiusValue(double max);
     void minCelsiusValue(double min);
+    void detectFace(Bitmap image);
 
 }

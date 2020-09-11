@@ -43,6 +43,19 @@
         app:layout_constraintVertical_bias="0.384"
         app:srcCompat="@drawable/noimage" />
 
+    <ImageView
+        android:id="@+id/imageViewFace"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="16:12"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintVertical_bias="0.384"
+        app:srcCompat="@drawable/noimage" />
+
     <Button
         android:id="@+id/analysisBtn"
         android:layout_width="wrap_content"

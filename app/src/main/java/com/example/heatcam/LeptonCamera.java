@@ -74,6 +74,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
             // update image with listener
             Bitmap camImage = ImageUtils.bitmapFromArray(rawFrame);
             listener.updateImage(camImage);
+            listener.detectFace(camImage);
             listener.maxCelsiusValue(kelvinToCelsius(maxRaw));
             listener.minCelsiusValue(kelvinToCelsius(minRaw));
         }
