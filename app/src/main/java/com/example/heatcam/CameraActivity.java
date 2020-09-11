@@ -52,7 +52,7 @@ public class CameraActivity extends Fragment implements CameraListener {
 
         scanBtn.setOnClickListener(v -> sModel.scanDevices(Objects.requireNonNull(getContext())));
         analysisBtn.setOnClickListener(v -> sModel.toggleAnalysisMode());
-        testBtn.setOnClickListener(v -> testFileReader.readTestFile("dataFace.txt"));
+        testBtn.setOnClickListener(v -> testFileReader.readTestFile("data2.txt"));
 
         imgView.setOnTouchListener((v, event) -> {
             camera.clickedHeatMapCoordinate(event.getX(), event.getY(), imgView.getWidth(), imgView.getHeight());

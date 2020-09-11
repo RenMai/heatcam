@@ -12,12 +12,15 @@ import java.util.List;
 public class TestFileReader {
     private Context context;
     private LeptonCamera camera;
+    boolean lock = false;
     public TestFileReader(Context context, LeptonCamera camera){
         this.context = context;
         this.camera = camera;
     }
 
     protected void readTestFile(String filu) {
+        if(lock) return;
+        lock = true;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -38,8 +41,9 @@ public class TestFileReader {
                             }
                         }
                         camera.onNewData(tavut);
-                        Thread.sleep(2);
+                        Thread.sleep(1);
                     }
+                    lock = false;
                 } catch (IOException | InterruptedException e ) {
                     e.printStackTrace();
                 }
