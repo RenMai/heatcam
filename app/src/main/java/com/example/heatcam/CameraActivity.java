@@ -1,12 +1,12 @@
 package com.example.heatcam;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +35,7 @@ public class CameraActivity extends Fragment implements CameraListener {
     private Button scanBtn;
     private Button analysisBtn;
     private Button testBtn;
+    private Button videoBtn;
     private ImageView imgView;
     private ImageView imgViewFace;
 
@@ -55,6 +56,7 @@ public class CameraActivity extends Fragment implements CameraListener {
         scanBtn = (Button) view.findViewById(R.id.scanBtn);
         analysisBtn = (Button) view.findViewById(R.id.analysisBtn);
         testBtn = (Button) view.findViewById(R.id.testBtn);
+        videoBtn = (Button) view.findViewById(R.id.videoBtn);
         imgView = (ImageView) view.findViewById(R.id.imageView);
         imgViewFace = (ImageView) view.findViewById(R.id.imageViewFace);
 
@@ -73,6 +75,10 @@ public class CameraActivity extends Fragment implements CameraListener {
         scanBtn.setOnClickListener(v -> sModel.scanDevices(Objects.requireNonNull(getContext())));
         analysisBtn.setOnClickListener(v -> sModel.toggleAnalysisMode());
         testBtn.setOnClickListener(v -> testFileReader.readTestFile("data2.txt"));
+        videoBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(CameraActivity.super.getContext(), VideoActivity.class);
+            startActivity(intent);
+        });
 
         imgView.setOnTouchListener((v, event) -> {
             camera.clickedHeatMapCoordinate(event.getX(), event.getY(), imgView.getWidth(), imgView.getHeight());
