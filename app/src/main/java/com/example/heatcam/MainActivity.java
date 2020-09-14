@@ -3,11 +3,12 @@ package com.example.heatcam;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.hoho.android.usbserial.driver.UsbSerialPort;
-import com.hoho.android.usbserial.util.SerialInputOutputManager;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,20 +17,22 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
-    private enum UsbPermission { Unknown, Requested, Granted, Denied };
-
-    private static final String INTENT_ACTION_GRANT_USB = BuildConfig.APPLICATION_ID + ".GRANT_USB";
-
-    private UsbPermission usbPermission = UsbPermission.Unknown;
-    private SerialInputOutputManager usbIoManager;
-    private UsbSerialPort usbSerialPort;
+    Button btn;
+    boolean active = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         setContentView(R.layout.activity_main);
+        btn = findViewById(R.id.devBtn);
+        btn.setOnClickListener(v -> changeLayout());
+
+        Fragment cameraActivity = new CameraActivity();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragmentCamera, cameraActivity, "default").commit();
+
+
 
          /*
         FragmentManager fManager = getSupportFragmentManager();
@@ -43,6 +46,24 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    private void changeLayout() {
+        if (!active)  {
+            FragmentManager fManager = getSupportFragmentManager();
+            FragmentTransaction fTransaction = fManager.beginTransaction();
+
+            Fragment fragment = new SetupFragment();
+            fTransaction.add(R.id.fragmentCamera, fragment, "dev");
+            fTransaction.addToBackStack(null);
+            fTransaction.commit();
+            active = true;
+        } else {
+            Fragment f = getSupportFragmentManager().findFragmentByTag("dev");
+            getSupportFragmentManager().beginTransaction().remove(f).commit();
+            active = false;
+        }
+    }
+
 
     private void createFileAndSave(String data) {
         try {

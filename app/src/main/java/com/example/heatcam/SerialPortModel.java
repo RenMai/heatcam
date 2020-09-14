@@ -83,7 +83,7 @@ public class SerialPortModel extends BroadcastReceiver {
             camListener.updateText(deviceInfo);
 
             // check device permission
-            if (usbPermission == UsbPermission.Unknown && !manager.hasPermission(foundDevice)) {
+            if (!manager.hasPermission(foundDevice)) {
                 usbPermission = UsbPermission.Requested;
                 PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(INTENT_ACTION_GRANT_USB), 0);
 
@@ -128,7 +128,7 @@ public class SerialPortModel extends BroadcastReceiver {
         }
         usbIoManager = null;
         usbSerialPort.close();
-        usbPermission = UsbPermission.Unknown;
+        //usbPermission = UsbPermission.Unknown;
         camListener.updateText("Disconnected");
     }
 

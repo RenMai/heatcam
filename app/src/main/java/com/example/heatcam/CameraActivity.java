@@ -1,6 +1,7 @@
 package com.example.heatcam;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -90,6 +91,12 @@ public class CameraActivity extends Fragment implements CameraListener {
 
     private void sendTestData(){
         testFileReader.readTestFile("data.txt");
+    }
+
+    @Override
+    public void onStart() {
+        sModel.scanDevices(getContext());
+        super.onStart();
     }
 
     @Override
