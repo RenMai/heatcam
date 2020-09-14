@@ -2,6 +2,7 @@ package com.example.heatcam;
 
 import android.graphics.Bitmap;
 
+import com.google.android.gms.common.util.ArrayUtils;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.nio.charset.StandardCharsets;
@@ -22,6 +23,8 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
     // raw data arrays
     private int[][] rawFrame;
     private int[] rawTelemetry;
+    private byte[] rawData;
+    private int rawDataIndex = 0;
 
     private CameraListener listener;
 
@@ -31,6 +34,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         this.height = 120;
         this.rawFrame = new int[120][160];
         this.rawTelemetry = new int [50];
+        this.rawData = new byte[height*(width+4)];
     }
 
     public void clickedHeatMapCoordinate(float xTouch, float yTouch, float xImg, float yImg){
@@ -46,19 +50,26 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
     @Override
     public void onNewData(byte[] data) {
         // check if data is last row
-        if(parseData(data)) {
+        if(height == data[3]) {
+            parseData(rawData);
+            rawDataIndex = 0;
+
             int maxRaw, minRaw;
             maxRaw = rawTelemetry[18] + rawTelemetry[19]*256;
             minRaw = rawTelemetry[21] + rawTelemetry[22]*256;
 
-            // TODO: convert rawFrame[][] to Bitmap
-            // update image with listener
             Bitmap camImage = ImageUtils.bitmapFromArray(rawFrame);
+
+            // update image with listener
             listener.updateImage(camImage);
             listener.detectFace(camImage);
-            listener.maxCelsiusValue(kelvinToCelsius(maxRaw));
-            listener.minCelsiusValue(kelvinToCelsius(minRaw));
+            // listener.maxCelsiusValue(kelvinToCelsius(maxRaw));
+            // listener.minCelsiusValue(kelvinToCelsius(minRaw));
+        } else {
+            System.arraycopy(data, 0, rawData, rawDataIndex, data.length);
+            rawDataIndex += data.length;
         }
+
     }
 
     private double kelvinToCelsius(int luku){
