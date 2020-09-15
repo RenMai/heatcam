@@ -7,7 +7,9 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.media.MediaScannerConnection;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +26,9 @@ import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -45,6 +50,10 @@ public class CameraActivity extends Fragment implements CameraListener {
     private FaceDetector detector;
 
     private SparseArray<Face> faces;
+
+    // test data variales
+    private File testFile;
+    private BufferedWriter writer;
 
 
 
@@ -75,7 +84,7 @@ public class CameraActivity extends Fragment implements CameraListener {
 
         scanBtn.setOnClickListener(v -> sModel.scanDevices(Objects.requireNonNull(getContext())));
         analysisBtn.setOnClickListener(v -> sModel.toggleAnalysisMode());
-        testBtn.setOnClickListener(v -> testFileReader.readTestFile("data2.txt"));
+        testBtn.setOnClickListener(v -> testFileReader.readTestFile("newdata.txt"));
         videoBtn.setOnClickListener(v -> {
             Intent intent = new Intent(CameraActivity.super.getContext(), VideoActivity.class);
             startActivity(intent);
@@ -86,7 +95,25 @@ public class CameraActivity extends Fragment implements CameraListener {
             return false;
         });
 
+        //initWriter();
+
         return view;
+    }
+
+    private void initWriter() {
+        // Creates a file in the primary external storage space of the
+        // current application.
+        // If the file does not exists, it is created.
+        try {
+            testFile = new File(getContext().getExternalFilesDir(null), "newdata.txt");
+            if (!testFile.exists())
+                testFile.createNewFile();
+
+            // Adds a line to the file
+            writer = new BufferedWriter(new FileWriter(testFile, true /*append*/));
+        } catch (Exception e){
+            Log.e("initWriter", "init failed");
+        }
     }
 
     private void sendTestData(){
@@ -131,6 +158,14 @@ public class CameraActivity extends Fragment implements CameraListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        if(writer != null) {
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -171,6 +206,32 @@ public class CameraActivity extends Fragment implements CameraListener {
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             imgView.getLayoutParams().height = 0;
             imgView.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+        }
+    }
+
+    public void writeToFile(byte[] data) {
+        try {
+
+
+            for(int i = 0; i <data.length; i++) {
+                int value = data[i];
+                if (i % 164 == 0) {
+                    writer.write("\n");
+                }
+                writer.write(value + " ");
+            }
+
+
+            // Refresh the data so it can seen when the device is plugged in a
+            // computer. You may have to unplug and replug the device to see the
+            // latest changes. This is not necessary if the user should not modify
+            // the files.
+            MediaScannerConnection.scanFile(getContext(),
+                    new String[]{testFile.toString()},
+                    null,
+                    null);
+        } catch (IOException e) {
+            Log.e("ReadWriteFile", "Unable to write to the TestFile.txt file.");
         }
     }
 }

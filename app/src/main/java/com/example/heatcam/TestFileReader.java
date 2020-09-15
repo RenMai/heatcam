@@ -39,7 +39,7 @@ public class TestFileReader {
                             }
                         }
                         camera.onNewData(tavut);
-                        Thread.sleep(1);
+                        Thread.sleep(0, 200000);
                     }
                     lock = false;
                 } catch (IOException | InterruptedException e ) {

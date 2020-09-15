@@ -34,7 +34,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         this.height = 120;
         this.rawFrame = new int[120][160];
         this.rawTelemetry = new int [50];
-        this.rawData = new byte[height*(width+4)];
+        this.rawData = new byte[height*(width+4) + 118];
     }
 
     public void clickedHeatMapCoordinate(float xTouch, float yTouch, float xImg, float yImg){
@@ -51,6 +51,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
     public void onNewData(byte[] data) {
         // check if data is last row
         if(height == data[3]) {
+            System.arraycopy(data, 0, rawData, rawDataIndex, data.length);
             parseData(rawData);
             rawDataIndex = 0;
 
@@ -63,13 +64,13 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
             // update image with listener
             listener.updateImage(camImage);
             listener.detectFace(camImage);
+            //listener.writeToFile(rawData);
             // listener.maxCelsiusValue(kelvinToCelsius(maxRaw));
             // listener.minCelsiusValue(kelvinToCelsius(minRaw));
         } else {
             System.arraycopy(data, 0, rawData, rawDataIndex, data.length);
             rawDataIndex += data.length;
         }
-
     }
 
     private double kelvinToCelsius(int luku){
@@ -100,7 +101,6 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
             } else if (lineNumber == height) { // telemetry
                 for (int j = 0; j < 48; j++) {
                     rawTelemetry[j] = data[i + 4 + j];
-
                 }
                 return true;
             }
