@@ -22,11 +22,19 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
 
     // raw data arrays
     private int[][] rawFrame;
-    private int[] rawTelemetry;
+    int[] rawTelemetry; // default visibility for tests
     private byte[] rawData;
     private int rawDataIndex = 0;
 
     private CameraListener listener;
+
+    public LeptonCamera(int width, int height) {
+        this.width = width;
+        this.height = height;
+        this.rawFrame = new int[height][width];
+        this.rawTelemetry = new int [50];
+        this.rawData = new byte[height*(width+4) + 118];
+    }
 
     public LeptonCamera(CameraListener listener) {
         this.listener = listener;
@@ -78,7 +86,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
     }
 
     // parse byte data into rawFrame 2d array
-    private boolean parseData(byte[] data) {
+    boolean parseData(byte[] data) {
         int bytesRead = data.length;
         int byteindx = 0;
         int lineNumber;
@@ -111,6 +119,11 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
     @Override
     public void onRunError(Exception e) {
         listener.disconnect();
+    }
+
+    // for testing purpose
+    int getRawFramePixel(int width, int height) {
+        return rawFrame[height][width];
     }
 
 }
