@@ -23,7 +23,7 @@ import java.util.Date;
  */
 
 public class MeasurementAccessObject {
-    static final String DEFAULT_FILE_NAME = "measurement_data.json";
+    private static final String DEFAULT_FILE_NAME = "measurement_data.json";
     private String fileName;
 
     public MeasurementAccessObject() {
@@ -45,6 +45,20 @@ public class MeasurementAccessObject {
         JSONObject o = new JSONObject();
         o.put("Date", date);
         o.put("Measured", measured);
+        return o;
+    }
+
+    /**
+     * Creates and returns new JSONObject.
+     * @param measured Measured temperature.
+     * @param date Date of measurement.
+     * @param outsideTemperature Measured outside temperature.
+     * @return new JSONObject
+     * @throws JSONException
+     */
+    public JSONObject newEntry(double measured, Date date, double outsideTemperature) throws JSONException {
+        JSONObject o = newEntry(measured, date);
+        o.put("OutsideTemperature", outsideTemperature);
         return o;
     }
 
