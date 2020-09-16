@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LeptonCamera">
+    tools:context=".LeptonCamera"
+    android:background="#ffffff">
 
     <ImageView
         android:id="@+id/imageView"
@@ -18,6 +19,18 @@
         app:layout_constraintTop_toBottomOf="@+id/textView"
         app:layout_constraintVertical_bias="0.384"
         app:srcCompat="@drawable/noimage" />
+
+    <ImageView
+        android:id="@+id/imageViewFace"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="16:12"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintVertical_bias="0.384"/>
 
     <Button
         android:id="@+id/testBtn"
@@ -92,16 +105,15 @@
         app:layout_constraintHorizontal_bias="0.513"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
-        android:id="@+id/cameraLayoutBtn"
+    <Spinner
+        android:id="@+id/test_data_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Camera Layout"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="12dp"
+        android:scrollbarStyle="outsideInset"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.376"
-        app:layout_constraintStart_toEndOf="@+id/videoBtn"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.071" />
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
