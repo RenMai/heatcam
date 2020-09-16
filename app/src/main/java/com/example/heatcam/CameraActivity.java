@@ -129,7 +129,7 @@ public class CameraActivity extends Fragment implements CameraListener {
     private void initTestDataSpinner() {
         try {
             String[] lis = getContext().getAssets().list("test_data/");
-            if(lis != null) {
+            if(lis != null && lis.length != 0) {
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.support_simple_spinner_dropdown_item, lis);
                 adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
                 testDataSpinner.setAdapter(adapter);
@@ -157,7 +157,7 @@ public class CameraActivity extends Fragment implements CameraListener {
         // current application.
         // If the file does not exists, it is created.
         try {
-            testFile = new File(getContext().getExternalFilesDir(null), "newdata.txt");
+            testFile = new File(getContext().getExternalFilesDir(null), "test_data/newdata.txt");
             if (!testFile.exists())
                 testFile.createNewFile();
 
