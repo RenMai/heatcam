@@ -44,9 +44,9 @@ public class CameraActivity extends Fragment implements CameraListener {
     private Button analysisBtn;
     private Button testBtn;
     private Button videoBtn;
+    private Button cameraLayoutBtn;
     private ToggleButton recordBtn;
     private ImageView imgView;
-    private ImageView imgViewFace;
 
     private TestFileReader testFileReader;
 
@@ -54,7 +54,7 @@ public class CameraActivity extends Fragment implements CameraListener {
 
     private SparseArray<Face> faces;
 
-    // test data variales
+    // test data variables
     private File testFile;
     private BufferedWriter writer;
 
@@ -70,12 +70,13 @@ public class CameraActivity extends Fragment implements CameraListener {
         analysisBtn = (Button) view.findViewById(R.id.analysisBtn);
         testBtn = (Button) view.findViewById(R.id.testBtn);
         videoBtn = (Button) view.findViewById(R.id.videoBtn);
+        cameraLayoutBtn = (Button) view.findViewById(R.id.cameraLayoutBtn);
         imgView = (ImageView) view.findViewById(R.id.imageView);
-        imgViewFace = (ImageView) view.findViewById(R.id.imageViewFace);
         recordBtn = view.findViewById(R.id.recordBtn);
 
         detector = new FaceDetector.Builder(view.getContext())
                 .setProminentFaceOnly(true)
+                .setLandmarkType(FaceDetector.ALL_LANDMARKS)
                 .build();
 
         faces = new SparseArray<>();
@@ -88,9 +89,14 @@ public class CameraActivity extends Fragment implements CameraListener {
 
         scanBtn.setOnClickListener(v -> sModel.scanDevices(Objects.requireNonNull(getContext())));
         analysisBtn.setOnClickListener(v -> sModel.toggleAnalysisMode());
-        testBtn.setOnClickListener(v -> testFileReader.readTestFile("newdata.txt"));
+        testBtn.setOnClickListener(v -> testFileReader.readTestFile("data2.txt"));
         videoBtn.setOnClickListener(v -> {
             Intent intent = new Intent(CameraActivity.super.getContext(), VideoActivity.class);
+            startActivity(intent);
+        });
+
+        cameraLayoutBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(CameraActivity.super.getContext(), LiveCameraActivity.class);
             startActivity(intent);
         });
 
@@ -197,14 +203,18 @@ public class CameraActivity extends Fragment implements CameraListener {
         // täs tunnistetaan framesta kasvot
         // https://developers.google.com/android/reference/com/google/android/gms/vision/face/FaceDetector#detect(com.google.android.gms.vision.Frame)
         faces = detector.detect(output);
-        if (faces.size() > 0) {
+        //System.out.println(faces.size());
+        if (faces.size() != 0) {
             Face face = faces.valueAt(0);
-            System.out.println(face.getPosition());
+            System.out.println(face.getContours().size());
             // tehään bitmap johon piirretään sit pistettä koordinaateista
-            Bitmap bMap = Bitmap.createBitmap(160, 120, Bitmap.Config.ARGB_8888);
+            // joudutaan kopioimaan bitmap et saadaan tehtyä siitä mutable
+            Bitmap bMap = image.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvas = new Canvas(bMap);
             canvas.drawCircle(face.getPosition().x, face.getPosition().y, 1, new Paint(Paint.ANTI_ALIAS_FLAG));
-            getActivity().runOnUiThread(() -> imgViewFace.setImageBitmap(bMap));
+            updateImage(bMap);
+        } else {
+            updateImage(image);
         }
 
     }

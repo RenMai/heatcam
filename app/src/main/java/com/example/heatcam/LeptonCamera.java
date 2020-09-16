@@ -71,8 +71,8 @@ public class LeptonCamera implements ThermalCamera, SerialInputOutputManager.Lis
             Bitmap camImage = ImageUtils.bitmapFromArray(rawFrame);
 
             // update image with listener
-            listener.updateImage(camImage);
-            listener.detectFace(camImage);
+           // listener.updateImage(camImage);
+           listener.detectFace(camImage);
             if (frameListener != null) {
                 frameListener.onNewFrame(rawData);
             }
