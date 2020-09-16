@@ -12,7 +12,7 @@ import java.util.Vector;
 // TODO: function implementations
 // TODO: save port name
 // TODO: tests
-public class LeptonCamera implements SerialInputOutputManager.Listener {
+public class LeptonCamera implements ThermalCamera, SerialInputOutputManager.Listener {
 
     private Vector<Integer> colorTable = ImageUtils.createColorTable();
 
@@ -27,6 +27,7 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
     private int rawDataIndex = 0;
 
     private CameraListener listener;
+    private FrameListener frameListener;
 
     public LeptonCamera(int width, int height) {
         this.width = width;
@@ -72,6 +73,9 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
             // update image with listener
             listener.updateImage(camImage);
             listener.detectFace(camImage);
+            if (frameListener != null) {
+                frameListener.onNewFrame(rawData);
+            }
             //listener.writeToFile(rawData);
             // listener.maxCelsiusValue(kelvinToCelsius(maxRaw));
             // listener.minCelsiusValue(kelvinToCelsius(minRaw));
@@ -126,4 +130,8 @@ public class LeptonCamera implements SerialInputOutputManager.Listener {
         return rawFrame[height][width];
     }
 
+    @Override
+    public void setFrameListener(FrameListener listener) {
+        this.frameListener = listener;
+    }
 }

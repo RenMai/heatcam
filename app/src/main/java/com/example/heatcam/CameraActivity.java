@@ -15,8 +15,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -42,6 +44,7 @@ public class CameraActivity extends Fragment implements CameraListener {
     private Button analysisBtn;
     private Button testBtn;
     private Button videoBtn;
+    private ToggleButton recordBtn;
     private ImageView imgView;
     private ImageView imgViewFace;
 
@@ -69,6 +72,7 @@ public class CameraActivity extends Fragment implements CameraListener {
         videoBtn = (Button) view.findViewById(R.id.videoBtn);
         imgView = (ImageView) view.findViewById(R.id.imageView);
         imgViewFace = (ImageView) view.findViewById(R.id.imageViewFace);
+        recordBtn = view.findViewById(R.id.recordBtn);
 
         detector = new FaceDetector.Builder(view.getContext())
                 .setProminentFaceOnly(true)
@@ -93,6 +97,14 @@ public class CameraActivity extends Fragment implements CameraListener {
         imgView.setOnTouchListener((v, event) -> {
             camera.clickedHeatMapCoordinate(event.getX(), event.getY(), imgView.getWidth(), imgView.getHeight());
             return false;
+        });
+
+        recordBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                camera.setFrameListener(new ImageRecorder(this.getContext()));
+            } else {
+                camera.setFrameListener(null);
+            }
         });
 
         //initWriter();
