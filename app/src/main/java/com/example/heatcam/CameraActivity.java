@@ -1,7 +1,6 @@
 package com.example.heatcam;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -14,9 +13,11 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -47,6 +48,7 @@ public class CameraActivity extends Fragment implements CameraListener {
     private ToggleButton recordBtn;
     private ImageView imgView;
     private ImageView imgViewFace;
+    private Spinner testDataSpinner;
 
     private TestFileReader testFileReader;
 
@@ -57,6 +59,8 @@ public class CameraActivity extends Fragment implements CameraListener {
     // test data variales
     private File testFile;
     private BufferedWriter writer;
+    private String testDataFileName = "";
+    private final String testDataPath = "test_data/";
 
 
 
@@ -73,6 +77,8 @@ public class CameraActivity extends Fragment implements CameraListener {
         imgView = (ImageView) view.findViewById(R.id.imageView);
         imgViewFace = (ImageView) view.findViewById(R.id.imageViewFace);
         recordBtn = view.findViewById(R.id.recordBtn);
+        testDataSpinner = view.findViewById(R.id.test_data_spinner);
+        initTestDataSpinner();
 
         detector = new FaceDetector.Builder(view.getContext())
                 .setProminentFaceOnly(true)
@@ -88,7 +94,7 @@ public class CameraActivity extends Fragment implements CameraListener {
 
         scanBtn.setOnClickListener(v -> sModel.scanDevices(Objects.requireNonNull(getContext())));
         analysisBtn.setOnClickListener(v -> sModel.toggleAnalysisMode());
-        testBtn.setOnClickListener(v -> testFileReader.readTestFile("newdata.txt"));
+        testBtn.setOnClickListener(v -> testFileReader.readTestFile(testDataPath + testDataFileName));
         videoBtn.setOnClickListener(v -> {
             Intent intent = new Intent(CameraActivity.super.getContext(), VideoActivity.class);
             startActivity(intent);
@@ -112,12 +118,38 @@ public class CameraActivity extends Fragment implements CameraListener {
         return view;
     }
 
+    private void initTestDataSpinner() {
+        try {
+            String[] lis = getContext().getAssets().list("test_data/");
+            if(lis != null) {
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.support_simple_spinner_dropdown_item, lis);
+                adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                testDataSpinner.setAdapter(adapter);
+                testDataFileName = lis[0];
+                testDataSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        testDataFileName = (String) parent.getItemAtPosition(position);
+                        System.out.println(testDataFileName);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void initWriter() {
         // Creates a file in the primary external storage space of the
         // current application.
         // If the file does not exists, it is created.
         try {
-            testFile = new File(getContext().getExternalFilesDir(null), "newdata.txt");
+            testFile = new File(getContext().getExternalFilesDir(null), "test_data/newdata.txt");
             if (!testFile.exists())
                 testFile.createNewFile();
 
