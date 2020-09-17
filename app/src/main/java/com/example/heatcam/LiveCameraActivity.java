@@ -132,13 +132,14 @@ public class LiveCameraActivity extends AppCompatActivity {
                 InputImage inputImage = InputImage.fromBitmap(bMap, rotationDegrees);
                 fTool.processImage(inputImage, image); // face detection
 
-                /* Eeron pose detection
+                /*Eeron pose detection
 
                 Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight());
                 InputImage poseImg = InputImage.fromBitmap(bMap, 0);
-                poseTool.processImage(poseImg); // <-- tää funktio kutsuu lopuks drawImage()
+                poseTool.processImage(poseImg, image); // <-- tää funktio kutsuu lopuks drawImage()
 
                  */
+
                 if (rotationDegrees == 0){
                     cameraView.setRotation(-90);
                 }

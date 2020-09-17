@@ -39,7 +39,7 @@ public class PoseDetectionTool {
         this.a = a;
     }
 
-    public void processImage(InputImage image) {
+    public void processImage(InputImage image, ImageProxy imageProxy) {
 
         Task<Pose> result =
                 poseDetector.process(image)
@@ -79,15 +79,14 @@ public class PoseDetectionTool {
                                     } else {
                                         a.drawImage(image.getBitmapInternal());
                                     }
+                                    imageProxy.close();
                                 })
                         .addOnFailureListener(
                                 e -> {
                                     // Task failed with an exception
                                     // ...
+                                    imageProxy.close();
                                 });
-
-
     }
-
 
 }
