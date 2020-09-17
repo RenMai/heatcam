@@ -10,6 +10,7 @@ import android.graphics.YuvImage;
 import android.media.Image;
 import android.os.Bundle;
 import android.util.Size;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -28,8 +29,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.google.android.gms.vision.CameraSource;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.mlkit.vision.common.InputImage;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -50,6 +51,11 @@ public class LiveCameraActivity extends AppCompatActivity {
     private Button cameraBtn;
     private PreviewView cameraFeed;
     private ImageView cameraView;
+    private RenderScriptTools rsTools;
+
+    private FaceDetectionTool fTool;
+
+    private boolean startDetect = false;
 
 
     @Override
@@ -60,6 +66,23 @@ public class LiveCameraActivity extends AppCompatActivity {
         cameraBtn = (Button) findViewById(R.id.cameraBtn);
         cameraFeed = (PreviewView) findViewById(R.id.cameraFeed);
         cameraView = (ImageView) findViewById(R.id.imageCamera);
+
+        rsTools = new RenderScriptTools(this);
+
+        fTool = new FaceDetectionTool(this);
+
+        cameraBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (startDetect) {
+                    startDetect = false;
+                    cameraBtn.setText("OFF");
+                } else {
+                    startDetect = true;
+                    cameraBtn.setText("ON");
+                }
+            }
+        });
 
         if (allPermissionsGranted()) {
             startCamera();
@@ -114,11 +137,20 @@ public class LiveCameraActivity extends AppCompatActivity {
             int rotationDegrees = image.getImageInfo().getRotationDegrees();
             @SuppressLint("UnsafeExperimentalUsageError") Image img = image.getImage();
             if (img != null) {
-               // Bitmap bMap = previewToBitmap(img);
-                Bitmap bMap = cameraFeed.getBitmap();
-                drawImage(bMap);
+               // System.out.println(rotationDegrees);
+               //Bitmap bMap = previewToBitmap(img);
+                //detectFaces(inputImage, image);
+
+                Bitmap bMap = rsTools.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight());
+                //Bitmap bMap = cameraFeed.getBitmap();
+                InputImage inputImage = InputImage.fromBitmap(bMap, rotationDegrees);
+                fTool.processImage(inputImage, image);
+                if (rotationDegrees == 0){
+                    cameraView.setRotation(-90);
+                }
+              //  detectFace(bMap);
             }
-            image.close();
+            //image.close();
         }
     }
 
@@ -169,7 +201,7 @@ public class LiveCameraActivity extends AppCompatActivity {
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
-   private void drawImage(Bitmap image) {
+   void drawImage(Bitmap image) {
         runOnUiThread(() -> cameraView.setImageBitmap(image));
     }
 }
