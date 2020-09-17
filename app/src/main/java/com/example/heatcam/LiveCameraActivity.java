@@ -114,7 +114,8 @@ public class LiveCameraActivity extends AppCompatActivity {
             int rotationDegrees = image.getImageInfo().getRotationDegrees();
             @SuppressLint("UnsafeExperimentalUsageError") Image img = image.getImage();
             if (img != null) {
-                Bitmap bMap = previewToBitmap(img);
+               // Bitmap bMap = previewToBitmap(img);
+                Bitmap bMap = cameraFeed.getBitmap();
                 drawImage(bMap);
             }
             image.close();
