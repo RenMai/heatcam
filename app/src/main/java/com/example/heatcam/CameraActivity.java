@@ -48,7 +48,6 @@ public class CameraActivity extends Fragment implements CameraListener {
     private Button cameraLayoutBtn;
     private ToggleButton recordBtn;
     private ImageView imgView;
-    private ImageView imgViewFace;
     private Spinner testDataSpinner;
 
     private TestFileReader testFileReader;
@@ -77,7 +76,6 @@ public class CameraActivity extends Fragment implements CameraListener {
         videoBtn = (Button) view.findViewById(R.id.videoBtn);
         cameraLayoutBtn = (Button) view.findViewById(R.id.cameraLayoutBtn);
         imgView = (ImageView) view.findViewById(R.id.imageView);
-        imgViewFace = (ImageView) view.findViewById(R.id.imageViewFace);
         recordBtn = view.findViewById(R.id.recordBtn);
         testDataSpinner = view.findViewById(R.id.test_data_spinner);
         initTestDataSpinner();
@@ -239,12 +237,14 @@ public class CameraActivity extends Fragment implements CameraListener {
         faces = detector.detect(output);
         if (faces.size() > 0) {
             Face face = faces.valueAt(0);
-            System.out.println(face.getPosition());
             // tehään bitmap johon piirretään sit pistettä koordinaateista
-            Bitmap bMap = Bitmap.createBitmap(160, 120, Bitmap.Config.ARGB_8888);
+            // joudutaan kopioimaan bitmap et saadaan tehtyä siitä mutable
+            Bitmap bMap = image.copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvas = new Canvas(bMap);
             canvas.drawCircle(face.getPosition().x, face.getPosition().y, 1, new Paint(Paint.ANTI_ALIAS_FLAG));
-            getActivity().runOnUiThread(() -> imgViewFace.setImageBitmap(bMap));
+            updateImage(bMap);
+        } else {
+            updateImage(image);
         }
 
     }
