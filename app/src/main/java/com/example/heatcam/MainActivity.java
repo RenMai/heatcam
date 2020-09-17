@@ -1,8 +1,10 @@
 package com.example.heatcam;
 
+import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
         Fragment cameraActivity = new CameraActivity();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragmentCamera, cameraActivity, "default").commit();
-
 
 
          /*

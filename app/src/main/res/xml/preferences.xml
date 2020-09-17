@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+   >
+
+    <SwitchPreference
+        app:key="enablesomthing"
+        app:title="Enable something"/>
+
+    <EditTextPreference
+        app:key="edittext"
+        app:title="Edit Text"
+        app:useSimpleSummaryProvider="true" />
+
+    <ListPreference
+        app:key="list"
+        app:title="List"
+        app:summary="%s"
+        app:defaultValue="item1"
+        app:entries="@array/labels"
+        app:entryValues="@array/values" />
+    <MultiSelectListPreference
+        app:key="multList"
+        app:title="Multi Select List"
+        app:summary="Tap to see selected items"
+        app:entries="@array/multi_select_labels"
+        app:entryValues="@array/multi_select_values"/>
+    <CheckBoxPreference
+        app:key="check"
+        app:title="CheckBox" />
+
+</androidx.preference.PreferenceScreen>
