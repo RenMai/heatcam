@@ -30,6 +30,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.mlkit.vision.common.InputImage;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -51,6 +52,8 @@ public class LiveCameraActivity extends AppCompatActivity {
     private PreviewView cameraFeed;
     private ImageView cameraView;
 
+    private PoseDetectionTool poseTool;
+    private RenderScriptTools rs;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,6 +63,9 @@ public class LiveCameraActivity extends AppCompatActivity {
         cameraBtn = (Button) findViewById(R.id.cameraBtn);
         cameraFeed = (PreviewView) findViewById(R.id.cameraFeed);
         cameraView = (ImageView) findViewById(R.id.imageCamera);
+
+        rs = new RenderScriptTools(this);
+        poseTool = new PoseDetectionTool(this);
 
         if (allPermissionsGranted()) {
             startCamera();
@@ -115,8 +121,11 @@ public class LiveCameraActivity extends AppCompatActivity {
             @SuppressLint("UnsafeExperimentalUsageError") Image img = image.getImage();
             if (img != null) {
                // Bitmap bMap = previewToBitmap(img);
-                Bitmap bMap = cameraFeed.getBitmap();
-                drawImage(bMap);
+                //Bitmap bMap = cameraFeed.getBitmap();
+                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight());
+                InputImage poseImg = InputImage.fromBitmap(bMap, 0);
+                poseTool.processImage(poseImg); // <-- tää funktio kutsuu lopuks drawImage()
+                //drawImage(bMap);
             }
             image.close();
         }
@@ -169,7 +178,7 @@ public class LiveCameraActivity extends AppCompatActivity {
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
-   private void drawImage(Bitmap image) {
+   public void drawImage(Bitmap image) {
         runOnUiThread(() -> cameraView.setImageBitmap(image));
     }
 }
