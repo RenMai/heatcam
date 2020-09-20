@@ -51,7 +51,7 @@ public class PoseDetectionTool {
                                     if (rightIndex != null && rightElbow != null && rightShoulder != null) {
                                         //System.out.println("pose = rightIndex : "+ rightIndex.getPosition() + " | Likelihood: " + rightIndex.getInFrameLikelihood());
                                         //System.out.println("pose = rightElbow : "+ rightElbow .getPosition() + " | Likelihood: " + rightElbow.getInFrameLikelihood());
-                                       // System.out.println("pose = rightShoul : "+ rightShoulder.getPosition() + " | Likelihood: " + rightShoulder.getInFrameLikelihood());
+                                        // System.out.println("pose = rightShoul : "+ rightShoulder.getPosition() + " | Likelihood: " + rightShoulder.getInFrameLikelihood());
                                         Bitmap b = image.getBitmapInternal();
                                         /*
                                         float points[] = {

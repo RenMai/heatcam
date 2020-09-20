@@ -105,7 +105,7 @@ public class LiveCameraActivity extends AppCompatActivity {
 
         ImageAnalysis imageAnalysis =
                 new ImageAnalysis.Builder()
-                        .setTargetResolution(new Size(1280, 720))
+                        .setTargetResolution(new Size(480, 640))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
 
@@ -127,21 +127,27 @@ public class LiveCameraActivity extends AppCompatActivity {
             if (img != null) {
                //Bitmap bMap = previewToBitmap(img);
                 //Bitmap bMap = cameraFeed.getBitmap();
-                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight());
 
-                InputImage inputImage = InputImage.fromBitmap(bMap, rotationDegrees);
+
+                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight(), rotationDegrees);
+
+                InputImage inputImage = InputImage.fromBitmap(bMap, 0);
                 fTool.processImage(inputImage, image); // face detection
 
-                /*Eeron pose detection
 
-                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight());
+                 /* Eeron pose detection
+
+                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight(), rotationDegrees);
                 InputImage poseImg = InputImage.fromBitmap(bMap, 0);
                 poseTool.processImage(poseImg, image); // <-- tää funktio kutsuu lopuks drawImage()
 
-                 */
+
+                  */
 
                 if (rotationDegrees == 0){
                     cameraView.setRotation(-90);
+                } else if (rotationDegrees == 270) {
+                    cameraView.setRotation(0);
                 }
               //  detectFace(bMap);
             }
