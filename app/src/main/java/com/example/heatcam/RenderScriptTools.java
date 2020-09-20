@@ -5,12 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.Image;
 
+import android.renderscript.*;
 
-import androidx.renderscript.Allocation;
-import androidx.renderscript.Element;
-import androidx.renderscript.RenderScript;
-import androidx.renderscript.Script;
-import androidx.renderscript.Type;
 
 import com.xxxyyy.testcamera2.ScriptC_yuv42088;
 

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.renderscript.*;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         Fragment cameraActivity = new CameraActivity();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragmentCamera, cameraActivity, "default").commit();
+
 
 
          /*

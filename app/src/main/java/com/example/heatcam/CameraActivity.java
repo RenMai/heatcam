@@ -46,6 +46,7 @@ public class CameraActivity extends Fragment implements CameraListener {
     private Button testBtn;
     private Button videoBtn;
     private Button cameraLayoutBtn;
+    private Button tempBtn;
     private ToggleButton recordBtn;
     private ImageView imgView;
     private Spinner testDataSpinner;
@@ -79,6 +80,8 @@ public class CameraActivity extends Fragment implements CameraListener {
         recordBtn = view.findViewById(R.id.recordBtn);
         testDataSpinner = view.findViewById(R.id.test_data_spinner);
         initTestDataSpinner();
+        // user temperature result
+        tempBtn = (Button) view.findViewById(R.id.butTemp);
 
         detector = new FaceDetector.Builder(view.getContext())
                 .setProminentFaceOnly(true)
@@ -103,6 +106,11 @@ public class CameraActivity extends Fragment implements CameraListener {
 
         cameraLayoutBtn.setOnClickListener(v -> {
             Intent intent = new Intent(CameraActivity.super.getContext(), LiveCameraActivity.class);
+            startActivity(intent);
+        });
+        // to show user temperature result
+        tempBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(CameraActivity.super.getContext(), User_result.class);
             startActivity(intent);
         });
 

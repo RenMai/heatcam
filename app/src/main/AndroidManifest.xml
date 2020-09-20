@@ -12,7 +12,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" android:configChanges="orientation|screenSize|keyboardHidden">
+        <activity android:name=".User_result"></activity>
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,15 +24,13 @@
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
+
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
         </activity>
-        <activity android:name=".VideoActivity">
-        </activity>
-        <activity android:name=".LiveCameraActivity">
-
-        </activity>
+        <activity android:name=".VideoActivity"></activity>
+        <activity android:name=".LiveCameraActivity"></activity>
     </application>
 
 </manifest>
