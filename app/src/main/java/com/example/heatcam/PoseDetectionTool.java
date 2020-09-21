@@ -21,6 +21,7 @@ import com.google.mlkit.vision.pose.PoseDetector;
 import com.google.mlkit.vision.pose.PoseDetectorOptions;
 import com.google.mlkit.vision.pose.PoseLandmark;
 
+import java.sql.SQLOutput;
 import java.util.List;
 
 public class PoseDetectionTool {
@@ -34,6 +35,7 @@ public class PoseDetectionTool {
 
     LiveCameraActivity a;
 
+
     public PoseDetectionTool (LiveCameraActivity a) {
         poseDetector = PoseDetection.getClient(options);
         this.a = a;
@@ -45,41 +47,31 @@ public class PoseDetectionTool {
                 poseDetector.process(image)
                         .addOnSuccessListener(
                                 pose -> {
-                                    PoseLandmark rightIndex = pose.getPoseLandmark(PoseLandmark.Type.LEFT_WRIST);
-                                    PoseLandmark rightElbow = pose.getPoseLandmark(PoseLandmark.Type.LEFT_ELBOW);
-                                    PoseLandmark rightShoulder = pose.getPoseLandmark(PoseLandmark.Type.LEFT_SHOULDER);
-                                    if (rightIndex != null && rightElbow != null && rightShoulder != null) {
-                                        //System.out.println("pose = rightIndex : "+ rightIndex.getPosition() + " | Likelihood: " + rightIndex.getInFrameLikelihood());
-                                        //System.out.println("pose = rightElbow : "+ rightElbow .getPosition() + " | Likelihood: " + rightElbow.getInFrameLikelihood());
-                                        // System.out.println("pose = rightShoul : "+ rightShoulder.getPosition() + " | Likelihood: " + rightShoulder.getInFrameLikelihood());
-                                        Bitmap b = image.getBitmapInternal();
-                                        /*
-                                        float points[] = {
-                                                rightShoulder.getPosition().x,
-                                                rightShoulder.getPosition().y,
-                                                rightElbow.getPosition().x,
-                                                rightElbow.getPosition().y,
-                                                rightIndex.getPosition().x,
-                                                rightIndex.getPosition().y
-                                        };
-*/
+                                    List<PoseLandmark> landmarks = pose.getAllPoseLandmarks();
+                                    if (!landmarks.isEmpty()) {
+                                        PoseLandmark rightWrist = landmarks.get(15);
+                                        PoseLandmark rightElbow = landmarks.get(13);
+                                        PoseLandmark rightShoulder = landmarks.get(11);
+                                        PoseLandmark nose = landmarks.get(0);
+                                        PoseLandmark rIndex = landmarks.get(19);
 
+                                        boolean handUp = nose.getPosition().y > rIndex.getPosition().y;
 
-                                        Canvas canvas = new Canvas(b);
+                                        Canvas canvas = new Canvas(image.getBitmapInternal());
                                         Paint paint = new Paint();
                                         paint.setColor(Color.GREEN);
-                                        paint.setStrokeWidth(30);
-                                        //canvas.drawLines(points, paint);
+                                        paint.setStrokeWidth(20);
                                         canvas.drawLine(rightShoulder.getPosition().x, rightShoulder.getPosition().y,
                                                 rightElbow.getPosition().x, rightElbow.getPosition().y, paint);
                                         canvas.drawLine(rightElbow.getPosition().x, rightElbow.getPosition().y,
-                                                rightIndex.getPosition().x, rightIndex.getPosition().y, paint);
-                                        a.drawImage(image.getBitmapInternal());
-
-                                    } else {
-                                        a.drawImage(image.getBitmapInternal());
+                                                rightWrist.getPosition().x, rightWrist.getPosition().y, paint);
+                                        canvas.drawCircle(nose.getPosition().x, nose.getPosition().y, 10, paint);
+                                        canvas.drawCircle(rIndex.getPosition().x, rIndex.getPosition().y, 10, paint);
+                                        a.updateText(handUp);
                                     }
+                                    a.drawImage(image.getBitmapInternal());
                                     imageProxy.close();
+
                                 })
                         .addOnFailureListener(
                                 e -> {

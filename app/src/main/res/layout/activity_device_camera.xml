@@ -45,4 +45,18 @@
         app:layout_constraintVertical_bias="0.838"
         tools:srcCompat="@tools:sample/avatars" />
 
+    <TextView
+        android:id="@+id/pose_text"
+        android:layout_width="149dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="131dp"
+        android:layout_marginEnd="131dp"
+        android:layout_marginBottom="32dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
