@@ -3,7 +3,6 @@ package com.example.heatcam;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -30,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-      
+
 
         btn = findViewById(R.id.devBtn);
         btn.setOnClickListener(v -> changeLayout());
@@ -77,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
 
-        
+
 
     }
 
