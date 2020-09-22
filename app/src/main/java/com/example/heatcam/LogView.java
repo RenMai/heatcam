@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -47,6 +48,7 @@ public class LogView extends AppCompatActivity {
         updateLog(sb.toString());
         ScrollView scroll = findViewById(R.id.log_scroll);
         scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN));
+        findViewById(R.id.logs_clear).setOnClickListener(v -> clearLog());
     }
 
     private void updateLog(String text) {
@@ -78,5 +80,16 @@ public class LogView extends AppCompatActivity {
             e.printStackTrace();
         }
         return list;
+    }
+
+    private void clearLog() {
+        File f = new File(getFilesDir() + "/logcat.txt");
+        f.delete();
+        try {
+            f.createNewFile();
+            updateLog("Cleared");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
