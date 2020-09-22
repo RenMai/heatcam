@@ -20,7 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
-
+    View decorView;
     Button btn;
     boolean active = false;
 
@@ -29,17 +29,58 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+      
+
         btn = findViewById(R.id.devBtn);
         btn.setOnClickListener(v -> changeLayout());
 
         Fragment cameraActivity = new CameraActivity();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragmentCamera, cameraActivity, "default").commit();
-
-
         initLogger();
 
+        /*
+        FragmentManager fManager = getSupportFragmentManager();
+        FragmentTransaction fTransaction = fManager.beginTransaction();
+
+        CameraActivity fragment = new CameraActivity();
+        fTransaction.add(R.id.fragmentCamera, fragment);
+        fTransaction.commit();
+        */
+
+        //Status & Navigation bars hiding 1/2
+        decorView = getWindow().getDecorView();
+        decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
+            if (visibility == 0)
+                decorView.setSystemUiVisibility(hideSystemBars());
+        });
     }
+    //Status & Navigation bars hiding 2/3
+    //this method gets called whenever the the window focus is changed
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            decorView.setSystemUiVisibility(hideSystemBars());
+
+        }
+
+    }
+    //Status & Navigation bars hiding 3/3
+    private int hideSystemBars() {
+        return View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+
+
+        
+
+    }
+
 
     private void initLogger() {
         String filePath = getFilesDir() + "/logcat.txt";
@@ -54,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void changeLayout() {
-        if (!active)  {
+        if (!active) {
             FragmentManager fManager = getSupportFragmentManager();
             FragmentTransaction fTransaction = fManager.beginTransaction();
 
@@ -82,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
             // Adds a line to the file
             BufferedWriter writer = new BufferedWriter(new FileWriter(testFile, true /*append*/));
-            writer.write(data +"\n");
+            writer.write(data + "\n");
             writer.close();
             // Refresh the data so it can seen when the device is plugged in a
             // computer. You may have to unplug and replug the device to see the
