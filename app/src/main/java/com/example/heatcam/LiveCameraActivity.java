@@ -132,7 +132,7 @@ public class LiveCameraActivity extends AppCompatActivity {
                 //Bitmap bMap = cameraFeed.getBitmap();
 
 
-                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight(), rotationDegrees);
+                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight());
 
                 InputImage inputImage = InputImage.fromBitmap(bMap, 0);
                 fTool.processImage(inputImage, image); // face detection
