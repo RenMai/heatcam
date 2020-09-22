@@ -30,7 +30,8 @@
                 android:resource="@xml/device_filter" />
         </activity>
         <activity android:name=".VideoActivity"></activity>
-        <activity android:name=".LiveCameraActivity"></activity>
+        <activity android:name=".LiveCameraActivity" />
+        <activity android:name=".LogView" />
     </application>
 
 </manifest>

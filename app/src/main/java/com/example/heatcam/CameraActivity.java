@@ -96,7 +96,7 @@ public class CameraActivity extends Fragment implements CameraListener {
         // camera.setListener(this);
         testFileReader = new TestFileReader(view.getContext(), camera);
 
-        scanBtn.setOnClickListener(v -> sModel.scanDevices(Objects.requireNonNull(getContext())));
+        scanBtn.setOnClickListener(v -> sModel.scanDevices(requireContext()));
         analysisBtn.setOnClickListener(v -> sModel.toggleAnalysisMode());
         testBtn.setOnClickListener(v -> testFileReader.readTestFile(testDataPath + testDataFileName));
         videoBtn.setOnClickListener(v -> {
@@ -126,6 +126,9 @@ public class CameraActivity extends Fragment implements CameraListener {
                 camera.setFrameListener(null);
             }
         });
+
+        view.findViewById(R.id.logs_button).setOnClickListener(v ->
+                startActivity(new Intent(CameraActivity.super.getContext(), LogView.class)));
 
         //initWriter();
 
