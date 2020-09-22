@@ -3,6 +3,7 @@ package com.example.heatcam;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -36,18 +37,20 @@ public class MainActivity extends AppCompatActivity {
                 .add(R.id.fragmentCamera, cameraActivity, "default").commit();
 
 
+        initLogger();
 
-         /*
-        FragmentManager fManager = getSupportFragmentManager();
-        FragmentTransaction fTransaction = fManager.beginTransaction();
+    }
 
-        CameraActivity fragment = new CameraActivity();
-        fTransaction.add(R.id.fragmentCamera, fragment);
-        fTransaction.commit();
-        */
-
-
-
+    private void initLogger() {
+        String filePath = getFilesDir() + "/logcat.txt";
+        try {
+            Runtime.getRuntime().exec("logcat -c");
+            Runtime.getRuntime().exec(new String[]{"logcat", "-v time", "-f", filePath,
+                    "heatcam:V", "AndroidRuntime:E", "System.out:I",  // filters
+                    "*:S"});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void changeLayout() {
