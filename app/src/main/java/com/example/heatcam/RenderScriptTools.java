@@ -19,7 +19,7 @@ public class RenderScriptTools {
         rs = RenderScript.create(context);
     }
 
-    public Bitmap YUV_420_888_toRGB(Image image, int width, int height, int rotation){
+    public Bitmap YUV_420_888_toRGB(Image image, int width, int height){
         // Get the three image planes
         Image.Plane[] planes = image.getPlanes();
         ByteBuffer buffer = planes[0].getBuffer();

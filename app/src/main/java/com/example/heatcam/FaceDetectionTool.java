@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 
@@ -12,6 +13,7 @@ import androidx.camera.core.ImageProxy;
 import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
+import com.google.mlkit.vision.face.FaceContour;
 import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
@@ -22,6 +24,7 @@ import java.util.List;
 public class FaceDetectionTool {
 
 
+    /*
     FaceDetectorOptions options =
             new FaceDetectorOptions.Builder()
                     .setClassificationMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
@@ -29,6 +32,13 @@ public class FaceDetectionTool {
                     .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
                     .setMinFaceSize(0.15f)
                     .enableTracking()
+                    .build();
+
+     */
+
+    FaceDetectorOptions options =
+            new FaceDetectorOptions.Builder()
+                    .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
                     .build();
 
     FaceDetector faceDetector;
@@ -61,9 +71,34 @@ public class FaceDetectionTool {
                                             Paint paint = new Paint();
                                             paint.setColor(Color.GREEN);
                                             paint.setStyle(Paint.Style.STROKE);
-                                            paint.setStrokeWidth(30);
-                                            canvas.drawRect(faces.get(0).getBoundingBox(), paint);
+                                            paint.setStrokeWidth(10);
+                                            canvas.drawRect(bounds, paint);
+
+                                            Paint contourPaint = new Paint();
+                                            contourPaint.setColor(Color.RED);
+                                            paint.setStyle(Paint.Style.STROKE);
+                                            paint.setStrokeWidth(5.0f);
+
+                                           // Path facePath = new Path();
+
+                                            for (FaceContour contour : face.getAllContours()) {
+                                                if (contour.getFaceContourType() == FaceContour.FACE) {
+                                                   // facePath.moveTo(contour.getPoints().get(0).x, contour.getPoints().get(0).y);
+                                                    for (PointF point : contour.getPoints()) {
+                                                        // facePath.lineTo(point.x, point.y);
+                                                        canvas.drawCircle(point.x, point.y, 5.0f, contourPaint);
+                                                    }
+                                                }
+
+                                            }
+
+                                           // facePath.close();
+                                           // canvas.drawPath(facePath, contourPaint);
+
+
                                             a.drawImage(b);
+
+
 
                                             float rotY = face.getHeadEulerAngleY();  // Head is rotated to the right rotY degrees
                                             float rotZ = face.getHeadEulerAngleZ();  // Head is tilted sideways rotZ degrees
