@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Size;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -58,6 +59,8 @@ public class LiveCameraActivity extends AppCompatActivity {
 
     private PoseDetectionTool poseTool;
     private RenderScriptTools rs;
+    private TextView posetext;
+    private boolean poseStatus = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,7 +70,7 @@ public class LiveCameraActivity extends AppCompatActivity {
         cameraBtn = (Button) findViewById(R.id.cameraBtn);
         cameraFeed = (PreviewView) findViewById(R.id.cameraFeed);
         cameraView = (ImageView) findViewById(R.id.imageCamera);
-
+        posetext = findViewById(R.id.pose_text);
         rs = new RenderScriptTools(this);
         poseTool = new PoseDetectionTool(this);
         fTool = new FaceDetectionTool(this);
@@ -129,7 +132,7 @@ public class LiveCameraActivity extends AppCompatActivity {
                 //Bitmap bMap = cameraFeed.getBitmap();
 
 
-                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight(), rotationDegrees);
+                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight());
 
                 InputImage inputImage = InputImage.fromBitmap(bMap, 0);
                 fTool.processImage(inputImage, image); // face detection
@@ -202,7 +205,21 @@ public class LiveCameraActivity extends AppCompatActivity {
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
-   public void drawImage(Bitmap image) {
+    public void drawImage(Bitmap image) {
         runOnUiThread(() -> cameraView.setImageBitmap(image));
+    }
+
+    public void updateText(boolean handUp) {
+        if(handUp != poseStatus) { // ignore update if status hasn't changed
+            poseStatus = handUp;
+            String txt = "The hand is ";
+            if(poseStatus) {
+                txt += "up";
+            } else {
+                txt += "down";
+            }
+            final String status = txt;
+            runOnUiThread(() -> posetext.setText(status));
+        }
     }
 }

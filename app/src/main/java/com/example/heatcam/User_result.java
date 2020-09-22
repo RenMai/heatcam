@@ -32,14 +32,13 @@ public class User_result extends AppCompatActivity {
 
 
         buttonStart.setOnClickListener(v -> {
-
             userTemp = 80;
             // TODO Auto-generated method stub
             buttonStart.setClickable(false);
             new asyncTaskUpdateProgress().execute();
             text = findViewById(R.id.textView);
 
-            text.setText("Your body temperature is too high!");
+            text.setText(R.string.msgHightTmprt);
         });
         buttonStart2.setOnClickListener(v -> {
             userTemp = 60;
@@ -47,7 +46,7 @@ public class User_result extends AppCompatActivity {
             buttonStart2.setClickable(false);
             new asyncTaskUpdateProgress().execute();
             text = findViewById(R.id.textView);
-            text.setText("Your body temperature is within normal limits!");
+            text.setText(R.string.msgNormTmprt);
         });
         buttonStart3.setOnClickListener(v -> {
             userTemp = 30;
@@ -55,7 +54,7 @@ public class User_result extends AppCompatActivity {
             buttonStart3.setClickable(false);
             new asyncTaskUpdateProgress().execute();
             text = findViewById(R.id.textView);
-            text.setText("Your body temperature is too low!");
+            text.setText(R.string.msgLowTmprt);
         });
     }
 
