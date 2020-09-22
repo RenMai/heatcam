@@ -28,15 +28,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
-
-
         btn = findViewById(R.id.devBtn);
         btn.setOnClickListener(v -> changeLayout());
 
         Fragment cameraActivity = new CameraActivity();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragmentCamera, cameraActivity, "default").commit();
+
         initLogger();
 
         /*
@@ -48,13 +46,14 @@ public class MainActivity extends AppCompatActivity {
         fTransaction.commit();
         */
 
-        //Status & Navigation bars hiding 1/2
+        //Status & Navigation bars hiding using decorView 1/2
         decorView = getWindow().getDecorView();
         decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
             if (visibility == 0)
                 decorView.setSystemUiVisibility(hideSystemBars());
         });
     }
+
     //Status & Navigation bars hiding 2/3
     //this method gets called whenever the the window focus is changed
     @Override
@@ -74,12 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-
-
-
-
     }
-
 
     private void initLogger() {
         String filePath = getFilesDir() + "/logcat.txt";
