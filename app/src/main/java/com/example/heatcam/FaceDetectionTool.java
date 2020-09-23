@@ -60,7 +60,7 @@ public class FaceDetectionTool {
                                     // [START_EXCLUDE]
                                     // [START get_face_info]
                                     if (faces.size() > 0) {
-
+                                        a.incrementDetectedFrames();
                                         for (Face face : faces) {
                                             //System.out.println(face.getAllContours() + " CONTOUR");
                                             //System.out.println(face.getAllLandmarks() + " LANDMARK");
@@ -74,29 +74,30 @@ public class FaceDetectionTool {
                                             paint.setStrokeWidth(10);
                                             canvas.drawRect(bounds, paint);
 
+
                                             Paint contourPaint = new Paint();
                                             contourPaint.setColor(Color.RED);
                                             contourPaint.setStyle(Paint.Style.STROKE);
                                             contourPaint.setStrokeWidth(7.0f);
-
-                                           Path facePath = new Path();
+                                          // Path facePath = new Path();
 
                                             for (FaceContour contour : face.getAllContours()) {
-                                                if (contour.getFaceContourType() == FaceContour.FACE) {
-                                                    facePath.moveTo(contour.getPoints().get(0).x, contour.getPoints().get(0).y);
+                                            //    if (contour.getFaceContourType() == FaceContour.FACE) {
+                                             //       facePath.moveTo(contour.getPoints().get(0).x, contour.getPoints().get(0).y);
                                                     //PointF temp = contour.getPoints().get(0);
+
                                                     for (PointF point : contour.getPoints()) {
-                                                         facePath.lineTo(point.x, point.y);
-                                                       // canvas.drawCircle(point.x, point.y, 5.0f, contourPaint);
+                                              //           facePath.lineTo(point.x, point.y);
+                                                        canvas.drawCircle(point.x, point.y, 5.0f, contourPaint);
                                                       //  canvas.drawLine(temp.x, temp.y, point.x, point.y, contourPaint);
                                                       //  temp = point;
                                                     }
                                                 }
 
-                                            }
+                                           // }
 
-                                            facePath.close();
-                                            canvas.drawPath(facePath, contourPaint);
+                                           // facePath.close();
+                                          // canvas.drawPath(facePath, contourPaint);
 
 
                                             a.drawImage(b);
@@ -127,6 +128,7 @@ public class FaceDetectionTool {
                                             }
                                         }
                                     } else {
+                                        a.decrementDetectedFrames();
                                         a.drawImage(image.getBitmapInternal());
                                     }
                                     // [END get_face_info]

@@ -1,6 +1,7 @@
 package com.example.heatcam;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,12 +9,16 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Size;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +33,8 @@ import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -62,10 +69,23 @@ public class LiveCameraActivity extends AppCompatActivity {
     private TextView posetext;
     private boolean poseStatus = false;
 
+    private VideoView videoView;
+
+    private MutableLiveData<Integer> detectedFrames = new MutableLiveData<>();
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_camera);
+
+        detectedFrames.setValue(50);
+
+        videoView = (VideoView) findViewById(R.id.videoView2);
+        videoView.setMediaController(new MediaController(this));
+
+        videoView.setOnCompletionListener(mp -> videoView.start());
+
 
         cameraBtn = (Button) findViewById(R.id.cameraBtn);
         cameraFeed = (PreviewView) findViewById(R.id.cameraFeed);
@@ -81,6 +101,24 @@ public class LiveCameraActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
 
+        detectedFrames.observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                if (integer < 10) {
+                    System.out.println("VIDEO START");
+                    if (!videoView.isPlaying()) {
+                        String path = "android.resource://" + getPackageName() + "/" + R.raw.gimi_dab;
+                        videoView.setVideoURI(Uri.parse(path));
+                        videoView.setVisibility(View.VISIBLE);
+                        videoView.start();
+                    }
+                } else if (integer > 80) {
+                    videoView.stopPlayback();
+                    videoView.setVisibility(View.INVISIBLE);
+                    System.out.println(integer);
+                }
+            }
+        });
     }
 
     private void startCamera() {
@@ -220,6 +258,22 @@ public class LiveCameraActivity extends AppCompatActivity {
             }
             final String status = txt;
             runOnUiThread(() -> posetext.setText(status));
+        }
+    }
+
+    public void incrementDetectedFrames() {
+        if (detectedFrames.getValue() > 100) {
+            detectedFrames.setValue(100);
+        } else {
+            detectedFrames.setValue(detectedFrames.getValue() + 1);
+        }
+    }
+
+    public void decrementDetectedFrames() {
+        if (detectedFrames.getValue() < 0) {
+            detectedFrames.setValue(0);
+        } else {
+            detectedFrames.setValue(detectedFrames.getValue() - 1);
         }
     }
 }
