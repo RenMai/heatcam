@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Size;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +41,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 
-public class LiveCameraActivity extends AppCompatActivity {
+public class LiveCameraActivity extends AppCompatActivity implements HeadTiltListener{
 
     // https://medium.com/@akhilbattula/android-camerax-java-example-aeee884f9102
     // https://developer.android.com/training/camerax/preview#java
@@ -52,6 +53,12 @@ public class LiveCameraActivity extends AppCompatActivity {
     private Button cameraBtn;
     private PreviewView cameraFeed;
     private ImageView cameraView;
+    private TextView yRotationTeksti;
+    private TextView xRotationTeksti;
+    private TextView answear;
+    private ProgressBar yBar;
+    private ProgressBar xBar;
+    private HeadTiltAnalyzer headTiltAnalyzer;
 
     private FaceDetectionTool fTool;
 
@@ -71,9 +78,17 @@ public class LiveCameraActivity extends AppCompatActivity {
         cameraFeed = (PreviewView) findViewById(R.id.cameraFeed);
         cameraView = (ImageView) findViewById(R.id.imageCamera);
         posetext = findViewById(R.id.pose_text);
+        yRotationTeksti = (TextView) findViewById(R.id.yrotation);
+        xRotationTeksti = (TextView) findViewById(R.id.xrotation);
+        xBar = (ProgressBar) findViewById(R.id.xBar);
+        yBar = (ProgressBar) findViewById(R.id.yBar);
+        answear = (TextView) findViewById(R.id.answear);
+
         rs = new RenderScriptTools(this);
         poseTool = new PoseDetectionTool(this);
         fTool = new FaceDetectionTool(this);
+
+        headTiltAnalyzer = new HeadTiltAnalyzer(this, xRotationTeksti, yRotationTeksti, xBar, yBar);
 
         if (allPermissionsGranted()) {
             startCamera();
@@ -119,6 +134,16 @@ public class LiveCameraActivity extends AppCompatActivity {
 
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, imageAnalysis, preview);
 
+    }
+
+    @Override
+    public void answearYes() {
+        runOnUiThread(() -> answear.setText("kyllä"));
+    }
+
+    @Override
+    public void answearNo(){
+        runOnUiThread(() -> answear.setText("ei"));
     }
 
     private class MyAnalyzer implements ImageAnalysis.Analyzer {
@@ -221,5 +246,8 @@ public class LiveCameraActivity extends AppCompatActivity {
             final String status = txt;
             runOnUiThread(() -> posetext.setText(status));
         }
+    }
+    public void headTilt(float x, float y){
+        headTiltAnalyzer.setTilt(x, y);
     }
 }

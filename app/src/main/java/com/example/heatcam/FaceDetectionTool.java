@@ -24,7 +24,7 @@ import java.util.List;
 public class FaceDetectionTool {
 
 
-    /*
+
     FaceDetectorOptions options =
             new FaceDetectorOptions.Builder()
                     .setClassificationMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
@@ -34,12 +34,12 @@ public class FaceDetectionTool {
                     .enableTracking()
                     .build();
 
-     */
 
-    FaceDetectorOptions options =
+
+   /* FaceDetectorOptions options =
             new FaceDetectorOptions.Builder()
                     .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
-                    .build();
+                    .build();*/
 
     FaceDetector faceDetector;
     LiveCameraActivity a;
@@ -78,6 +78,8 @@ public class FaceDetectionTool {
                                             contourPaint.setColor(Color.RED);
                                             contourPaint.setStyle(Paint.Style.STROKE);
                                             contourPaint.setStrokeWidth(7.0f);
+
+                                            a.headTilt(face.getHeadEulerAngleX(), face.getHeadEulerAngleY());
 
                                            Path facePath = new Path();
 
