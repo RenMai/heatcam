@@ -28,7 +28,7 @@ public class User_result extends AppCompatActivity {
         buttonStart3 = findViewById(R.id.start3);
         text2 = findViewById(R.id.textView2);
         text2.setText("THERMAL CAMERA");
-        vProgressBar = findViewById(R.id.vprogressbar);
+        vProgressBar = findViewById(R.id.vprogressbar3);
 
 
         buttonStart.setOnClickListener(v -> {
