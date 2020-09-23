@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             Runtime.getRuntime().exec("logcat -c");
             Runtime.getRuntime().exec(new String[]{"logcat", "-v time", "-f", filePath,
-                    "heatcam:V", "AndroidRuntime:E", "System.out:I",  // filters
+                    "heatcam:V", "AndroidRuntime:E", "System.out:I",  "SerialInputOutputManager:V", // filters
                     "*:S"});
         } catch (IOException e) {
             e.printStackTrace();

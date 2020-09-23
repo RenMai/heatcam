@@ -33,7 +33,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Objects;
 
 public class CameraActivity extends Fragment implements CameraListener {
 
@@ -90,7 +89,8 @@ public class CameraActivity extends Fragment implements CameraListener {
 
         faces = new SparseArray<>();
 
-        camera = new LeptonCamera(this);
+        camera = new LowResolutionCamera();
+        camera.setCameraListener(this);
         sModel = new SerialPortModel(this, camera);
 
         // camera.setListener(this);

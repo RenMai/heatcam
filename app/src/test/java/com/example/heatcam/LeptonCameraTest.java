@@ -13,7 +13,7 @@ public class LeptonCameraTest {
         int width = 160;
         int height = 120;
         byte[] testData = generateTestData((width + 4), height);
-        LeptonCamera lc = new LeptonCamera(width, height);
+        LeptonCamera lc = new HighResolutionCamera();
         Vector<Integer> colorTable = ImageUtils.createColorTable();
 
 

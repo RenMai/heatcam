@@ -70,7 +70,7 @@ public class SerialPortModel extends BroadcastReceiver {
         manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
         List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(Objects.requireNonNull(manager));
         if (availableDrivers.isEmpty())  {
-            Log.i("scanDevices", "No USB serial drivers for the connected device");
+            Log.i("heatcam", "No USB serial drivers for the connected device");
             return;
         }
         driver = availableDrivers.get(0);
@@ -84,6 +84,7 @@ public class SerialPortModel extends BroadcastReceiver {
 
             // check device permission
             if (!manager.hasPermission(foundDevice)) {
+                Log.d("heatcam", "No permission, requesting...");
                 usbPermission = UsbPermission.Requested;
                 PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(INTENT_ACTION_GRANT_USB), 0);
 
@@ -105,14 +106,16 @@ public class SerialPortModel extends BroadcastReceiver {
         if (usbIoManager != null) {
             return;
         }
-
+        Log.d("hetacam","Connecting...");
         camListener.setConnectingImage();
         UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
         usbSerialPort = driver.getPorts().get(0); // Most devices have just one port (port 0)
         try {
             usbSerialPort.open(connection);
             usbSerialPort.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-            calibrate();
+            usbSerialPort.setDTR(true);
+            usbSerialPort.setRTS(true);
+            //calibrate();
         } catch (Exception e) {
             e.printStackTrace();
             camListener.setNoFeedImage();

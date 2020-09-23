@@ -1,49 +1,43 @@
 package com.example.heatcam;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
-import com.google.android.gms.common.util.ArrayUtils;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 
-
-// TODO: function implementations
-// TODO: save port name
-// TODO: tests
-public class LeptonCamera implements ThermalCamera, SerialInputOutputManager.Listener {
-
+public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputManager.Listener {
     private Vector<Integer> colorTable = ImageUtils.createColorTable();
 
     // max width and height of image
     private int width;
     private int height;
+    private int telemetryWidth;
 
     // raw data arrays
     private int[][] rawFrame;
     int[] rawTelemetry; // default visibility for tests
     private byte[] rawData;
-    private int rawDataIndex = 0;
 
-    private CameraListener listener;
-    private FrameListener frameListener;
-
-    public LeptonCamera(int width, int height) {
-        this.width = width;
-        this.height = height;
-        this.rawFrame = new int[height][width];
-        this.rawTelemetry = new int [50];
-        this.rawData = new byte[height*(width+4) + 118];
+    public int getRawDataIndex() {
+        return rawDataIndex;
     }
 
-    public LeptonCamera(CameraListener listener) {
-        this.listener = listener;
-        this.width = 160;
-        this.height = 120;
-        this.rawFrame = new int[120][160];
-        this.rawTelemetry = new int [50];
-        this.rawData = new byte[height*(width+4) + 118];
+    private int rawDataIndex = 0;
+
+    private CameraListener cameraListener;
+    private FrameListener frameListener;
+
+    public LeptonCamera(int width, int height, int telemetryWidth) {
+        this.width = width;
+        this.height = height;
+        this.telemetryWidth = telemetryWidth;
+        this.rawFrame = new int[height][width];
+        this.rawData = new byte[height*(width+4) + telemetryWidth + 4];
+        this.rawTelemetry = new int[telemetryWidth];
+        System.out.println("created new leptoncamera");
     }
 
     public void clickedHeatMapCoordinate(float xTouch, float yTouch, float xImg, float yImg){
@@ -56,37 +50,20 @@ public class LeptonCamera implements ThermalCamera, SerialInputOutputManager.Lis
         System.out.println(rawFrame[yPiste][xPiste]);
     }
 
+   // public abstract void onNewData(byte[] data);
+
     @Override
-    public void onNewData(byte[] data) {
-        // check if data is last row
-        if(height == data[3]) {
-            System.arraycopy(data, 0, rawData, rawDataIndex, data.length);
-            parseData(rawData);
-            rawDataIndex = 0;
-
-            int maxRaw, minRaw;
-            maxRaw = rawTelemetry[18] + rawTelemetry[19]*256;
-            minRaw = rawTelemetry[21] + rawTelemetry[22]*256;
-
-            Bitmap camImage = ImageUtils.bitmapFromArray(rawFrame);
-
-            // update image with listener
-           // listener.updateImage(camImage);
-           listener.detectFace(camImage);
-            if (frameListener != null) {
-                frameListener.onNewFrame(rawData);
-            }
-            //listener.writeToFile(rawData);
-            // listener.maxCelsiusValue(kelvinToCelsius(maxRaw));
-            // listener.minCelsiusValue(kelvinToCelsius(minRaw));
-        } else {
-            System.arraycopy(data, 0, rawData, rawDataIndex, data.length);
-            rawDataIndex += data.length;
-        }
+    public void onRunError(Exception e) {
+        Log.d("heatcam", e.getMessage());
+        cameraListener.disconnect();
     }
 
-    private double kelvinToCelsius(int luku){
-        return Math.round((luku/100 - 273.15)*100.0)/100.0;//kahden desimaalin pyöristys
+    public double kelvinToCelsius(int luku){
+        return Math.round(((double)luku/100 - 273.15)*100.0)/100.0;//kahden desimaalin pyöristys
+    }
+
+    boolean parseData() {
+        return parseData(rawData);
     }
 
     // parse byte data into rawFrame 2d array
@@ -111,27 +88,58 @@ public class LeptonCamera implements ThermalCamera, SerialInputOutputManager.Lis
                     }
                 }
             } else if (lineNumber == height) { // telemetry
-                for (int j = 0; j < 48; j++) {
+                for (int j = 0; j < telemetryWidth; j++) {
                     rawTelemetry[j] = data[i + 4 + j];
                 }
                 return true;
+
             }
         }
         return false;
     }
 
-    @Override
-    public void onRunError(Exception e) {
-        listener.disconnect();
+    protected void extractRow(byte[] data) {
+        System.arraycopy(data, 0, rawData, rawDataIndex, data.length);
     }
 
-    // for testing purpose
+    protected Bitmap getBitmapInternal() {
+        return ImageUtils.bitmapFromArray(rawFrame);
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setRawDataIndex(int rawDataIndex) {
+        this.rawDataIndex = rawDataIndex;
+    }
+
+    public CameraListener getCameraListener() {
+        return cameraListener;
+    }
+
+    public void setCameraListener(CameraListener cameraListener) {
+        this.cameraListener = cameraListener;
+    }
+
+    public FrameListener getFrameListener() {
+        return frameListener;
+    }
+
+    @Override
+    public void setFrameListener(FrameListener frameListener) {
+        this.frameListener = frameListener;
+    }
+    public byte[] getRawData() {
+        return rawData;
+    }
+
     int getRawFramePixel(int width, int height) {
         return rawFrame[height][width];
     }
 
-    @Override
-    public void setFrameListener(FrameListener listener) {
-        this.frameListener = listener;
-    }
 }
