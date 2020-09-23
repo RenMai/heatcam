@@ -24,8 +24,11 @@
                                 android:endColor="#030CFB"
                                 android:centerColor="#14FF03"
                                 android:centerY="0.5"
-
                                 android:angle="270"/>
+                            <stroke
+                                android:width="2dp"
+                                android:color="#FF000000"
+                                />
                         </shape>
                     </clip>
                 </item>

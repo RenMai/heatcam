@@ -32,7 +32,7 @@ public class User_result extends AppCompatActivity {
 
 
         buttonStart.setOnClickListener(v -> {
-            userTemp = 80;
+            userTemp = 90;
             // TODO Auto-generated method stub
             buttonStart.setClickable(false);
             new asyncTaskUpdateProgress().execute();
