@@ -52,22 +52,22 @@ public class HeadTiltAnalyzer {
     void headDownCall(){
         headDown.time = System.currentTimeMillis();
         if(movementIsWithinTimeLimit(headDown.time, headUp.time))
-            headTiltListener.answearYes();
+            headTiltListener.answerYes();
     }
     void headUpCall(){
         headUp.time = System.currentTimeMillis();
         if(movementIsWithinTimeLimit(headDown.time, headUp.time))
-            headTiltListener.answearYes();
+            headTiltListener.answerYes();
     }
     void headLeftCall(){
         headLeft.time = System.currentTimeMillis();
         if(movementIsWithinTimeLimit(headLeft.time, headRight.time))
-            headTiltListener.answearNo();
+            headTiltListener.answerNo();
     }
     void headRightCall(){
         headRight.time = System.currentTimeMillis();
         if(movementIsWithinTimeLimit(headLeft.time, headRight.time))
-            headTiltListener.answearNo();
+            headTiltListener.answerNo();
     }
 
     class HeadMoved{

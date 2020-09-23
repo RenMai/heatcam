@@ -30,7 +30,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.google.android.gms.vision.CameraSource;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.vision.common.InputImage;
 
@@ -55,7 +54,7 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
     private ImageView cameraView;
     private TextView yRotationTeksti;
     private TextView xRotationTeksti;
-    private TextView answear;
+    private TextView answer;
     private ProgressBar yBar;
     private ProgressBar xBar;
     private HeadTiltAnalyzer headTiltAnalyzer;
@@ -82,7 +81,7 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
         xRotationTeksti = (TextView) findViewById(R.id.xrotation);
         xBar = (ProgressBar) findViewById(R.id.xBar);
         yBar = (ProgressBar) findViewById(R.id.yBar);
-        answear = (TextView) findViewById(R.id.answear);
+        answer = (TextView) findViewById(R.id.answer);
 
         rs = new RenderScriptTools(this);
         poseTool = new PoseDetectionTool(this);
@@ -137,13 +136,13 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
     }
 
     @Override
-    public void answearYes() {
-        runOnUiThread(() -> answear.setText("kyllä"));
+    public void answerYes() {
+        runOnUiThread(() -> answer.setText("kyllä"));
     }
 
     @Override
-    public void answearNo(){
-        runOnUiThread(() -> answear.setText("ei"));
+    public void answerNo(){
+        runOnUiThread(() -> answer.setText("ei"));
     }
 
     private class MyAnalyzer implements ImageAnalysis.Analyzer {
