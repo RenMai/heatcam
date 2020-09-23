@@ -1,6 +1,7 @@
 package com.example.heatcam;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,12 +9,17 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Size;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +34,8 @@ import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -40,7 +48,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 
-public class LiveCameraActivity extends AppCompatActivity {
+public class LiveCameraActivity extends AppCompatActivity implements HeadTiltListener{
 
     // https://medium.com/@akhilbattula/android-camerax-java-example-aeee884f9102
     // https://developer.android.com/training/camerax/preview#java
@@ -52,6 +60,12 @@ public class LiveCameraActivity extends AppCompatActivity {
     private Button cameraBtn;
     private PreviewView cameraFeed;
     private ImageView cameraView;
+    private TextView yRotationTeksti;
+    private TextView xRotationTeksti;
+    private TextView answer;
+    private ProgressBar yBar;
+    private ProgressBar xBar;
+    private HeadTiltAnalyzer headTiltAnalyzer;
 
     private FaceDetectionTool fTool;
 
@@ -62,18 +76,39 @@ public class LiveCameraActivity extends AppCompatActivity {
     private TextView posetext;
     private boolean poseStatus = false;
 
+    private VideoView videoView;
+
+    private MutableLiveData<Integer> detectedFrames = new MutableLiveData<>();
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_camera);
 
+        detectedFrames.setValue(50);
+
+        videoView = (VideoView) findViewById(R.id.videoView2);
+        videoView.setMediaController(new MediaController(this));
+
+        videoView.setOnCompletionListener(mp -> videoView.start());
+
+
         cameraBtn = (Button) findViewById(R.id.cameraBtn);
         cameraFeed = (PreviewView) findViewById(R.id.cameraFeed);
         cameraView = (ImageView) findViewById(R.id.imageCamera);
         posetext = findViewById(R.id.pose_text);
+        yRotationTeksti = (TextView) findViewById(R.id.yrotation);
+        xRotationTeksti = (TextView) findViewById(R.id.xrotation);
+        xBar = (ProgressBar) findViewById(R.id.xBar);
+        yBar = (ProgressBar) findViewById(R.id.yBar);
+        answer = (TextView) findViewById(R.id.answer);
+
         rs = new RenderScriptTools(this);
         poseTool = new PoseDetectionTool(this);
         fTool = new FaceDetectionTool(this);
+
+        headTiltAnalyzer = new HeadTiltAnalyzer(this, xRotationTeksti, yRotationTeksti, xBar, yBar);
 
         if (allPermissionsGranted()) {
             startCamera();
@@ -81,6 +116,24 @@ public class LiveCameraActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
 
+        detectedFrames.observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                if (integer < 10) {
+                    System.out.println("VIDEO START");
+                    if (!videoView.isPlaying()) {
+                        String path = "android.resource://" + getPackageName() + "/" + R.raw.gimi_dab;
+                        videoView.setVideoURI(Uri.parse(path));
+                        videoView.setVisibility(View.VISIBLE);
+                        videoView.start();
+                    }
+                } else if (integer > 80) {
+                    videoView.stopPlayback();
+                    videoView.setVisibility(View.INVISIBLE);
+                    System.out.println(integer);
+                }
+            }
+        });
     }
 
     private void startCamera() {
@@ -119,6 +172,16 @@ public class LiveCameraActivity extends AppCompatActivity {
 
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, imageAnalysis, preview);
 
+    }
+
+    @Override
+    public void answerYes() {
+        runOnUiThread(() -> answer.setText("kyllä"));
+    }
+
+    @Override
+    public void answerNo(){
+        runOnUiThread(() -> answer.setText("ei"));
     }
 
     private class MyAnalyzer implements ImageAnalysis.Analyzer {
@@ -220,6 +283,25 @@ public class LiveCameraActivity extends AppCompatActivity {
             }
             final String status = txt;
             runOnUiThread(() -> posetext.setText(status));
+        }
+    }
+    public void headTilt(float x, float y){
+        headTiltAnalyzer.setTilt(x, y);
+    }
+
+    public void incrementDetectedFrames() {
+        if (detectedFrames.getValue() > 100) {
+            detectedFrames.setValue(100);
+        } else {
+            detectedFrames.setValue(detectedFrames.getValue() + 1);
+        }
+    }
+
+    public void decrementDetectedFrames() {
+        if (detectedFrames.getValue() < 0) {
+            detectedFrames.setValue(0);
+        } else {
+            detectedFrames.setValue(detectedFrames.getValue() - 1);
         }
     }
 }
