@@ -16,8 +16,6 @@
         android:layout_marginTop="100dp"
         android:contentDescription="TODO"
         android:text="ImageUser"
-        app:layout_constraintEnd_toStartOf="@+id/linearLayout1"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
         app:srcCompat="@drawable/ic_launcher_background" />
@@ -25,9 +23,9 @@
     <TextView
         android:id="@+id/textView"
         android:layout_width="390dp"
-        android:layout_height="149dp"
+        android:layout_height="0dp"
         android:layout_marginTop="100dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="25dp"
         android:textAlignment="center"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -35,7 +33,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/start" />
 
     <TextView
         android:id="@+id/textView2"
@@ -51,43 +49,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="94dp"
-        android:layout_height="254dp"
-        android:layout_marginStart="24dp"
+    <ProgressBar
+        android:id="@+id/vprogressbar3"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="90dp"
+        android:layout_height="263dp"
         android:layout_marginEnd="16dp"
-        android:background="#F5F8F6"
-        android:backgroundTint="#F6F8F6"
-        android:forceHasOverlappingRendering="true"
-        android:orientation="vertical"
+        android:layout_marginBottom="11dp"
+        android:progressDrawable="@drawable/verticalprogressbar"
         app:layout_constraintBottom_toBottomOf="@+id/imageView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="@+id/imageView">
-
-
-        <ProgressBar
-            android:id="@+id/vprogressbar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:progressDrawable="@drawable/verticalprogressbar"
-            android:progressTint="#0428F3" />
-
-
-    </LinearLayout>
+        app:layout_constraintTop_toTopOf="@+id/imageView" />
 
     <Button
         android:id="@+id/start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="450dp"
+        android:layout_marginBottom="59dp"
         android:text="High"
-        app:layout_constraintEnd_toEndOf="@+id/linearLayout1"
-        app:layout_constraintStart_toStartOf="@+id/linearLayout1"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout1" />
+        app:layout_constraintBottom_toTopOf="@+id/textView"
+        app:layout_constraintStart_toStartOf="@+id/vprogressbar3"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/start2"
@@ -109,14 +92,5 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/start2"
         app:layout_constraintTop_toBottomOf="@+id/start2" />
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

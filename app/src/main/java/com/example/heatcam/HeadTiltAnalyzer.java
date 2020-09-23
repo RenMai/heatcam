@@ -30,14 +30,14 @@ public class HeadTiltAnalyzer {
     }
 
     protected void setTilt(float rotX, float rotY){
-        //xRotationTeksti.setText("X: "+rotX);
-        //yRotationTeksti.setText("Y: "+rotY);
+        xRotationTeksti.setText("X: "+rotX);
+        yRotationTeksti.setText("Y: "+rotY);
 
         int newX = (int)rotX+50;
         int newY = (int)rotY+50;
 
-        //yBar.setProgress(newY);
-        //xBar.setProgress(newX);
+        yBar.setProgress(newY);
+        xBar.setProgress(newX);
 
         if(newX >= 70) headUpCall();
         if(newX <= 40) headDownCall();
