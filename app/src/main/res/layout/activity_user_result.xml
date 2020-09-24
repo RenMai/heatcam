@@ -5,17 +5,18 @@
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_red_to_blue"
+    android:background="@drawable/bg_red_to_blue_list"
     tools:context=".MainActivity">
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="261dp"
         android:layout_height="264dp"
-        android:layout_marginStart="24dp"
         android:layout_marginTop="100dp"
         android:contentDescription="TODO"
         android:text="ImageUser"
+        app:layout_constraintEnd_toStartOf="@+id/vprogressbar3"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
         app:srcCompat="@drawable/ic_launcher_background" />
@@ -24,6 +25,7 @@
         android:id="@+id/textView"
         android:layout_width="395dp"
         android:layout_height="95dp"
+        android:layout_marginTop="172dp"
         android:layout_marginBottom="25dp"
         android:textAlignment="center"
         android:textSize="30sp"
@@ -31,7 +33,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
     <TextView
         android:id="@+id/textView2"
@@ -52,11 +55,14 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="90dp"
         android:layout_height="263dp"
+        android:layout_marginStart="21dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="11dp"
         android:progressDrawable="@drawable/verticalprogressbar"
         app:layout_constraintBottom_toBottomOf="@+id/imageView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toTopOf="@+id/imageView" />
 
     <Button

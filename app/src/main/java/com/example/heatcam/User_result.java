@@ -1,7 +1,8 @@
 package com.example.heatcam;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.constraintlayout.widget.ConstraintLayout;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -22,6 +23,12 @@ public class User_result extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_result);
+
+        ConstraintLayout constraintLayout = (ConstraintLayout) findViewById(R.id.linearLayout);
+        AnimationDrawable animationDrawable = (AnimationDrawable) constraintLayout.getBackground();
+        animationDrawable.setEnterFadeDuration(2000);
+        animationDrawable.setExitFadeDuration(4000);
+        animationDrawable.start();
 
         buttonStart = findViewById(R.id.start);
         buttonStart2 = findViewById(R.id.start2);
