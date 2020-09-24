@@ -11,15 +11,20 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.apache.commons.io.input.ReversedLinesFileReader;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LogView extends AppCompatActivity {
+
+    private static final int MAX_READ_LINES = 300;
 
     private TextView log;
     private List<String> logs;
@@ -46,8 +51,6 @@ public class LogView extends AppCompatActivity {
         StringBuilder sb = new StringBuilder();
         logs.forEach(e -> sb.append(e).append("\n"));
         updateLog(sb.toString());
-        ScrollView scroll = findViewById(R.id.log_scroll);
-        scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN));
         findViewById(R.id.logs_clear).setOnClickListener(v -> clearLog());
     }
 
@@ -69,9 +72,9 @@ public class LogView extends AppCompatActivity {
         String filePath = getFilesDir() + "/logcat.txt";
         List<String> list = new ArrayList<>();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            ReversedLinesFileReader reader = new ReversedLinesFileReader(new File(filePath), StandardCharsets.UTF_8);
             String st;
-            while((st = br.readLine()) != null) {
+            while((st = reader.readLine()) != null && list.size() < MAX_READ_LINES) {
                 list.add(st);
             }
         } catch (FileNotFoundException e) {
