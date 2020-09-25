@@ -17,6 +17,7 @@
         </shape>
     </item>
     <item android:id="@android:id/progress">
+
         <layer-list>
                 <item>
                     <clip
