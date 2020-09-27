@@ -48,10 +48,15 @@ public class LogView extends AppCompatActivity {
             public void afterTextChanged(Editable s) {filter(s.toString());}
         });
         logs = fetchLog();
+        findViewById(R.id.logs_clear).setOnClickListener(v -> clearLog());
+    }
+
+    @Override
+    protected void onStart() {
         StringBuilder sb = new StringBuilder();
         logs.forEach(e -> sb.append(e).append("\n"));
         updateLog(sb.toString());
-        findViewById(R.id.logs_clear).setOnClickListener(v -> clearLog());
+        super.onStart();
     }
 
     private void updateLog(String text) {
