@@ -40,6 +40,16 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
         System.out.println("created new leptoncamera");
     }
 
+    public LeptonCamera(int width, int height, int telemetryWidth, int bits) {
+        this.width = width;
+        this.height = height;
+        this.telemetryWidth = telemetryWidth;
+        this.rawFrame = new int[height][width];
+        this.rawData = new byte[height*((width*(bits/8))+4) + telemetryWidth + 4];
+        this.rawTelemetry = new int[telemetryWidth];
+        System.out.println("created new leptoncamera");
+    }
+
     public void clickedHeatMapCoordinate(float xTouch, float yTouch, float xImg, float yImg){
         float xScale = (float)this.width/xImg;
         float yScale = (float)this.height/yImg;
@@ -96,6 +106,44 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
             }
         }
         return false;
+    }
+
+    boolean parse16bitData() {
+        return parse16bitData(rawData);
+    }
+
+    boolean parse16bitData(byte[] data) {
+        int bytesRead = data.length;
+        int byteindx = 0;
+        int lineNumber;
+        int i;
+        byte[] startBytes = new byte[] {-1, -1, -1};
+        String rowBytes = new String(data, StandardCharsets.UTF_8);
+        String pattern = new String(startBytes, StandardCharsets.UTF_8);
+        byteindx = rowBytes.indexOf(pattern);
+
+        for(i = byteindx; i < bytesRead; i += (width*2+4)) { // row
+            lineNumber = data[i + 3];
+            if(lineNumber < height) {
+                int colInd = 0;
+                for (int j = 0; j < width*2; j+=2) {
+                    int dataInd = i + j + 4;
+                    if (dataInd < bytesRead) {
+                        rawFrame[lineNumber][colInd++] = (data[dataInd] & 0xff) + (data[dataInd+1] & 0xff)*256;
+                    }
+                }
+            } else if(lineNumber == height) {
+                for (int j = 0; j < telemetryWidth; j++) {
+                    rawTelemetry[j] = data[i + 4 + j];
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Vector<Integer> getColorTable() {
+        return colorTable;
     }
 
     protected void extractRow(byte[] data) {
