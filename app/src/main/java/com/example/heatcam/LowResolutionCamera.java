@@ -21,8 +21,8 @@ public class LowResolutionCamera extends LeptonCamera implements SerialInputOutp
             extractRow(data);
             parseData();
             setRawDataIndex(0);
-            int maxRaw = rawTelemetry[0] + rawTelemetry[1]*0xFF;
-            int minRaw = rawTelemetry[3] + rawTelemetry[5]*0xFF;
+            int maxRaw = (rawTelemetry[0]&0xFF) + (rawTelemetry[1]&0xFF)*256;
+            int minRaw = (rawTelemetry[3]&0xFF) + (rawTelemetry[4]&0xFF)*256;
             Log.d("heatcam", "on new Frame");
             Matrix m = new Matrix();
             m.postRotate(180);
