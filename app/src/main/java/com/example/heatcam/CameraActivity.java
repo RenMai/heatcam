@@ -2,6 +2,7 @@ package com.example.heatcam;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -93,6 +94,10 @@ public class CameraActivity extends Fragment implements CameraListener {
         camera.setCameraListener(this);
         sModel = new SerialPortModel(this, camera);
 
+        // register intent receiver for request
+        IntentFilter filter = new IntentFilter("android.hardware.usb.action.USB_DEVICE_ATTACHED");
+        getContext().registerReceiver(sModel, filter);
+
         // camera.setListener(this);
         testFileReader = new TestFileReader(view.getContext(), camera);
 
@@ -183,7 +188,7 @@ public class CameraActivity extends Fragment implements CameraListener {
 
     @Override
     public void onStart() {
-        sModel.scanDevices(getContext());
+        //sModel.scanDevices(getContext());
         super.onStart();
     }
 

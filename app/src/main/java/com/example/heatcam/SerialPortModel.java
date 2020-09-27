@@ -50,6 +50,13 @@ public class SerialPortModel extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+
+        if("android.hardware.usb.action.USB_DEVICE_ATTACHED".equals(action)) {
+            synchronized (this) {
+                scanDevices(context);
+            }
+        }
+
         if (INTENT_ACTION_GRANT_USB.equals(action)) {
             synchronized (this) {
                 UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
@@ -64,6 +71,7 @@ public class SerialPortModel extends BroadcastReceiver {
             }
         }
     }
+
 
     public void scanDevices(Context context) {
         // Find all available drivers from attached devices.
