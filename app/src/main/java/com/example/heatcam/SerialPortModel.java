@@ -42,9 +42,21 @@ public class SerialPortModel extends BroadcastReceiver {
 
     private boolean analysisMode;
 
-    public SerialPortModel(CameraListener camListener, SerialInputOutputManager.Listener sioListener) {
-        this.camListener = camListener;
+    private static SerialPortModel instance;
+
+    public static SerialPortModel getInstance() {
+        if (instance == null) {
+            instance = new SerialPortModel();
+        }
+        return instance;
+    }
+
+    public void setSioListener(SerialInputOutputManager.Listener sioListener) {
         this.sioListener = sioListener;
+    }
+
+    public void setCamListener(CameraListener camListener) {
+        this.camListener = camListener;
     }
 
     @Override

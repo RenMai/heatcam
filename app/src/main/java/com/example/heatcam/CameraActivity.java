@@ -92,7 +92,10 @@ public class CameraActivity extends Fragment implements CameraListener {
 
         camera = new LowResolutionCamera();
         camera.setCameraListener(this);
-        sModel = new SerialPortModel(this, camera);
+        //sModel = new SerialPortModel(this, camera);
+        sModel = SerialPortModel.getInstance();
+        sModel.setCamListener(this);
+        sModel.setSioListener(camera);
 
         // register intent receiver for request
         IntentFilter filter = new IntentFilter("android.hardware.usb.action.USB_DEVICE_ATTACHED");
