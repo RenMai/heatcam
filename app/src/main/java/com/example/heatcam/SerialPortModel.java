@@ -57,6 +57,9 @@ public class SerialPortModel extends BroadcastReceiver {
 
     public void setCamListener(CameraListener camListener) {
         this.camListener = camListener;
+        if(sioListener != null) {
+            ((LeptonCamera) sioListener).setCameraListener(this.camListener);
+        }
     }
 
     @Override

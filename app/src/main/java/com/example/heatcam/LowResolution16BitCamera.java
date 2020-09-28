@@ -24,6 +24,7 @@ public class LowResolution16BitCamera extends LeptonCamera {
             bMap = Bitmap.createBitmap(bMap, 0,0, bMap.getWidth(), bMap.getHeight(), m, true);
             getCameraListener().updateImage(bMap);
             getCameraListener().updateText(""+ kelvinToCelsius(maxRaw));
+            getCameraListener().maxCelsiusValue(kelvinToCelsius(maxRaw));
         } else {
             extractRow(data);
             setRawDataIndex(getRawDataIndex()+data.length);

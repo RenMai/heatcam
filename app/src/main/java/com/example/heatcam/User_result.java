@@ -8,6 +8,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -16,7 +17,7 @@ import android.widget.TextView;
 public class User_result extends AppCompatActivity implements CameraListener {
 
     // the value could be used of user temperature when userTemp is 100/real 39C etc.
-    private double userTemp;
+    private double userTemp = 0;
 
     private Button buttonStart, buttonStart2, buttonStart3;
     private TextView text, text2;
@@ -106,7 +107,7 @@ public class User_result extends AppCompatActivity implements CameraListener {
     @Override
     public void maxCelsiusValue(double max) {
         if(ready == true){
-            if(laskuri < 300){
+            if(laskuri < 100){
                 if(max > userTemp){
                     userTemp = max;
                 }
@@ -115,6 +116,9 @@ public class User_result extends AppCompatActivity implements CameraListener {
             else {
                 ready = false;
                 laskuri = 0;
+                new asyncTaskUpdateProgress().execute();
+                text = findViewById(R.id.textView);
+                text.setText(R.string.msgHightTmprt);
             }
         }
 
