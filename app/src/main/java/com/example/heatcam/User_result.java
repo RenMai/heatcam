@@ -2,22 +2,28 @@ package com.example.heatcam;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+
+import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public class User_result extends AppCompatActivity {
+public class User_result extends AppCompatActivity implements CameraListener {
 
     // the value could be used of user temperature when userTemp is 100/real 39C etc.
-    private int userTemp = 0;
+    private double userTemp;
 
     private Button buttonStart, buttonStart2, buttonStart3;
     private TextView text, text2;
+    private boolean ready = false;
+    private  int laskuri = 0;
     ProgressBar vProgressBar;
+    SerialPortModel serialPortModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +35,10 @@ public class User_result extends AppCompatActivity {
         animationDrawable.setEnterFadeDuration(2000);
         animationDrawable.setExitFadeDuration(4000);
         animationDrawable.start();
+
+        new asyncTaskUpdateProgress().execute();
+        serialPortModel = SerialPortModel.getInstance();
+        serialPortModel.setCamListener(this);
 
         buttonStart = findViewById(R.id.start);
         buttonStart2 = findViewById(R.id.start2);
@@ -56,13 +66,73 @@ public class User_result extends AppCompatActivity {
             text.setText(R.string.msgNormTmprt);
         });
         buttonStart3.setOnClickListener(v -> {
+            ready = true;
+            /*
             userTemp = 30;
             // TODO Auto-generated method stub
             buttonStart3.setClickable(false);
             new asyncTaskUpdateProgress().execute();
             text = findViewById(R.id.textView);
-            text.setText(R.string.msgLowTmprt);
+            text.setText(R.string.msgLowTmprt);*/
         });
+    }
+
+    @Override
+    public void setConnectingImage() {
+
+    }
+
+    @Override
+    public void setNoFeedImage() {
+
+    }
+
+    @Override
+    public void updateImage(Bitmap image) {
+        runOnUiThread(() -> { ((ImageView)findViewById(R.id.imageView)).setImageBitmap(image);});
+
+    }
+
+    @Override
+    public void updateText(String text) {
+
+    }
+
+    @Override
+    public void disconnect() {
+
+    }
+
+    @Override
+    public void maxCelsiusValue(double max) {
+        if(ready == true){
+            if(laskuri < 300){
+                if(max > userTemp){
+                    userTemp = max;
+                }
+                laskuri++;
+            }
+            else {
+                ready = false;
+                laskuri = 0;
+            }
+        }
+
+    }
+
+    @Override
+    public void minCelsiusValue(double min) {
+
+    }
+
+    @Override
+    public void detectFace(Bitmap image) {
+
+    }
+
+    @Override
+    public void writeToFile(byte[] data) {
+
     }
 
 
