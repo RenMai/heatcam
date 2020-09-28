@@ -32,19 +32,18 @@ public class LowResolution16BitCamera extends LeptonCamera {
     }
 
     private Bitmap convertTo8bit(int min, int max) {
-        int[][] temp;
         int pix;
-        temp = new int[getHeight()][getWidth()];
+        int ind = 0;
+        int[] colors = new int[getWidth() * getHeight()];
         for(int i = 0; i < getHeight(); i++) {
             for(int j = 0; j < getWidth(); j++) {
                 pix = ((getRawFramePixel(j, i) - min) * 255 )/ (max-min);
                 if(pix > 255) pix = 255;
                 else if(pix < 0) pix = 0;
-                temp[i][j] = getColorTable().elementAt(pix);
+                colors[ind++] = getColorTable().elementAt(pix);
             }
         }
-
-        return ImageUtils.bitmapFromArray(temp);
+        return Bitmap.createBitmap(colors, getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
     }
 
 }
