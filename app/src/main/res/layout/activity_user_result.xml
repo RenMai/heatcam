@@ -96,7 +96,7 @@
         android:layout_width="89dp"
         android:layout_height="47dp"
         android:layout_marginStart="8dp"
-        android:text="Low"
+        android:text="START"
         app:layout_constraintEnd_toEndOf="@+id/start2"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/start2"
