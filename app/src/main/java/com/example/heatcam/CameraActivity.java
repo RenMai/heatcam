@@ -191,7 +191,7 @@ public class CameraActivity extends Fragment implements CameraListener {
 
     @Override
     public void onStart() {
-        //sModel.scanDevices(getContext());
+        sModel.scanDevices(getContext());
         super.onStart();
     }
 
