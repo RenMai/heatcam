@@ -23,8 +23,8 @@
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="395dp"
-        android:layout_height="95dp"
+        android:layout_width="400dp"
+        android:layout_height="150dp"
         android:layout_marginTop="172dp"
 
         android:layout_marginBottom="25dp"
@@ -73,33 +73,12 @@
         app:layout_constraintTop_toTopOf="@+id/imageView" />
 
     <Button
-        android:id="@+id/start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="450dp"
-        android:text="High"
-        app:layout_constraintStart_toStartOf="@+id/vprogressbar3"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/start2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Norm"
-        app:layout_constraintEnd_toEndOf="@+id/start"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/start"
-        app:layout_constraintTop_toBottomOf="@+id/start" />
-
-    <Button
         android:id="@+id/start3"
         android:layout_width="89dp"
         android:layout_height="47dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
         android:text="START"
-        app:layout_constraintEnd_toEndOf="@+id/start2"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/start2"
-        app:layout_constraintTop_toBottomOf="@+id/start2" />
+        app:layout_constraintEnd_toEndOf="@+id/vprogressbar3"
+        app:layout_constraintTop_toBottomOf="@+id/vprogressbar3" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
