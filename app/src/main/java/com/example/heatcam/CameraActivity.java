@@ -102,7 +102,9 @@ public class CameraActivity extends Fragment implements CameraListener {
         getContext().registerReceiver(sModel, filter);
 
         // camera.setListener(this);
-        testFileReader = new TestFileReader(view.getContext(), camera);
+        LeptonCamera testCam = new HighResolutionCamera();
+        testCam.setCameraListener(this);
+        testFileReader = new TestFileReader(view.getContext(), testCam);
 
         scanBtn.setOnClickListener(v -> sModel.scanDevices(requireContext()));
         analysisBtn.setOnClickListener(v -> sModel.toggleAnalysisMode());
