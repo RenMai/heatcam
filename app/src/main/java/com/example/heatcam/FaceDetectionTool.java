@@ -29,8 +29,7 @@ public class FaceDetectionTool {
             new FaceDetectorOptions.Builder()
                     .setClassificationMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
                     .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
-                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
-                    .setMinFaceSize(0.15f)
+                    .setMinFaceSize(0.35f)
                     .enableTracking()
                     .build();
 
@@ -44,12 +43,16 @@ public class FaceDetectionTool {
     FaceDetector faceDetector;
     LiveCameraActivity a;
 
+    private volatile boolean isProcessing = false;
+
     public FaceDetectionTool(LiveCameraActivity a) {
         faceDetector = FaceDetection.getClient(options);
         this.a = a;
     }
 
     public void processImage(InputImage image, ImageProxy imageProxy) {
+
+        isProcessing = true;
 
         Task<List<Face>> result =
                 faceDetector.process(image)
@@ -103,6 +106,11 @@ public class FaceDetectionTool {
 
                                             a.drawImage(b);
 
+                                            PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
+                                            PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
+
+                                            a.calculateFaceDistance(leftEyeP, rightEyeP);
+
 
 
                                             float rotY = face.getHeadEulerAngleY();  // Head is rotated to the right rotY degrees
@@ -134,8 +142,12 @@ public class FaceDetectionTool {
                                     // [END get_face_info]
                                     // [END_EXCLUDE]
                                     //System.out.println("SUCCESS");
-                                    imageProxy.close();
+                                     //imageProxy.close();
                                 })
+                        .addOnCompleteListener(res -> {
+                            imageProxy.close();
+                            isProcessing = false;
+                        })
                         .addOnFailureListener(
                                 e -> {
 
@@ -145,6 +157,11 @@ public class FaceDetectionTool {
                                     System.out.println(e.getMessage());
                                     e.printStackTrace();
                                     imageProxy.close();
+                                    isProcessing = false;
                                 });
+    }
+
+    public boolean isProcessing() {
+        return isProcessing;
     }
 }

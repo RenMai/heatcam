@@ -1,17 +1,22 @@
 package com.example.heatcam;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Size;
+import android.util.SizeF;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -24,6 +29,7 @@ import android.widget.VideoView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.camera2.interop.Camera2CameraInfo;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
@@ -37,7 +43,6 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
-import com.google.android.gms.vision.CameraSource;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.vision.common.InputImage;
 
@@ -56,6 +61,8 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
     private Executor executor = Executors.newSingleThreadExecutor();
     private final int REQUEST_CODE_PERMISSIONS = 1001;
     private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA"};
+    private final int IMAGE_WIDTH = 480;
+    private final int IMAGE_HEIGHT = 640;
 
     private Button cameraBtn;
     private PreviewView cameraFeed;
@@ -79,6 +86,16 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
     private VideoView videoView;
 
     private MutableLiveData<Integer> detectedFrames = new MutableLiveData<>();
+
+    private float focalLength = 0f;
+    private final int AVERAGE_EYE_DISTANCE = 63; // in mm
+
+    private float angleX = 0;
+    private float angleY = 0;
+
+    private float sensorX;
+    private float sensorY;
+
 
 
     @Override
@@ -161,7 +178,7 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
 
         ImageAnalysis imageAnalysis =
                 new ImageAnalysis.Builder()
-                        .setTargetResolution(new Size(480, 640))
+                        .setTargetResolution(new Size(IMAGE_WIDTH, IMAGE_HEIGHT))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
 
@@ -172,7 +189,68 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
 
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, imageAnalysis, preview);
 
+        @SuppressLint("UnsafeExperimentalUsageError") String camId = Camera2CameraInfo.extractCameraId(camera.getCameraInfo());
+        checkFocalLength(camId);
+
     }
+
+
+    /*
+        ==================================================
+        ========== Naaman etäisyyden mittaus =============
+        TODO: ei toimi kunnolla
+
+        https://ivanludvig.github.io/blog/2019/07/20/calculating-screen-to-face-distance-android.html
+        https://stackoverflow.com/questions/39965408/what-is-the-android-camera2-api-equivalent-of-camera-parameters-gethorizontalvie/39983168
+     */
+    private void checkFocalLength(String camId) {
+        CameraManager cameraManager = (CameraManager) getApplicationContext().getSystemService(Context.CAMERA_SERVICE);
+        CameraCharacteristics characteristics = null;
+        float[] focalLengths;
+        try {
+            characteristics = cameraManager.getCameraCharacteristics(camId);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+
+        focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+        SizeF sensorSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+        float sensorWidth = sensorSize.getWidth();
+        float sensorHeight = sensorSize.getHeight();
+
+
+        if (focalLengths.length == 1) {
+            focalLength = focalLengths[0];
+            float fovX = (float) (2 * Math.atan(sensorWidth / (2 * focalLength)));
+            float fovY = (float) (2 * Math.atan(sensorHeight / (2 * focalLength)));
+            sensorX = (float) (Math.tan(Math.toRadians(fovX / 2)) * 2 * focalLength);
+            sensorY = (float) (Math.tan(Math.toRadians(fovY / 2)) * 2 * focalLength);
+        } else {
+            System.out.println("Focal length löyty kaksi arvoa");
+        }
+
+    }
+
+    public void calculateFaceDistance(PointF leftEye, PointF rightEye) {
+        float deltaX = Math.abs(leftEye.x - rightEye.x);
+        float deltaY = Math.abs(leftEye.y - rightEye.y);
+
+        float dist = 0f;
+        if (deltaX >= deltaY) {
+           dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorX) * (IMAGE_WIDTH / deltaX);
+        } else {
+            dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorY) * (IMAGE_HEIGHT / deltaY);
+        }
+
+        float finalDist = dist / 1000 * 2;
+        runOnUiThread(() -> posetext.setText(String.format("%.0f", finalDist) + "cm"));
+    }
+
+    /*
+        ==================================================
+        ===== Naaman etäisyyden mittauslohko loppuu ======
+     */
+
 
     @Override
     public void answerYes() {
@@ -188,17 +266,18 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
 
         @Override
         public void analyze(@NonNull ImageProxy image) {
-            int rotationDegrees = image.getImageInfo().getRotationDegrees();
-            @SuppressLint("UnsafeExperimentalUsageError") Image img = image.getImage();
-            if (img != null) {
-               //Bitmap bMap = previewToBitmap(img);
-                //Bitmap bMap = cameraFeed.getBitmap();
+            if (!fTool.isProcessing()) {
+                int rotationDegrees = image.getImageInfo().getRotationDegrees();
+                @SuppressLint("UnsafeExperimentalUsageError") Image img = image.getImage();
+                if (img != null) {
+                    //Bitmap bMap = previewToBitmap(img);
+                    //Bitmap bMap = cameraFeed.getBitmap();
 
 
-                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight());
+                    Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight());
 
-                InputImage inputImage = InputImage.fromBitmap(bMap, 0);
-                fTool.processImage(inputImage, image); // face detection
+                    InputImage inputImage = InputImage.fromBitmap(bMap, 0);
+                    fTool.processImage(inputImage, image); // face detection
 
 
                  /* Eeron pose detection
@@ -210,14 +289,17 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
 
                   */
 
-                if (rotationDegrees == 0){
-                    cameraView.setRotation(-90);
-                } else if (rotationDegrees == 270) {
-                    cameraView.setRotation(0);
+                    if (rotationDegrees == 0) {
+                        cameraView.setRotation(-90);
+                    } else if (rotationDegrees == 270) {
+                        cameraView.setRotation(0);
+                    }
+                    //  detectFace(bMap);
                 }
-              //  detectFace(bMap);
-            }
-            //image.close();
+                //image.close();
+           } else {
+                image.close();
+           }
         }
     }
 
