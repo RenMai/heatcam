@@ -29,7 +29,9 @@ public class LowResolutionCamera extends LeptonCamera implements SerialInputOutp
             Bitmap bMap = getBitmapInternal();
             bMap = Bitmap.createBitmap(bMap, 0,0, bMap.getWidth(), bMap.getHeight(), m, true);
             getCameraListener().updateImage(bMap);
-            getCameraListener().updateText(""+ kelvinToCelsius(maxRaw));
+           // getCameraListener().updateText(""+ kelvinToCelsius(maxRaw));
+            getCameraListener().maxCelsiusValue(kelvinToCelsius(maxRaw));
+            getCameraListener().minCelsiusValue(kelvinToCelsius(minRaw));
             if(getFrameListener() != null) {
                 getFrameListener().onNewFrame(getRawData());
             }

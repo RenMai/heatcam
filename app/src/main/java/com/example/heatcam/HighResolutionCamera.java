@@ -15,7 +15,10 @@ public class HighResolutionCamera extends LeptonCamera {
             int maxRaw = (rawTelemetry[18]&0xFF) + (rawTelemetry[19]&0xFF)*256;
             int minRaw = (rawTelemetry[21]&0xFF) + (rawTelemetry[22]&0xFF)*256;
 
-            getCameraListener().detectFace(getBitmapInternal());
+            //getCameraListener().detectFace(getBitmapInternal());
+            getCameraListener().maxCelsiusValue(kelvinToCelsius(maxRaw));
+            getCameraListener().minCelsiusValue(kelvinToCelsius(minRaw));
+            getCameraListener().updateImage(getBitmapInternal());
             if(getFrameListener() != null) {
                 getFrameListener().onNewFrame(getRawData());
             }
