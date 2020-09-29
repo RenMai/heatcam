@@ -27,7 +27,8 @@ public class FaceDetectionTool {
 
     FaceDetectorOptions options =
             new FaceDetectorOptions.Builder()
-                    .setClassificationMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+                    .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
                     .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
                     .setMinFaceSize(0.35f)
                     .enableTracking()
