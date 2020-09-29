@@ -18,11 +18,12 @@ public class User_result extends AppCompatActivity implements CameraListener {
 
     // the value could be used of user temperature when userTemp is 100/real 39C etc.
     private double userTemp = 0;
+    double temp = 0;
 
     private Button buttonStart, buttonStart2, buttonStart3;
     private TextView text, text2;
     private boolean ready = false;
-    private  int laskuri = 0;
+    private int laskuri = 0;
     ProgressBar vProgressBar;
     SerialPortModel serialPortModel;
 
@@ -36,37 +37,37 @@ public class User_result extends AppCompatActivity implements CameraListener {
         animationDrawable.setEnterFadeDuration(2000);
         animationDrawable.setExitFadeDuration(4000);
         animationDrawable.start();
-
-        new asyncTaskUpdateProgress().execute();
+        text = findViewById(R.id.textView);
+        //new asyncTaskUpdateProgress().execute();
         serialPortModel = SerialPortModel.getInstance();
         serialPortModel.setCamListener(this);
 
-        buttonStart = findViewById(R.id.start);
-        buttonStart2 = findViewById(R.id.start2);
+//        buttonStart = findViewById(R.id.start);
+//        buttonStart2 = findViewById(R.id.start2);
         buttonStart3 = findViewById(R.id.start3);
+        text = findViewById(R.id.textView);
         text2 = findViewById(R.id.textView2);
         text2.setText("THERMAL CAMERA");
         vProgressBar = findViewById(R.id.vprogressbar3);
 
 
-        buttonStart.setOnClickListener(v -> {
-            userTemp = 90;
-            // TODO Auto-generated method stub
-            buttonStart.setClickable(false);
-            new asyncTaskUpdateProgress().execute();
-            text = findViewById(R.id.textView);
-
-            text.setText(R.string.msgHightTmprt);
-        });
-        buttonStart2.setOnClickListener(v -> {
-            userTemp = 60;
-            // TODO Auto-generated method stub
-            buttonStart2.setClickable(false);
-            new asyncTaskUpdateProgress().execute();
-            text = findViewById(R.id.textView);
-            text.setText(R.string.msgNormTmprt);
-        });
+//        buttonStart.setOnClickListener(v -> {
+//            userTemp = 37.8;
+//            // TODO Auto-generated method stub
+//            buttonStart.setClickable(false);
+//            new asyncTaskUpdateProgress().execute();
+//            text = findViewById(R.id.textView);
+//            text.setText(R.string.msgHightTmprt);
+//        });
+//        buttonStart2.setOnClickListener(v -> {
+//            userTemp = 35.5;
+//            // TODO Auto-generated method stub
+//            buttonStart2.setClickable(false);
+//            new asyncTaskUpdateProgress().execute();
+//            text.setText(R.string.msgNormTmprt);
+//        });
         buttonStart3.setOnClickListener(v -> {
+            //buttonStart3.setClickable(false);
             ready = true;
             /*
             userTemp = 30;
@@ -74,70 +75,66 @@ public class User_result extends AppCompatActivity implements CameraListener {
             buttonStart3.setClickable(false);
             new asyncTaskUpdateProgress().execute();
             text = findViewById(R.id.textView);
-            text.setText(R.string.msgLowTmprt);*/
+            text.setText(R.string.msgLowTmprt);
+            */
         });
     }
 
     @Override
-    public void setConnectingImage() {
-
-    }
+    public void setConnectingImage() { }
 
     @Override
-    public void setNoFeedImage() {
-
-    }
+    public void setNoFeedImage() { }
 
     @Override
     public void updateImage(Bitmap image) {
-        runOnUiThread(() -> { ((ImageView)findViewById(R.id.imageView)).setImageBitmap(image);});
+        runOnUiThread(() -> {
+            ((ImageView) findViewById(R.id.imageView)).setImageBitmap(image);
+        });
 
     }
 
     @Override
-    public void updateText(String text) {
-
-    }
+    public void updateText(String text) { }
 
     @Override
-    public void disconnect() {
-
-    }
+    public void disconnect() { }
 
     @Override
     public void maxCelsiusValue(double max) {
-        if(ready == true){
-            if(laskuri < 100){
-                if(max > userTemp){
+        if (ready == true) {
+            if (laskuri < 100) {
+                if (max > userTemp) {
                     userTemp = max;
                 }
                 laskuri++;
-            }
-            else {
+            } else {
                 ready = false;
                 laskuri = 0;
+
                 new asyncTaskUpdateProgress().execute();
-                text = findViewById(R.id.textView);
-                text.setText(R.string.msgHightTmprt);
+
+                if (75 >= userTemp && userTemp >= 27) {
+                    text.setText(R.string.msgNormTmprt);
+                } else if (userTemp > 75) {
+                    text.setText(R.string.msgHightTmprt);
+                } else {
+                    text.setText(R.string.msgLowTmprt);
+                }
+
             }
         }
 
     }
 
     @Override
-    public void minCelsiusValue(double min) {
-
-    }
+    public void minCelsiusValue(double min) { }
 
     @Override
-    public void detectFace(Bitmap image) {
-
-    }
+    public void detectFace(Bitmap image) { }
 
     @Override
-    public void writeToFile(byte[] data) {
-
-    }
+    public void writeToFile(byte[] data) { }
 
 
     public class asyncTaskUpdateProgress extends AsyncTask<Void, Integer, Void> {
@@ -147,7 +144,9 @@ public class User_result extends AppCompatActivity implements CameraListener {
         @Override
         protected void onPostExecute(Void result) {
             // TODO Auto-generated method stub
-            buttonStart.setClickable(true);
+            // buttonStart3.setClickable(true);
+
+
         }
 
         @Override
@@ -165,16 +164,21 @@ public class User_result extends AppCompatActivity implements CameraListener {
         @Override
         protected Void doInBackground(Void... arg0) {
             // TODO Auto-generated method stub
-            while (progress < userTemp) {
+
+            temp = (userTemp - 27)/(41 - 27)*100;
+            while (progress < temp) {
                 progress++;
                 publishProgress(progress);
                 SystemClock.sleep(1);
+
             }
             return null;
+
         }
 
 
-    }
 
+
+    }
 
 }
