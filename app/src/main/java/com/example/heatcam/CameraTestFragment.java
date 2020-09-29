@@ -26,6 +26,8 @@ public class CameraTestFragment extends Fragment implements CameraListener {
     private String testDataFileName = "maskilasit.txt";
     private final String testDataPath = "test_data/";
 
+    private CameraListener listener = this;
+
 
     @Nullable
     @Override
@@ -60,19 +62,22 @@ public class CameraTestFragment extends Fragment implements CameraListener {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 System.out.println(position);
                 disconnect();
+                LeptonCamera cam = null;
                 switch (position) {
                     case 0 :
-                        sModel.setSioListener(new LowResolution16BitCamera());
-                        sModel.scanDevices(getContext());
+                        cam = new LowResolution16BitCamera();
                         break;
                     case 1 :
-                        sModel.setSioListener(new LowResolutionCamera());
-                        sModel.scanDevices(getContext());
+                        cam = new LowResolutionCamera();
                         break;
                     case 3 :
-                        sModel.setSioListener(new HighResolutionCamera());
-                        sModel.scanDevices(getContext());
+                        cam = new HighResolutionCamera();
                         break;
+                }
+                if(cam != null) {
+                    cam.setCameraListener(listener);
+                    sModel.setSioListener(cam);
+                    sModel.scanDevices(getContext());
                 }
             }
 
