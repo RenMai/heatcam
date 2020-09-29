@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class LogView extends AppCompatActivity {
 
@@ -66,7 +67,10 @@ public class LogView extends AppCompatActivity {
     private void filter(final String filter) {
         StringBuilder sb = new StringBuilder();
         logs.forEach(e -> {
-            if(e.contains(filter)) {
+            boolean contains = Pattern.compile(Pattern.quote(filter), Pattern.CASE_INSENSITIVE) // better than using toLowerCase performance-wise
+                    .matcher(e)
+                    .find();
+            if(contains) {
                 sb.append(e).append("\n");
             }
         });
