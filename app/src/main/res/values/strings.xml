@@ -3,4 +3,5 @@
     <string name="msgLowTmprt">Your body temperature is too low!</string>
     <string name="msgNormTmprt">Your body temperature is within normal limits!</string>
     <string name="msgHightTmprt">Your body temperature is too high!</string>
+    <string name="otsikko">THERMAL CAMERA</string>
 </resources>
