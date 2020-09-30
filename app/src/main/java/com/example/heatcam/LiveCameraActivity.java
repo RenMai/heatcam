@@ -90,8 +90,8 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
     private float focalLength = 0f;
     private final int AVERAGE_EYE_DISTANCE = 63; // in mm
 
-    private float angleX = 0;
-    private float angleY = 0;
+    private float angleX;
+    private float angleY;
 
     private float sensorX;
     private float sensorY;
@@ -128,6 +128,21 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
         headTiltAnalyzer = new HeadTiltAnalyzer(this, xRotationTeksti, yRotationTeksti, xBar, yBar);
 
         if (allPermissionsGranted()) {
+            /*
+            joudutaan käyttämään vanhaa camera APIa että saadaan arvot kasvojen etäisyyden mittaukseen
+            https://ivanludvig.github.io/blog/2019/07/20/calculating-screen-to-face-distance-android.html
+            https://github.com/IvanLudvig/Screen-to-face-distance
+             */
+            android.hardware.Camera cam = getFrontCam();
+            android.hardware.Camera.Parameters camP = cam.getParameters();
+            focalLength = camP.getFocalLength();
+            angleX = camP.getHorizontalViewAngle();
+            angleY = camP.getVerticalViewAngle();
+            sensorX = (float) (Math.tan(Math.toRadians(angleX / 2)) * 2 * focalLength);
+            sensorY = (float) (Math.tan(Math.toRadians(angleY / 2)) * 2 * focalLength);
+            cam.stopPreview();
+            cam.release();
+
             startCamera();
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
@@ -189,46 +204,25 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
 
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, imageAnalysis, preview);
 
-        @SuppressLint("UnsafeExperimentalUsageError") String camId = Camera2CameraInfo.extractCameraId(camera.getCameraInfo());
-        checkFocalLength(camId);
 
     }
 
-
-    /*
-        ==================================================
-        ========== Naaman etäisyyden mittaus =============
-        TODO: ei toimi kunnolla
-
-        https://ivanludvig.github.io/blog/2019/07/20/calculating-screen-to-face-distance-android.html
-        https://stackoverflow.com/questions/39965408/what-is-the-android-camera2-api-equivalent-of-camera-parameters-gethorizontalvie/39983168
-     */
-    private void checkFocalLength(String camId) {
-        CameraManager cameraManager = (CameraManager) getApplicationContext().getSystemService(Context.CAMERA_SERVICE);
-        CameraCharacteristics characteristics = null;
-        float[] focalLengths;
-        try {
-            characteristics = cameraManager.getCameraCharacteristics(camId);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
+    private android.hardware.Camera getFrontCam() {
+        android.hardware.Camera cam = null;
+        android.hardware.Camera.CameraInfo camInfo = new android.hardware.Camera.CameraInfo();
+        int camCount = android.hardware.Camera.getNumberOfCameras();
+        for (int camIdx = 0; camIdx < camCount; camIdx++) {
+            android.hardware.Camera.getCameraInfo(camIdx, camInfo);
+            if (camInfo.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                try {
+                    cam = android.hardware.Camera.open(camIdx);
+                } catch (Exception e) {
+                    System.out.println("Failed to open cam");
+                    e.printStackTrace();
+                }
+            }
         }
-
-        focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
-        SizeF sensorSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
-        float sensorWidth = sensorSize.getWidth();
-        float sensorHeight = sensorSize.getHeight();
-
-
-        if (focalLengths.length == 1) {
-            focalLength = focalLengths[0];
-            float fovX = (float) (2 * Math.atan(sensorWidth / (2 * focalLength)));
-            float fovY = (float) (2 * Math.atan(sensorHeight / (2 * focalLength)));
-            sensorX = (float) (Math.tan(Math.toRadians(fovX / 2)) * 2 * focalLength);
-            sensorY = (float) (Math.tan(Math.toRadians(fovY / 2)) * 2 * focalLength);
-        } else {
-            System.out.println("Focal length löyty kaksi arvoa");
-        }
-
+        return cam;
     }
 
     public void calculateFaceDistance(PointF leftEye, PointF rightEye) {
@@ -237,19 +231,15 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
 
         float dist = 0f;
         if (deltaX >= deltaY) {
-           dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorX) * (IMAGE_WIDTH / deltaX);
+            dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorX) * (IMAGE_WIDTH / deltaX);
         } else {
-            dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorY) * (IMAGE_HEIGHT / deltaY);
+           dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorY) * (IMAGE_HEIGHT / deltaY);
         }
 
-        float finalDist = dist / 1000 * 2;
+        float finalDist = dist / 10;
         runOnUiThread(() -> posetext.setText(String.format("%.0f", finalDist) + "cm"));
     }
 
-    /*
-        ==================================================
-        ===== Naaman etäisyyden mittauslohko loppuu ======
-     */
 
 
     @Override
