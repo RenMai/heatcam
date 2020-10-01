@@ -86,8 +86,9 @@ public class MeasurementStartFragment extends Fragment {
         canvas.drawRect(rt, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         float x = overlay.getWidth() / 4.0f;
-        float fromTop = 200;
-        canvas.drawOval(x,  fromTop, x*3, overlay.getHeight()/2.0f, paint);
+        float fromTop = 400;
+        float bottom = fromTop + 760;
+        canvas.drawOval(x,  fromTop, x*3, bottom, paint);
         ((ImageView)view.findViewById(R.id.start_layout_oval_overlay)).setImageBitmap(overlay);
     }
 
