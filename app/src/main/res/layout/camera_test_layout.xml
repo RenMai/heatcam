@@ -32,7 +32,7 @@
         android:id="@+id/camera_min_raw_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:text="minValue"
         app:layout_constraintEnd_toEndOf="@+id/camera_max_raw_value"
         app:layout_constraintTop_toBottomOf="@+id/camera_max_raw_value" />
@@ -68,6 +68,26 @@
         android:text="Disconnected"
         app:layout_constraintEnd_toEndOf="@+id/camera_setting_spinner"
         app:layout_constraintTop_toBottomOf="@+id/camera_test_view" />
+
+    <EditText
+        android:id="@+id/edit_max_filter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ems="3"
+        android:inputType="numberDecimal"
+        app:layout_constraintBottom_toBottomOf="@+id/camera_max_raw_value"
+        app:layout_constraintStart_toEndOf="@+id/camera_max_raw_value" />
+
+    <EditText
+        android:id="@+id/edit_min_filter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ems="3"
+        android:inputType="numberDecimal"
+        app:layout_constraintBottom_toBottomOf="@+id/camera_min_raw_value"
+        app:layout_constraintStart_toEndOf="@+id/camera_min_raw_value" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
