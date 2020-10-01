@@ -70,7 +70,7 @@ public class CameraTestFragment extends Fragment implements CameraListener {
                     case 1 :
                         cam = new LowResolutionCamera();
                         break;
-                    case 3 :
+                    case 2 :
                         cam = new HighResolutionCamera();
                         break;
                 }
@@ -88,6 +88,12 @@ public class CameraTestFragment extends Fragment implements CameraListener {
         });
 
         return view;
+    }
+
+    @Override
+    public void onPause() {
+        disconnect();
+        super.onPause();
     }
 
     @Override
@@ -128,12 +134,14 @@ public class CameraTestFragment extends Fragment implements CameraListener {
     @Override
     public void maxCelsiusValue(double max) {
         TextView text = getActivity().findViewById(R.id.camera_max_raw_value);
+        if(text == null) return;
         getActivity().runOnUiThread(() -> text.setText((String.valueOf(max))));
     }
 
     @Override
     public void minCelsiusValue(double min) {
         TextView text = getActivity().findViewById(R.id.camera_min_raw_value);
+        if(text == null) return;
         getActivity().runOnUiThread(() -> text.setText((String.valueOf(min))));
     }
 
