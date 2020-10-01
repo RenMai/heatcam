@@ -3,12 +3,20 @@ package com.example.heatcam;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.drawable.shapes.OvalShape;
 import android.media.Image;
 import android.os.Bundle;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -54,6 +62,7 @@ public class MeasurementStartFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.measurement_start_layout, container, false);
+        createFaceOval(view);
         rs = new RenderScriptTools(view.getContext());
         cameraFeed = view.findViewById(R.id.measurement_position_video);
         faceDetector = FaceDetection.getClient(options);
@@ -64,6 +73,22 @@ public class MeasurementStartFragment extends Fragment {
         }
 
         return view;
+    }
+
+    private void createFaceOval(View view) {
+        Bitmap overlay = Bitmap.createBitmap(1200, 1920, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(overlay);
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setAlpha(150);
+        paint.setStyle(Paint.Style.FILL);
+        Rect rt = new Rect(0,0, overlay.getWidth(), overlay.getHeight());
+        canvas.drawRect(rt, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        float x = overlay.getWidth() / 4.0f;
+        float fromTop = 200;
+        canvas.drawOval(x,  fromTop, x*3, overlay.getHeight()/2.0f, paint);
+        ((ImageView)view.findViewById(R.id.start_layout_oval_overlay)).setImageBitmap(overlay);
     }
 
     private void startCamera() {
@@ -108,18 +133,6 @@ public class MeasurementStartFragment extends Fragment {
         return true;
     }
 
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == REQUEST_CODE_PERMISSIONS){
-            if(allPermissionsGranted()){
-                startCamera();
-            } else{
-                Toast.makeText(getContext(), "Permissions not granted by the user.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
 
     public void processImage(InputImage image, ImageProxy imageProxy) {
 
