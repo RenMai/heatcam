@@ -149,7 +149,7 @@ public class MeasurementStartFragment extends Fragment {
                                             synchronized (this) {
                                                 if(smileProb > 0.99 && !found) {
                                                     found = true;
-                                                    Fragment f = new MenuFragment();
+                                                    Fragment f = new User_result();
                                                     getActivity().getSupportFragmentManager().beginTransaction()
                                                             .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
                                                             .replace(R.id.fragmentCamera, f, "default").commit();
@@ -163,7 +163,7 @@ public class MeasurementStartFragment extends Fragment {
                                             synchronized (this) {
                                                 if(rightEyeOpenProb < 0.02 && !found) {
                                                     found = true;
-                                                    Fragment f = new MenuFragment();
+                                                    Fragment f = new User_result();
                                                     getActivity().getSupportFragmentManager().beginTransaction()
                                                             .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
                                                             .replace(R.id.fragmentCamera, f, "default").commit();

@@ -81,4 +81,27 @@
         app:layout_constraintEnd_toEndOf="@+id/vprogressbar3"
         app:layout_constraintTop_toBottomOf="@+id/vprogressbar3" />
 
+    <TextView
+        android:id="@+id/textDistance"
+        android:layout_width="296dp"
+        android:layout_height="66dp"
+        android:text="Distance: "
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/textMeasuring"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintVertical_bias="0.837" />
+
+    <TextView
+        android:id="@+id/textMeasuring"
+        android:layout_width="292dp"
+        android:layout_height="64dp"
+        android:layout_marginBottom="48dp"
+        android:text="Measuring temp: FALSE"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/textView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
