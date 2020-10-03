@@ -46,7 +46,7 @@ public class User_result extends Fragment implements CameraListener {
     private double userTemp = 0, correcTemp = 0;
     double temp = 0;
 
-    private Button buttonStart3;
+    private Button buttonStart3, buttonQR;
     private TextView text, text2, textDistance, textMeasuring;
     private ImageView imgView;
     private boolean ready = false;
@@ -89,6 +89,7 @@ public class User_result extends Fragment implements CameraListener {
         serialPortModel = SerialPortModel.getInstance();
         serialPortModel.setCamListener(this);
         buttonStart3 = view.findViewById(R.id.start3);
+        buttonQR = view.findViewById(R.id.QRbutton);
         text = view.findViewById(R.id.textView);
         text2 = view.findViewById(R.id.textView2);
         text2.setText(R.string.otsikko);
@@ -114,6 +115,11 @@ public class User_result extends Fragment implements CameraListener {
         buttonStart3.setOnClickListener(v -> {
             ready = true;
             userTemp = 0;
+        });
+        buttonQR.setOnClickListener(v -> {
+            Fragment qr = new QR_code_fragment();
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentCamera, qr, "default").commit();
         });
 
         detectedFace.observe(getViewLifecycleOwner(), new Observer<Face>() {
