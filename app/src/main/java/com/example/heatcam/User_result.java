@@ -16,7 +16,11 @@ import androidx.lifecycle.Observer;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.Image;
 import android.os.AsyncTask;
@@ -47,7 +51,7 @@ public class User_result extends Fragment implements CameraListener {
     double temp = 0;
 
     private Button buttonStart3, buttonQR;
-    private TextView text, text2, textDistance, textMeasuring;
+    private TextView text, text2, textDistance, textMeasuring, debugs;
     private ImageView imgView;
     private boolean ready = false;
     private boolean hasMeasured = false;
@@ -70,8 +74,12 @@ public class User_result extends Fragment implements CameraListener {
     private float sensorX;
     private float sensorY;
 
-    private AsyncTask tempMeasureTask;
+    private Rect naamarajat;
+    float korkeussuhde = (float)LeptonCamera.getHeight()/(float)IMAGE_HEIGHT;//32/640
+    float leveyssuhde = (float)LeptonCamera.getWidth()/(float)IMAGE_WIDTH;//24/480
 
+    private AsyncTask tempMeasureTask;
+    private HuippuLukema huiput = new HuippuLukema();
     private MutableLiveData<Face> detectedFace = new MutableLiveData<>();
 
     @Override
@@ -92,6 +100,7 @@ public class User_result extends Fragment implements CameraListener {
         buttonQR = view.findViewById(R.id.QRbutton);
         text = view.findViewById(R.id.textView);
         text2 = view.findViewById(R.id.textView2);
+        //debugs = view.findViewById(R.id.debugs);
         text2.setText(R.string.otsikko);
         textDistance = view.findViewById(R.id.textDistance);
         textMeasuring = view.findViewById(R.id.textMeasuring);
@@ -115,6 +124,7 @@ public class User_result extends Fragment implements CameraListener {
         buttonStart3.setOnClickListener(v -> {
             ready = true;
             userTemp = 0;
+            huiput = new HuippuLukema();
         });
         buttonQR.setOnClickListener(v -> {
             Fragment qr = new QR_code_fragment();
@@ -141,6 +151,7 @@ public class User_result extends Fragment implements CameraListener {
                     ready = false;
                     progress = 0;
                     laskuri = 0;
+                    huiput = new HuippuLukema();
                     if (tempMeasureTask != null) {
                         tempMeasureTask.cancel(true);
                     }
@@ -162,7 +173,65 @@ public class User_result extends Fragment implements CameraListener {
 
     @Override
     public void updateImage(Bitmap image) {
+
+        if(naamarajat != null && ready){
+            //huiput = new HuippuLukema();
+            huiput = laskeAlue();
+
+            Canvas canvas = new Canvas(image);
+            Paint paint = new Paint();
+            paint.setColor(Color.GREEN);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(1);
+
+            Paint paint2 = new Paint();
+            paint2.setColor(Color.MAGENTA);
+            paint2.setStyle(Paint.Style.STROKE);
+            paint2.setStrokeWidth(1);
+
+            canvas.drawCircle(huiput.x, huiput.y, 1, paint2);
+            Rect rect = new Rect();
+            rect.set((int)(leveyssuhde*naamarajat.left),(int)(korkeussuhde*naamarajat.top),(int)(leveyssuhde*naamarajat.right),(int)(korkeussuhde*naamarajat.bottom));
+            canvas.drawRect(rect, paint);
+        }
+
         getActivity().runOnUiThread(() -> imgView.setImageBitmap(image));
+    }
+
+    public HuippuLukema laskeAlue(){
+
+        int maxleveys = LeptonCamera.getWidth()-1;
+        int maxkorkeus = LeptonCamera.getHeight()-1;
+
+        int vasen = (int)(naamarajat.left*leveyssuhde); if(vasen < 0) vasen = 0; if(vasen > maxleveys) vasen = maxleveys;
+        int oikea = (int)(naamarajat.right*leveyssuhde); if(oikea < 0) oikea = 0; if(oikea > maxleveys) oikea = maxleveys;
+        int yla = (int)(naamarajat.top*korkeussuhde); if(yla < 0) yla = 0; if(yla > maxkorkeus) yla = maxkorkeus;
+        int ala = (int)(naamarajat.bottom*korkeussuhde); if(ala < 0) ala = 0; if(ala > maxkorkeus) ala = maxkorkeus;
+
+        int[][] tempFrame = LeptonCamera.getTempFrame();
+
+        try{
+            if(tempFrame != null /*&& tempFrame.length > maxkorkeus && tempFrame[tempFrame.length-1].length > maxleveys*/){
+                for(int y = yla; y <= ala; y++){
+                    for(int x = vasen; x <= oikea; x++){
+                        double lampo = (tempFrame[y][x]- 27315)/100.0;
+                        if(lampo > huiput.max){
+                            huiput.max = lampo;
+                            huiput.y = y;
+                            huiput.x = x;
+                        }
+                    }
+                }
+            }
+        }catch (Exception e){
+
+        }
+        return  huiput;
+    }
+    class HuippuLukema{
+        int x = 0;
+        int y = 0;
+        double max = 0;
     }
 
     @Override
@@ -176,8 +245,9 @@ public class User_result extends Fragment implements CameraListener {
         if (ready) {
             getActivity().runOnUiThread(() ->textMeasuring.setText("Measuring temp: TRUE " + laskuri + "/100"));
             if (laskuri < 100) {
-                if (max > userTemp) {
-                    userTemp = max;
+                huiput = laskeAlue();
+                if (huiput.max > userTemp) {
+                    userTemp = huiput.max;
             }
                 laskuri++;
             } else {
@@ -323,6 +393,7 @@ public class User_result extends Fragment implements CameraListener {
 
     public void updateDetectedFace(Face face) {
         detectedFace.setValue(face);
+        naamarajat = face.getBoundingBox();
     }
 
     private class MyAnalyzer implements ImageAnalysis.Analyzer {
