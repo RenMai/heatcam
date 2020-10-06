@@ -1,5 +1,7 @@
 package com.example.heatcam;
 
+import android.graphics.Bitmap;
+
 public class HighResolutionCamera extends LeptonCamera {
 
     public HighResolutionCamera() {
@@ -16,6 +18,7 @@ public class HighResolutionCamera extends LeptonCamera {
             int minRaw = (rawTelemetry[21]&0xFF) + (rawTelemetry[22]&0xFF)*256;
 
             //getCameraListener().detectFace(getBitmapInternal());
+            createTempFrame(minRaw, maxRaw);
             getCameraListener().maxCelsiusValue(kelvinToCelsius(maxRaw));
             getCameraListener().minCelsiusValue(kelvinToCelsius(minRaw));
             getCameraListener().updateImage(getBitmapInternal());
@@ -26,5 +29,15 @@ public class HighResolutionCamera extends LeptonCamera {
             extractRow(data);
             setRawDataIndex(getRawDataIndex()+data.length);
         }
+    }
+
+    private void createTempFrame(int min, int max) {
+        int[][] tempData =  getRawFrame();
+        for(int i = 0; i < getHeight(); i++) {
+            for(int j = 0; j < getWidth(); j++) {
+                tempData[i][j] = min + tempData[i][j] / 255 * (max - min);
+            }
+        }
+        setRawTempFrame(tempData);
     }
 }

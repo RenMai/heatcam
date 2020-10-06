@@ -32,18 +32,18 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(v -> changeLayout());
 
         // kommentoi tästä
-
+/*
         Fragment cameraActivity = new CameraActivity();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragmentCamera, cameraActivity, "default").commit();
         initLogger();
         // tähän ja poista seuraava kommentti
-        /*
+
+ */
          btn.setVisibility(View.INVISIBLE);
-        Fragment f = new CameraTestFragment();
+        Fragment f = new MenuFragment();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragmentCamera, f, "default").commit();
-        */
 
 
         /*

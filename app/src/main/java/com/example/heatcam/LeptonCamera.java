@@ -12,11 +12,12 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
     private Vector<Integer> colorTable = ImageUtils.createColorTable();
 
     // max width and height of image
-    private int width;
-    private int height;
+    private static int width;
+    private static int height;
     private int telemetryWidth;
 
     // raw data arrays
+    private static int[][] rawTempFrame;
     private int[][] rawFrame;
     int[] rawTelemetry; // default visibility for tests
     private byte[] rawData;
@@ -35,6 +36,7 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
         this.height = height;
         this.telemetryWidth = telemetryWidth;
         this.rawFrame = new int[height][width];
+        this.rawTempFrame = new int[height][width];
         this.rawData = new byte[height*(width+4) + telemetryWidth + 4];
         this.rawTelemetry = new int[telemetryWidth];
         System.out.println("created new leptoncamera");
@@ -45,6 +47,7 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
         this.height = height;
         this.telemetryWidth = telemetryWidth;
         this.rawFrame = new int[height][width];
+        this.rawTempFrame = new int[height][width];
         this.rawData = new byte[height*((width*(bits/8))+4) + telemetryWidth + 4];
         this.rawTelemetry = new int[telemetryWidth];
         System.out.println("created new leptoncamera");
@@ -94,6 +97,7 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
                 for (int j = 0; j < width; j++) {
                     int dataInd = i + j + 4;
                     if (dataInd < bytesRead) {
+                        rawTempFrame[lineNumber][j] = (data[dataInd] & 0xff);
                         rawFrame[lineNumber][j] = colorTable.elementAt(data[dataInd] & 0xff);
                     }
                 }
@@ -129,6 +133,7 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
                 for (int j = 0; j < width*2; j+=2) {
                     int dataInd = i + j + 4;
                     if (dataInd < bytesRead) {
+                        rawTempFrame[lineNumber][colInd] = (data[dataInd] & 0xff) + (data[dataInd+1] & 0xff)*256;
                         rawFrame[lineNumber][colInd++] = (data[dataInd] & 0xff) + (data[dataInd+1] & 0xff)*256;
                     }
                 }
@@ -154,13 +159,19 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
         return ImageUtils.bitmapFromArray(rawFrame);
     }
 
-    public int getWidth() {
+    public static int getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public static int getHeight() {
         return height;
     }
+
+    public static int[][] getTempFrame(){ return rawTempFrame;}
+
+    public int[][] getRawFrame(){ return rawFrame;}
+
+    public void setRawTempFrame(int[][] data){rawTempFrame = data;}
 
     public void setRawDataIndex(int rawDataIndex) {
         this.rawDataIndex = rawDataIndex;
