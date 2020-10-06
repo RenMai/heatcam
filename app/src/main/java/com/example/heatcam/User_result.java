@@ -173,12 +173,14 @@ public class User_result extends Fragment implements CameraListener {
 
     @Override
     public void updateImage(Bitmap image) {
+        // copy image to make it mutable
+        Bitmap bMap = image.copy(Bitmap.Config.ARGB_8888, true);
 
         if(naamarajat != null && ready){
             //huiput = new HuippuLukema();
             huiput = laskeAlue();
 
-            Canvas canvas = new Canvas(image);
+            Canvas canvas = new Canvas(bMap);
             Paint paint = new Paint();
             paint.setColor(Color.GREEN);
             paint.setStyle(Paint.Style.STROKE);
@@ -195,7 +197,7 @@ public class User_result extends Fragment implements CameraListener {
             canvas.drawRect(rect, paint);
         }
 
-        getActivity().runOnUiThread(() -> imgView.setImageBitmap(image));
+        getActivity().runOnUiThread(() -> imgView.setImageBitmap(bMap));
     }
 
     public HuippuLukema laskeAlue(){
@@ -235,7 +237,9 @@ public class User_result extends Fragment implements CameraListener {
     }
 
     @Override
-    public void updateText(String text) { }
+    public void updateText(String text) {
+        getActivity().runOnUiThread(() -> text2.setText(text));
+    }
 
     @Override
     public void disconnect() { }
@@ -307,7 +311,7 @@ public class User_result extends Fragment implements CameraListener {
             // TODO Auto-generated method stub
             double tmin = 29, tmax = 39;
 
-            text2.setText(Double.toString(correcTemp));
+            updateText(Double.toString(correcTemp));
             temp = (userTemp - tmin)/(tmax - tmin)*100;
             while (progress < temp) {
                 progress++;
