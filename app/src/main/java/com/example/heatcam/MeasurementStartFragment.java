@@ -142,11 +142,7 @@ public class MeasurementStartFragment extends Fragment {
             System.out.println("fov" + angleX + angleY);
             sensorX = (float) (Math.tan(Math.toRadians(angleX / 2)) * 2 * focalLength);
             sensorY = (float) (Math.tan(Math.toRadians(angleY / 2)) * 2 * focalLength);
-            //sensorX = (float) (Math.atan(sensor.getWidth() / (2*focalLength)) * 2);
-            //sensorY = (float) (Math.atan(sensor.getHeight() / (2*focalLength)) * 2);
             System.out.println("leng" + focalLength);
-
-            SizeF sensorSize = c.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
 
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -232,11 +228,6 @@ public class MeasurementStartFragment extends Fragment {
             dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorY) * (imgHeight / deltaY) / 100;
         }
 
-        //System.out.println("distance " + dist);
-
-        //System.out.println(middleX + ", m : " + middleY);
-        //System.out.println(p.x + ",se" + p.y);
-       // System.out.println("focal " + focalLength.);
         boolean xOK = noseP.x > (middleX - maxDeviation) && noseP.x < (middleX + maxDeviation);
         boolean yOK = noseP.y > (middleY - maxDeviation) && noseP.y < (middleY + maxDeviation);
         boolean distanceOK = dist < 600 && dist > 400;
