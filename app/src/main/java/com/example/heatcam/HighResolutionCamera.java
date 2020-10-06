@@ -32,7 +32,7 @@ public class HighResolutionCamera extends LeptonCamera {
     }
 
     private void createTempFrame(int min, int max) {
-        int[][] tempData =  getRawFrame();
+        int[][] tempData =  getTempFrame();
         for(int i = 0; i < getHeight(); i++) {
             for(int j = 0; j < getWidth(); j++) {
                 tempData[i][j] = min + tempData[i][j] / 255 * (max - min);
