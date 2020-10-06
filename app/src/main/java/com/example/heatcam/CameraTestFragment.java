@@ -3,11 +3,14 @@ package com.example.heatcam;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -27,7 +30,7 @@ public class CameraTestFragment extends Fragment implements CameraListener {
     private final String testDataPath = "test_data/";
 
     private CameraListener listener = this;
-
+    private LowResolution16BitCamera activeCam = null;
 
     @Nullable
     @Override
@@ -63,9 +66,11 @@ public class CameraTestFragment extends Fragment implements CameraListener {
                 System.out.println(position);
                 disconnect();
                 LeptonCamera cam = null;
+                activeCam = null;
                 switch (position) {
                     case 0 :
                         cam = new LowResolution16BitCamera();
+                        activeCam = (LowResolution16BitCamera) cam;
                         break;
                     case 1 :
                         cam = new LowResolutionCamera();
@@ -84,6 +89,62 @@ public class CameraTestFragment extends Fragment implements CameraListener {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
+            }
+        });
+
+        EditText maxFilter = view.findViewById(R.id.edit_max_filter);
+        maxFilter.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                if(activeCam != null) {
+                    float value = -1;
+                    try {
+                        value = Float.parseFloat(s.toString());
+
+                    } catch(Exception e) {
+                    }
+
+                    activeCam.setMaxFilter(value);
+
+                }
+            }
+        });
+        EditText minFilter = view.findViewById(R.id.edit_min_filter);
+        minFilter.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(activeCam != null) {
+                    float value = -1;
+                    try {
+                        value = Float.parseFloat(s.toString());
+                    } catch(Exception e) {
+
+                    }
+                    activeCam.setMinFilter(value);
+
+
+                }
             }
         });
 

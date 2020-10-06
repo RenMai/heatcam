@@ -5,6 +5,18 @@ import android.graphics.Matrix;
 
 public class LowResolution16BitCamera extends LeptonCamera {
 
+    public void setMaxFilter(float maxFilter) {
+        this.maxFilter = maxFilter;
+    }
+
+    private float maxFilter = -1;
+
+    public void setMinFilter(float minFilter) {
+        this.minFilter = minFilter;
+    }
+
+    private float minFilter = -1;
+
     public LowResolution16BitCamera() {
         super(24, 32,24, 16);
     }
@@ -17,6 +29,14 @@ public class LowResolution16BitCamera extends LeptonCamera {
             setRawDataIndex(0);
             int maxRaw = (rawTelemetry[0]&0xFF) + (rawTelemetry[1]&0xFF)*256;
             int minRaw = (rawTelemetry[3]&0xFF) + (rawTelemetry[4]&0xFF)*256;
+            getCameraListener().maxCelsiusValue(kelvinToCelsius(maxRaw));
+            getCameraListener().minCelsiusValue(kelvinToCelsius(minRaw));
+            if(maxFilter > 0) {
+                maxRaw = (int) ((maxFilter + 273.15) *100);
+            }
+            if(minFilter > 0) {
+                minRaw = (int) ((minFilter + 273.15) *100);
+            }
             //Bitmap bMap = convertTo8bit(29915, 30515);
             Bitmap bMap = convertTo8bit(minRaw, maxRaw);
             Matrix m = new Matrix();
@@ -24,8 +44,7 @@ public class LowResolution16BitCamera extends LeptonCamera {
             bMap = Bitmap.createBitmap(bMap, 0,0, bMap.getWidth(), bMap.getHeight(), m, true);
             getCameraListener().updateImage(bMap);
             //getCameraListener().updateText(""+ kelvinToCelsius(maxRaw));
-            getCameraListener().maxCelsiusValue(kelvinToCelsius(maxRaw));
-            getCameraListener().minCelsiusValue(kelvinToCelsius(minRaw));
+
         } else {
             extractRow(data);
             setRawDataIndex(getRawDataIndex()+data.length);
