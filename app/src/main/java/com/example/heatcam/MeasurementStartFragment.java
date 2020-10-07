@@ -103,6 +103,7 @@ public class MeasurementStartFragment extends Fragment {
         paint.setColor(Color.BLACK);
         paint.setAlpha(150);
         paint.setStyle(Paint.Style.FILL);
+        paint.setAntiAlias(true);
         Rect rt = new Rect(0,0, overlay.getWidth(), overlay.getHeight());
         canvas.drawRect(rt, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
