@@ -3,20 +3,12 @@ package com.example.heatcam;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
 import android.widget.EditText;
-import android.widget.ScrollView;
 import android.widget.TextView;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import org.apache.commons.io.input.ReversedLinesFileReader;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -78,16 +70,16 @@ public class LogView extends AppCompatActivity {
     }
 
     private List<String> fetchLog() {
-        String filePath = getFilesDir() + "/logcat.txt";
+        String filePath = getFilesDir() + "/logcat.log";
         List<String> list = new ArrayList<>();
+        File f = new File(filePath);
         try {
-            ReversedLinesFileReader reader = new ReversedLinesFileReader(new File(filePath), StandardCharsets.UTF_8);
+            if(!f.exists()) f.createNewFile();
+            ReversedLinesFileReader reader = new ReversedLinesFileReader(f, StandardCharsets.UTF_8);
             String st;
             while((st = reader.readLine()) != null && list.size() < MAX_READ_LINES) {
                 list.add(st);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -95,7 +87,7 @@ public class LogView extends AppCompatActivity {
     }
 
     private void clearLog() {
-        File f = new File(getFilesDir() + "/logcat.txt");
+        File f = new File(getFilesDir() + "/logcat.log");
         f.delete();
         try {
             f.createNewFile();
