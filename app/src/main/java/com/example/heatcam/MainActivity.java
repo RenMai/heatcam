@@ -1,5 +1,7 @@
 package com.example.heatcam;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
@@ -8,7 +10,11 @@ import android.view.View;
 import android.widget.Button;
 import android.renderscript.*;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -22,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     View decorView;
     Button btn;
     boolean active = false;
+
+    private static boolean AUTO_MODE = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
             if (visibility == 0)
                 decorView.setSystemUiVisibility(hideSystemBars());
         });
+
+        initLogger();
     }
 
     //Status & Navigation bars hiding 2/3
@@ -85,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initLogger() {
-        String filePath = getFilesDir() + "/logcat.txt";
+        String filePath = getFilesDir() + "/logcat.log";
         try {
             Runtime.getRuntime().exec("logcat -c");
             Runtime.getRuntime().exec(new String[]{"logcat", "-v time", "-f", filePath,
@@ -138,6 +148,21 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e("ReadWriteFile", "Unable to write to the TestFile.txt file.");
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(AUTO_MODE) {
+            // TODO: estäminen salasanalla tms, nyt vaa kyssäri ku koittaa poistuu
+            DialogFragment fragment = new ExitAutoDialogFragment();
+            fragment.show(getSupportFragmentManager(), "exit_auto");
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public static synchronized void setAutoMode(boolean mode) {
+        AUTO_MODE = mode;
     }
 
 

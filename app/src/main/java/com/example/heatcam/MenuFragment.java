@@ -28,6 +28,7 @@ public class MenuFragment extends Fragment {
                     .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
                     .replace(R.id.fragmentCamera, fragment, "measure_start")
                     .commit();
+            MainActivity.setAutoMode(true);
         });
 
         view.findViewById(R.id.menu_logs_button).setOnClickListener(v -> {
