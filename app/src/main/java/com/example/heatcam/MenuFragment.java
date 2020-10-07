@@ -1,6 +1,5 @@
 package com.example.heatcam;
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,6 +9,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+
+import java.util.List;
 
 public class MenuFragment extends Fragment {
 
@@ -36,11 +38,28 @@ public class MenuFragment extends Fragment {
         });
 
         view.findViewById(R.id.menu_settings_button).setOnClickListener(v -> {
-            Fragment fragment = new SetupFragment();
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
-                    .add(R.id.menu_dev_fragment, fragment, "settings")
-                    .commit();
+            if(MainActivity.getSettingsStatus()) {
+                FragmentManager manager = getActivity().getSupportFragmentManager();
+                List<Fragment> l = manager.getFragments();
+
+                // first two are main activity and menu fragment
+                // -> remove top fragment from list
+                if(l.size() > 2) {
+                    manager.beginTransaction()
+                            .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                            .remove(l.get(l.size() - 1))
+                            .commit();
+                }
+                MainActivity.setSettingsStatus(false);
+            } else {
+                Fragment fragment = new SetupFragment();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                        .add(R.id.menu_dev_fragment, fragment, "settings")
+                        .commit();
+                MainActivity.setSettingsStatus(true);
+            }
+
         });
 
         return view;

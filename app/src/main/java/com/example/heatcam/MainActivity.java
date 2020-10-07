@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     boolean active = false;
 
     private static boolean AUTO_MODE = false;
+    private static boolean SETTINGS_OPEN = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,6 +169,11 @@ public class MainActivity extends AppCompatActivity {
                         .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
                         .remove(l.get(l.size()-1))
                         .commit();
+
+                // retardi mut ihs :D en jaksanu miettii parempaa tapaa ku halusin et settings buttonii painamal uudestaa pääsee takas ja myös jos painaa back button
+                if (SETTINGS_OPEN) {
+                    SETTINGS_OPEN = false;
+                }
             } else {
                 // if there are not other than root fragments exit app
                 // TODO: vois tähki tehä jonku dialog joka kysyy poistutaanko
@@ -180,5 +186,11 @@ public class MainActivity extends AppCompatActivity {
         AUTO_MODE = mode;
     }
 
+    public static synchronized void setSettingsStatus(boolean status) {
+        SETTINGS_OPEN = status;
+    }
 
+    public static synchronized boolean getSettingsStatus() {
+        return SETTINGS_OPEN;
+    }
 }
