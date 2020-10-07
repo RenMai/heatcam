@@ -23,6 +23,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     View decorView;
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
          btn.setVisibility(View.INVISIBLE);
         Fragment f = new MenuFragment();
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragmentCamera, f, "default").commit();
+                .replace(R.id.fragmentCamera, f, "menu").commit();
 
 
         /*
@@ -157,7 +158,21 @@ public class MainActivity extends AppCompatActivity {
             DialogFragment fragment = new ExitAutoDialogFragment();
             fragment.show(getSupportFragmentManager(), "exit_auto");
         } else {
-            super.onBackPressed();
+            FragmentManager manager = getSupportFragmentManager();
+            List<Fragment> l = manager.getFragments();
+
+            // first two are main activity and menu fragment
+            // -> remove top fragment from list
+            if(l.size() > 2) {
+                manager.beginTransaction()
+                        .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                        .remove(l.get(l.size()-1))
+                        .commit();
+            } else {
+                // if there are not other than root fragments exit app
+                // TODO: vois tähki tehä jonku dialog joka kysyy poistutaanko
+                super.onBackPressed();
+            }
         }
     }
 
