@@ -15,6 +15,7 @@ import android.hardware.camera2.CameraManager;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
 import android.view.View;
@@ -42,9 +43,12 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.mlkit.common.MlKitException;
 import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.face.FaceDetectorOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -63,6 +67,8 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
     private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA"};
     private final int IMAGE_WIDTH = 480;
     private final int IMAGE_HEIGHT = 640;
+
+    private final String TAG = "LiveCameraActivity";
 
     private Button cameraBtn;
     private PreviewView cameraFeed;
@@ -95,6 +101,12 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
 
     private float sensorX;
     private float sensorY;
+
+    private VisionImageProcessor imageProcessor;
+    private ProcessCameraProvider cameraProvider;
+    private CameraSelector cameraSelector;
+    private ImageAnalysis analysisCase;
+    private Preview previewCase;
 
 
 
@@ -143,6 +155,22 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
             cam.stopPreview();
             cam.release();
 
+            /*
+            cameraSelector = new CameraSelector.Builder()
+                    .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+                    .build();
+
+            new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
+                    .get(CameraXViewModel.class)
+                    .getProcessCameraProvider()
+                    .observe(
+                            this,
+                            provider -> {
+                                cameraProvider = provider;
+                                bindAllCameraUseCases();
+                            }
+                    );
+             */
             startCamera();
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
@@ -167,6 +195,102 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
             }
         });
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        bindAllCameraUseCases();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (imageProcessor != null) {
+            imageProcessor.stop();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (imageProcessor != null) {
+            imageProcessor.stop();
+        }
+    }
+
+    private void bindAllCameraUseCases() {
+        if (cameraProvider != null) {
+            // As required by CameraX API, unbinds all use cases before trying to re-bind any of them.
+            cameraProvider.unbindAll();
+            bindPreviewUseCase();
+           // bindFaceAnalysisUseCase();
+        }
+    }
+
+
+    private void bindPreviewUseCase() {
+        if (cameraProvider == null) {
+            return;
+        }
+        if (previewCase != null) {
+            cameraProvider.unbind(previewCase);
+        }
+
+        previewCase = new Preview.Builder().build();
+        previewCase.setSurfaceProvider(cameraFeed.createSurfaceProvider());
+        cameraProvider.bindToLifecycle(/* lifecycleOwner= */ this, cameraSelector, previewCase);
+    }
+
+
+    /*
+    private void bindFaceAnalysisUseCase() {
+        if (cameraProvider == null) {
+            return;
+        }
+        if (analysisCase != null) {
+            cameraProvider.unbind(analysisCase);
+        }
+        if (imageProcessor != null) {
+            imageProcessor.stop();
+        }
+
+        try {
+            FaceDetectorOptions faceDetectOptions = new FaceDetectorOptions.Builder()
+                    .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+                    .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+                    .setMinFaceSize(0.35f)
+                    .enableTracking()
+                    .build();
+
+            imageProcessor = new FaceDetectorProcessor(this, faceDetectOptions);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        analysisCase =
+                new ImageAnalysis.Builder()
+                        .setTargetResolution(new Size(IMAGE_WIDTH, IMAGE_HEIGHT))
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .build();
+
+
+        analysisCase.setAnalyzer(
+                // imageProcessor.processImageProxy will use another thread to run the detection underneath,
+                // thus we can just runs the analyzer itself on main thread.
+                ContextCompat.getMainExecutor(this),
+                imageProxy -> {
+                    try {
+                        imageProcessor.processImageProxy(imageProxy);
+                    } catch (MlKitException e) {
+                        Log.e(TAG, "Failed to process image. Error: " + e.getLocalizedMessage());
+
+                    }
+                });
+
+        cameraProvider.bindToLifecycle(/* lifecycleOwner=  this, cameraSelector, analysisCase);
+    }
+*/
 
     private void startCamera() {
         final ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -264,7 +388,7 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
                     //Bitmap bMap = cameraFeed.getBitmap();
 
 
-                    Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight());
+                    Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight(), rotationDegrees);
 
                     InputImage inputImage = InputImage.fromBitmap(bMap, 0);
                     fTool.processImage(inputImage, image); // face detection

@@ -6,6 +6,7 @@ import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
+import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -13,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
@@ -26,6 +28,7 @@ import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,8 +39,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.mlkit.common.MlKitException;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
+import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
 
 import java.util.concurrent.ExecutionException;
@@ -45,6 +50,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class User_result extends Fragment implements CameraListener {
+
+    private final String TAG = "UserResult";
 
     // the value could be used of user temperature when userTemp is 100/real 39C etc.
     private double userTemp = 0, correcTemp = 0;
@@ -81,6 +88,12 @@ public class User_result extends Fragment implements CameraListener {
     private AsyncTask tempMeasureTask;
     private HuippuLukema huiput = new HuippuLukema();
     private MutableLiveData<Face> detectedFace = new MutableLiveData<>();
+
+    private VisionImageProcessor imageProcessor;
+    private ProcessCameraProvider cameraProvider;
+    private CameraSelector cameraSelector;
+    private ImageAnalysis analysisCase;
+    private Preview previewCase;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -119,7 +132,22 @@ public class User_result extends Fragment implements CameraListener {
         cam.stopPreview();
         cam.release();
 
-        startCamera();
+        cameraSelector = new CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+                .build();
+
+        new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getActivity().getApplication()))
+                .get(CameraXViewModel.class)
+                .getProcessCameraProvider()
+                .observe(
+                        getViewLifecycleOwner(),
+                        provider -> {
+                            cameraProvider = provider;
+                            bindAllCameraUseCases();
+                        }
+                );
+
+       // startCamera();
 
         buttonStart3.setOnClickListener(v -> {
             ready = true;
@@ -163,6 +191,99 @@ public class User_result extends Fragment implements CameraListener {
 
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        bindAllCameraUseCases();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (imageProcessor != null) {
+            imageProcessor.stop();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (imageProcessor != null) {
+            imageProcessor.stop();
+        }
+    }
+
+    private void bindAllCameraUseCases() {
+        if (cameraProvider != null) {
+            // As required by CameraX API, unbinds all use cases before trying to re-bind any of them.
+            cameraProvider.unbindAll();
+           // bindPreviewUseCase();
+            bindFaceAnalysisUseCase();
+        }
+    }
+
+    private void bindFaceAnalysisUseCase() {
+        if (cameraProvider == null) {
+            return;
+        }
+        if (analysisCase != null) {
+            cameraProvider.unbind(analysisCase);
+        }
+        if (imageProcessor != null) {
+            imageProcessor.stop();
+        }
+
+        try {
+            FaceDetectorOptions faceDetectOptions = new FaceDetectorOptions.Builder()
+                    .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+                    .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+                    .setMinFaceSize(0.35f)
+                    .enableTracking()
+                    .build();
+
+            imageProcessor = new FaceDetectorProcessor(getContext(), faceDetectOptions, this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        analysisCase =
+                new ImageAnalysis.Builder()
+                        .setTargetResolution(new Size(IMAGE_WIDTH, IMAGE_HEIGHT))
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .build();
+
+
+        analysisCase.setAnalyzer(
+                // imageProcessor.processImageProxy will use another thread to run the detection underneath,
+                // thus we can just runs the analyzer itself on main thread.
+                ContextCompat.getMainExecutor(getContext()),
+                imageProxy -> {
+                    /*
+                    if (needUpdateGraphicOverlayImageSourceInfo) {
+                        boolean isImageFlipped = lensFacing == CameraSelector.LENS_FACING_FRONT;
+                        int rotationDegrees = imageProxy.getImageInfo().getRotationDegrees();
+                        if (rotationDegrees == 0 || rotationDegrees == 180) {
+                            graphicOverlay.setImageSourceInfo(
+                                    imageProxy.getWidth(), imageProxy.getHeight(), isImageFlipped);
+                        } else {
+                            /*
+                            graphicOverlay.setImageSourceInfo(
+                                    imageProxy.getHeight(), imageProxy.getWidth(), isImageFlipped);
+                        }
+                    }
+                     */
+                    try {
+                        imageProcessor.processImageProxy(imageProxy);
+                    } catch (MlKitException e) {
+                        Log.e(TAG, "Failed to process image. Error: " + e.getLocalizedMessage());
+
+                    }
+                });
+
+        cameraProvider.bindToLifecycle(/* lifecycleOwner= */ this, cameraSelector, analysisCase);
     }
 
     @Override
@@ -408,7 +529,7 @@ public class User_result extends Fragment implements CameraListener {
             @SuppressLint("UnsafeExperimentalUsageError") Image img = image.getImage();
             if (img != null) {
 
-                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight());
+                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight(), rotationDegrees);
 
                 InputImage inputImage = InputImage.fromBitmap(bMap, 0);
                 fTool.processImage(inputImage, image); // face detection

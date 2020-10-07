@@ -19,7 +19,7 @@ public class RenderScriptTools {
         rs = RenderScript.create(context);
     }
 
-    public Bitmap YUV_420_888_toRGB(Image image, int width, int height){
+    public Bitmap YUV_420_888_toRGB(Image image, int width, int height, int rotation){
         // Get the three image planes
         Image.Plane[] planes = image.getPlanes();
         ByteBuffer buffer = planes[0].getBuffer();
@@ -80,8 +80,8 @@ public class RenderScriptTools {
         mYuv420.forEach_doConvert(outAlloc,lo);
         outAlloc.copyTo(outBitmap);
         Matrix matrix = new Matrix();
-        matrix.postRotate(90);
-        matrix.preScale(-1, 1);
+        matrix.postRotate(rotation);
+        matrix.preScale(1, 1);
         outBitmap = Bitmap.createBitmap(outBitmap, 0, 0, outBitmap.getWidth(), outBitmap.getHeight(), matrix, true);
 
         return outBitmap;
