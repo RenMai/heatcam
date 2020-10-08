@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">Heatcam</string>
-    <string name="msgLowTmprt">Your body temperature is too low!</string>
-    <string name="msgNormTmprt">Your body temperature is within normal limits!</string>
-    <string name="msgHightTmprt">Your body temperature is too high!</string>
+    <string name="msgLowTmprt">It looks like your body temperature is LOWER than the average body temperature.</string>
+    <string name="msgNormTmprt">It looks like your body temperature is within NORMAL limits.</string>
+    <string name="msgHightTmprt">It looks like your body temperature is HIGHER than the average body temperature.</string>
     <string name="otsikko">THERMAL CAMERA</string>
     <string name="start_layout_info_text">Hei, voin arvioida ruumiinlämpötilasi.\nAseta naamasi ovaalin sisälle aloittaaksesi arvioinnin.</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="qr_instrucion">Scan the QR code with your phone camera to provide feedback on your experience</string>
-    <string name="FeedBack">FEEDBACK</string>
+    <string name="FeedBack">We look forward to hearing from you about our product.</string>
 </resources>
