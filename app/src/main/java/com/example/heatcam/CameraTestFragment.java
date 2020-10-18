@@ -1,5 +1,6 @@
 package com.example.heatcam;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
@@ -11,10 +12,12 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -26,7 +29,7 @@ import androidx.fragment.app.Fragment;
 import java.util.Locale;
 
 
-public class CameraTestFragment extends Fragment implements CameraListener {
+public class CameraTestFragment extends Fragment implements CameraListener, HybridImageListener {
 
     private SerialPortModel sModel;
     private TestFileReader testFileReader;
@@ -44,7 +47,8 @@ public class CameraTestFragment extends Fragment implements CameraListener {
     private TextView textAzimuth;
     private TextView textPitch;
     private TextView textRoll;
-
+    private TextView kerroinTeksti, resoTeksti;
+    private HybridBitmapBuilder hybridBitmap;
     // Gravity rotational data
     private float gravity[];
     // Magnetic rotational data
@@ -60,6 +64,7 @@ public class CameraTestFragment extends Fragment implements CameraListener {
     // roll y axis
     private float roll;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -73,6 +78,10 @@ public class CameraTestFragment extends Fragment implements CameraListener {
         textAzimuth = view.findViewById(R.id.textAzimuth);
         textPitch = view.findViewById(R.id.textPitch);
         textRoll = view.findViewById(R.id.textRoll);
+        //liveFeed = view.findViewById(R.id.livefeed);
+        kerroinTeksti = view.findViewById(R.id.kerroinText);
+        resoTeksti = view.findViewById(R.id.resot);
+        hybridBitmap = new HybridBitmapBuilder(this, view);
 
         sManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         sManager.registerListener(myDeviceOrientationListener, sManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
@@ -87,6 +96,55 @@ public class CameraTestFragment extends Fragment implements CameraListener {
 
         view.findViewById(R.id.camera_test_data_button).setOnClickListener(v -> {
             testFileReader.readTestFile(testDataPath + testDataFileName);
+        });
+
+        view.findViewById(R.id.ylos).setOnTouchListener((v, e)-> {
+            if(e.getAction() == MotionEvent.ACTION_MOVE || e.getAction() == MotionEvent.ACTION_DOWN){
+                ModifyHeatmap.setyOffset(ModifyHeatmap.getyOffset()-1);
+                getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+            }
+            return false;
+        });
+        view.findViewById(R.id.alas).setOnTouchListener((v, e)-> {
+            if(e.getAction() == MotionEvent.ACTION_MOVE || e.getAction() == MotionEvent.ACTION_DOWN){
+                ModifyHeatmap.setyOffset(ModifyHeatmap.getyOffset()+1);
+                getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+            }
+            return false;
+        });
+        view.findViewById(R.id.oikea).setOnTouchListener((v, e)-> {
+            if(e.getAction() == MotionEvent.ACTION_MOVE || e.getAction() == MotionEvent.ACTION_DOWN){
+                ModifyHeatmap.setxOffset(ModifyHeatmap.getxOffset()+1);
+                getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+            }
+            return false;
+        });
+        view.findViewById(R.id.vasen).setOnTouchListener((v, e)-> {
+            if(e.getAction() == MotionEvent.ACTION_MOVE || e.getAction() == MotionEvent.ACTION_DOWN){
+                ModifyHeatmap.setxOffset(ModifyHeatmap.getxOffset()-1);
+                getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+            }
+            return false;
+        });
+        view.findViewById(R.id.plus).setOnClickListener(v -> {
+            ModifyHeatmap.setScale(Math.round((ModifyHeatmap.getScale() + 0.2f)*10.0f)/10.0f);
+            getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+        });
+        view.findViewById(R.id.miinus).setOnClickListener(v -> {
+            ModifyHeatmap.setScale(Math.round((ModifyHeatmap.getScale() - 0.2f)*10.0f)/10.0f);
+            getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+        });
+        view.findViewById(R.id.heatmap).setOnClickListener(v -> {
+            HybridImageOptions.heatmap = ((CheckBox) v).isChecked();
+        });
+        view.findViewById(R.id.opacity).setOnClickListener(v -> {
+            HybridImageOptions.opacity = ((CheckBox) v).isChecked();
+        });
+        view.findViewById(R.id.temperature).setOnClickListener(v -> {
+            HybridImageOptions.temperature = ((CheckBox) v).isChecked();
+        });
+        view.findViewById(R.id.facebounds).setOnClickListener(v -> {
+            HybridImageOptions.facebounds = ((CheckBox) v).isChecked();
         });
 
         Spinner setting = view.findViewById(R.id.camera_setting_spinner);
@@ -218,7 +276,8 @@ public class CameraTestFragment extends Fragment implements CameraListener {
 
     @Override
     public void updateImage(Bitmap image) {
-        getActivity().runOnUiThread(() -> camFeed.setImageBitmap(image));
+        sendHeatmap(image);
+        //getActivity().runOnUiThread(() -> camFeed.setImageBitmap(image));
     }
 
     @Override
@@ -300,4 +359,14 @@ public class CameraTestFragment extends Fragment implements CameraListener {
             }
         }
     };
+
+    @Override
+    public void onNewHybridImage(Bitmap image) {
+        getActivity().runOnUiThread(() -> camFeed.setImageBitmap(image));
+    }
+
+    @Override
+    public void sendHeatmap(Bitmap image) {
+        hybridBitmap.setHeatmap(image);
+    }
 }

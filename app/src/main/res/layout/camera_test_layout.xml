@@ -120,5 +120,118 @@
         app:layout_constraintTop_toBottomOf="@+id/textPitch"
         app:layout_constraintVertical_bias="0.069" />
 
+    <TextView
+        android:id="@+id/kerroinText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="84dp"
+        android:layout_marginTop="40dp"
+        android:text="TextView"
+        app:layout_constraintStart_toStartOf="@+id/camera_min_raw_value"
+        app:layout_constraintTop_toBottomOf="@+id/camera_min_raw_value" />
+
+    <Button
+        android:id="@+id/oikea"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:text="O"
+        app:layout_constraintStart_toEndOf="@+id/ylos"
+        app:layout_constraintTop_toBottomOf="@+id/ylos" />
+
+    <Button
+        android:id="@+id/ylos"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="64dp"
+        android:text="Y"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/camera_test_view" />
+
+    <Button
+        android:id="@+id/alas"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="40dp"
+        android:text="A"
+        app:layout_constraintStart_toStartOf="@+id/vasen"
+        app:layout_constraintTop_toBottomOf="@+id/ylos" />
+
+    <Button
+        android:id="@+id/plus"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="12dp"
+        android:text="+"
+        app:layout_constraintStart_toStartOf="@+id/alas"
+        app:layout_constraintTop_toBottomOf="@+id/alas" />
+
+    <Button
+        android:id="@+id/miinus"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="4dp"
+        android:text="-"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/plus"
+        app:layout_constraintTop_toBottomOf="@+id/plus"
+        app:layout_constraintVertical_bias="0.014" />
+
+    <Button
+        android:id="@+id/vasen"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:text="V"
+        app:layout_constraintEnd_toStartOf="@+id/ylos"
+        app:layout_constraintTop_toBottomOf="@+id/ylos" />
+
+    <TextView
+        android:id="@+id/resot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="TextView"
+        app:layout_constraintStart_toStartOf="@+id/kerroinText"
+        app:layout_constraintTop_toBottomOf="@+id/kerroinText" />
+
+    <CheckBox
+        android:id="@+id/opacity"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginStart="88dp"
+        android:layout_marginTop="8dp"
+        android:checked="true"
+        android:text="Opacity"
+        app:layout_constraintStart_toEndOf="@+id/oikea"
+        app:layout_constraintTop_toBottomOf="@+id/oikea" />
+
+    <CheckBox
+        android:id="@+id/facebounds"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Face Bounds"
+        app:layout_constraintStart_toStartOf="@+id/opacity"
+        app:layout_constraintTop_toBottomOf="@+id/opacity" />
+
+    <CheckBox
+        android:id="@+id/temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Temperature"
+        app:layout_constraintStart_toStartOf="@+id/heatmap"
+        app:layout_constraintTop_toBottomOf="@+id/heatmap" />
+
+    <CheckBox
+        android:id="@+id/heatmap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Heatmap"
+        app:layout_constraintStart_toStartOf="@+id/facebounds"
+        app:layout_constraintTop_toBottomOf="@+id/facebounds" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
