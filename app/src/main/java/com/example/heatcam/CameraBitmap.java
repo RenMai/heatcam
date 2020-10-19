@@ -17,6 +17,7 @@ import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
@@ -46,7 +47,7 @@ public class CameraBitmap {
         if (allPermissionsGranted()) {
             startCamera();
         } else {
-           FragmentManager.findFragment(view).requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+            ((Fragment) owner).getActivity().requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
     }
 
