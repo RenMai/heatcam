@@ -1,7 +1,9 @@
 package com.example.heatcam;
 
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -20,6 +22,13 @@ public class QR_code_fragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.qr_code_fragment, container, false);
+
+        //moving background
+        ConstraintLayout constraintLayout = (ConstraintLayout) view.findViewById(R.id.ConstraintLayout);
+        AnimationDrawable animationDrawable = (AnimationDrawable) constraintLayout.getBackground();
+        animationDrawable.setEnterFadeDuration(2000);
+        animationDrawable.setExitFadeDuration(4000);
+        animationDrawable.start();
 
         text = view.findViewById(R.id.textView);
         text1 = view.findViewById(R.id.textView1);
