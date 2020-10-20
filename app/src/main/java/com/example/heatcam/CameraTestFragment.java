@@ -3,6 +3,7 @@ package com.example.heatcam;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -187,6 +188,11 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
         });
 
         EditText maxFilter = view.findViewById(R.id.edit_max_filter);
+        SharedPreferences sp = getActivity().getPreferences(Context.MODE_PRIVATE);
+        float maxFilterVal = sp.getFloat(getString(R.string.preference_max_filter), 0);
+        if(maxFilterVal > 0 ) {
+            maxFilter.setText(Float.toString(maxFilterVal));
+        }
         maxFilter.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -208,13 +214,20 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
 
                     } catch(Exception e) {
                     }
-
+                    getActivity().getPreferences(Context.MODE_PRIVATE)
+                            .edit()
+                            .putFloat(getString(R.string.preference_max_filter), value)
+                            .apply();
                     activeCam.setMaxFilter(value);
 
                 }
             }
         });
         EditText minFilter = view.findViewById(R.id.edit_min_filter);
+        float minFilterVal = sp.getFloat(getString(R.string.preference_min_filter), 0);
+        if(minFilterVal > 0 ) {
+            minFilter.setText(Float.toString(minFilterVal));
+        }
         minFilter.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -235,6 +248,10 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
                     } catch(Exception e) {
 
                     }
+                    getActivity().getPreferences(Context.MODE_PRIVATE)
+                            .edit()
+                            .putFloat(getString(R.string.preference_min_filter), value)
+                            .apply();
                     activeCam.setMinFilter(value);
 
 

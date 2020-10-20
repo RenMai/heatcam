@@ -9,4 +9,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="qr_instruction">Scan the QR code with your phone camera to provide feedback on your experience</string>
     <string name="FeedBack">We look forward to hearing from you about our product.</string>
+
+    <!-- PREFERENCE KEYS -->
+    <string name="preference_min_filter">PREFERENCE_MIN_FILTER</string>
+    <string name="preference_max_filter">PREFERENCE_MAX_FILTER</string>
 </resources>
