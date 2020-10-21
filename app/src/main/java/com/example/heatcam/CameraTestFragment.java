@@ -162,10 +162,13 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
                 disconnect();
                 LeptonCamera cam = null;
                 activeCam = null;
+                SharedPreferences sp = getActivity().getPreferences(Context.MODE_PRIVATE);
                 switch (position) {
                     case 0 :
                         cam = new LowResolution16BitCamera();
                         activeCam = (LowResolution16BitCamera) cam;
+                        activeCam.setMaxFilter(sp.getFloat(getString(R.string.preference_max_filter), -1));
+                        activeCam.setMinFilter(sp.getFloat(getString(R.string.preference_min_filter), -1));
                         break;
                     case 1 :
                         cam = new LowResolutionCamera();
@@ -253,8 +256,6 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
                             .putFloat(getString(R.string.preference_min_filter), value)
                             .apply();
                     activeCam.setMinFilter(value);
-
-
                 }
             }
         });

@@ -2,6 +2,7 @@ package com.example.heatcam;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -40,6 +41,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -65,7 +67,7 @@ public class MeasurementStartFragment extends Fragment {
     private final String TAG = "MeasurementStartFragment";
 
     private int facePositionCheckCounter = 0;
-    private final int checkLimit = 30;
+    private final int checkLimit = 10;
 
     private final int AVERAGE_EYE_DISTANCE = 63; // in mm
 
@@ -85,6 +87,8 @@ public class MeasurementStartFragment extends Fragment {
     private ImageAnalysis analysisCase;
     private Preview previewCase;
 
+    private float preferred_measure_distance;
+
     private FaceDetector faceDetector;
     private FaceDetectorOptions options =
             new FaceDetectorOptions.Builder()
@@ -92,6 +96,12 @@ public class MeasurementStartFragment extends Fragment {
                     .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
                     .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
                     .build();
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        preferred_measure_distance = Float.parseFloat(PreferenceManager.getDefaultSharedPreferences(getContext()).getString(getString(R.string.preference_measure_distance), "300"));
+    }
 
     @Nullable
     @Override
@@ -281,10 +291,12 @@ public class MeasurementStartFragment extends Fragment {
         Rect rt = new Rect(0,0, overlay.getWidth(), overlay.getHeight());
         canvas.drawRect(rt, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        float x = overlay.getWidth() / 4.0f;
-        float fromTop = 400;
-        float bottom = fromTop + 760;
-        canvas.drawOval(x,  fromTop, x*3, bottom, paint);
+        float x = overlay.getWidth() / 2.0f;
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(view.getContext());
+        float width = Float.parseFloat(sp.getString(getString(R.string.preference_oval_width), "750"))/ 2;
+        float height = Float.parseFloat(sp.getString(getString(R.string.preference_oval_height), "1300"));
+        float fromTop = Float.parseFloat(sp.getString(getString(R.string.preference_oval_pos_from_top), "200"));;
+        canvas.drawOval(x-width,  fromTop, x+width, height, paint);
         ((ImageView)view.findViewById(R.id.start_layout_oval_overlay)).setImageBitmap(overlay);
     }
 
@@ -388,8 +400,8 @@ public class MeasurementStartFragment extends Fragment {
     public synchronized void facePositionCheck(Face face, int imgWidth, int imgHeight) {
 
         float middleX = imgWidth/2f;
-        float middleY = imgHeight/2.35f; // joutuu sit säätää tabletille tää ja deviation
-        float maxDeviation = 20f; // eli max +- pixel heitto sijaintiin
+        float middleY = imgHeight/2.05f; // joutuu sit säätää tabletille tää ja deviation
+        float maxDeviation = 15f; // eli max +- pixel heitto sijaintiin
         PointF noseP = face.getLandmark(FaceLandmark.NOSE_BASE).getPosition();
         PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
         PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
@@ -404,14 +416,14 @@ public class MeasurementStartFragment extends Fragment {
             dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorY) * (imgHeight / deltaY) / 100;
         }
 
-        System.out.println(dist + " paskaa dist");
+        System.out.println(dist + " dist");
 
         boolean xOK = noseP.x > (middleX - maxDeviation) && noseP.x < (middleX + maxDeviation);
         boolean yOK = noseP.y > (middleY - maxDeviation) && noseP.y < (middleY + maxDeviation);
 
-        System.out.println(xOK + " paskaa xok");
-        System.out.println(yOK + " paskaa yok");
-        boolean distanceOK = dist < 600 && dist > 400;
+        int offset = 50;
+
+        boolean distanceOK = dist < preferred_measure_distance+offset && dist > preferred_measure_distance-offset;
         if (xOK && yOK && distanceOK) {
             facePositionCheckCounter++;
             updateProgress();
