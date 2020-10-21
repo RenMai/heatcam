@@ -13,4 +13,8 @@
     <!-- PREFERENCE KEYS -->
     <string name="preference_min_filter">PREFERENCE_MIN_FILTER</string>
     <string name="preference_max_filter">PREFERENCE_MAX_FILTER</string>
+    <string name="preference_measure_distance">PREFERENCE_MEASURE_DISTANCE</string>
+    <string name="preference_oval_width">PREFERENCE_OVAL_WIDTH</string>
+    <string name="preference_oval_height">PREFERENCE_OVAL_HEIGHT</string>
+    <string name="preference_oval_pos_from_top">PREFERENCE_OVAL_POS_FROM_TOP</string>
 </resources>

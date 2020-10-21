@@ -8,8 +8,32 @@
         app:title="Enable something"/>
 
     <EditTextPreference
-        app:key="edittext"
-        app:title="Edit Text"
+        app:key="@string/preference_measure_distance"
+        app:title="Preferred measure distance"
+        android:defaultValue="300"
+        android:inputType="number"
+        android:digits="0123456789"
+        app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        app:key="@string/preference_oval_width"
+        app:title="Oval width"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="950"
+        app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        app:key="@string/preference_oval_height"
+        app:title="Oval height"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="1450"
+        app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        app:key="@string/preference_oval_pos_from_top"
+        app:title="Oval position from top"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="80"
         app:useSimpleSummaryProvider="true" />
 
     <ListPreference
