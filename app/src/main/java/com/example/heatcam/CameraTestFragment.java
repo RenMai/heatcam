@@ -264,7 +264,7 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
 
     @Override
     public void onPause() {
-        disconnect();
+        //disconnect();
         super.onPause();
         sManager.unregisterListener(myDeviceOrientationListener);
     }
