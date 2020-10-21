@@ -37,6 +37,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.tasks.Task;
@@ -67,6 +69,8 @@ public class MeasurementStartFragment extends Fragment {
 
     private final int AVERAGE_EYE_DISTANCE = 63; // in mm
 
+    private MutableLiveData<Integer> detectedFrames = new MutableLiveData<>();
+
     private float focalLength;
     private float sensorX;
     private float sensorY;
@@ -93,10 +97,15 @@ public class MeasurementStartFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.measurement_start_layout, container, false);
+        // prevent app from dimming
+        view.setKeepScreenOn(true);
         createFaceOval(view);
         rs = new RenderScriptTools(view.getContext());
         cameraFeed = view.findViewById(R.id.measurement_position_video);
         faceDetector = FaceDetection.getClient(options);
+
+        // takes approx. 2 minutes to go from 1000 to 10
+        detectedFrames.setValue(1000);
 
         if (allPermissionsGranted()) {
             getCameraProperties();
@@ -122,6 +131,18 @@ public class MeasurementStartFragment extends Fragment {
 
         ProgressBar bar = view.findViewById(R.id.face_check_prog);
         bar.setMax(checkLimit);
+
+        detectedFrames.observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                if (integer < 10) {
+                    Fragment f = new MenuFragment();
+                    getActivity().getSupportFragmentManager().beginTransaction()
+                            .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                            .replace(R.id.fragmentCamera, f, "menu").commit();
+                }
+            }
+        });
 
         return view;
     }
@@ -416,6 +437,22 @@ public class MeasurementStartFragment extends Fragment {
             bar.setProgress(facePositionCheckCounter);
         } catch (Exception ignored) {
 
+        }
+    }
+
+    public void incrementDetectedFrames() {
+        if (detectedFrames.getValue() > 1000) {
+            detectedFrames.setValue(1000);
+        } else {
+            detectedFrames.setValue(detectedFrames.getValue() + 1);
+        }
+    }
+
+    public void decrementDetectedFrames() {
+        if (detectedFrames.getValue() < 0) {
+            detectedFrames.setValue(0);
+        } else {
+            detectedFrames.setValue(detectedFrames.getValue() - 1);
         }
     }
 

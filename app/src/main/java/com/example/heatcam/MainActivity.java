@@ -3,17 +3,22 @@ package com.example.heatcam;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.renderscript.*;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -26,6 +31,9 @@ import java.io.IOException;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private final int REQUEST_CODE_PERMISSIONS = 1001;
+    private final String CAMERA_PERMISSION = "android.permission.CAMERA";
+
     View decorView;
     Button btn;
     boolean active = false;
@@ -36,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        checkPermissions();
 
         setContentView(R.layout.activity_main);
         btn = findViewById(R.id.devBtn);
@@ -122,6 +132,21 @@ public class MainActivity extends AppCompatActivity {
             Fragment f = getSupportFragmentManager().findFragmentByTag("dev");
             getSupportFragmentManager().beginTransaction().remove(f).commit();
             active = false;
+        }
+    }
+
+    private void checkPermissions() {
+            if (ContextCompat.checkSelfPermission(this, CAMERA_PERMISSION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{CAMERA_PERMISSION}, REQUEST_CODE_PERMISSIONS);
+            }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        if (requestCode == REQUEST_CODE_PERMISSIONS && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+            Toast.makeText(this, "No permissions granted, app closing", Toast.LENGTH_LONG).show();
+            finishAffinity();
         }
     }
 

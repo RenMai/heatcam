@@ -66,6 +66,8 @@ public class FaceDetectorProcessor extends VisionProcessorBase<List<Face>> {
                 userResult.updateDetectedFace(face);
 
             }
+        } else {
+            userResult.noFaceDetected();
         }
     }
 

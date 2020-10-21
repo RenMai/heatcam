@@ -95,9 +95,13 @@ public class User_result extends Fragment implements CameraListener {
     private ImageAnalysis analysisCase;
     private Preview previewCase;
 
+    private int detectedFrames;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.activity_user_result, container, false);
+        // prevent app from dimming
+        view.setKeepScreenOn(true);
 
         //moving background
         ConstraintLayout constraintLayout = (ConstraintLayout) view.findViewById(R.id.ConstraintLayout);
@@ -106,6 +110,8 @@ public class User_result extends Fragment implements CameraListener {
         animationDrawable.setExitFadeDuration(4000);
         animationDrawable.start();
 
+        // takes approx. 1min30sec to go from 2000 to 10
+        detectedFrames = 2000;
 
         //new asyncTaskUpdateProgress().execute();
         serialPortModel = SerialPortModel.getInstance();
@@ -520,6 +526,23 @@ public class User_result extends Fragment implements CameraListener {
     public void updateDetectedFace(Face face) {
         detectedFace.setValue(face);
         naamarajat = face.getBoundingBox();
+        if (detectedFrames > 2000) {
+            detectedFrames = 2000;
+        } else {
+            detectedFrames++;
+        }
+    }
+
+    // gets called when face wasn't detected to decrement counter
+    // and when counter value goes below 10 it will change fragment
+    public void noFaceDetected() {
+        detectedFrames--;
+        if (detectedFrames < 10) {
+            Fragment f = new MenuFragment();
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                    .replace(R.id.fragmentCamera, f, "menu").commit();
+        }
     }
 
     private class MyAnalyzer implements ImageAnalysis.Analyzer {
