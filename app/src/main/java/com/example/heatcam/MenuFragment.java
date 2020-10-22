@@ -27,7 +27,17 @@ public class MenuFragment extends Fragment {
                 .replace(R.id.menu_dev_fragment, f, "camera_test").commit();
 
         view.findViewById(R.id.menu_start_auto_button).setOnClickListener(v -> {
+            /*
             Fragment fragment = new MeasurementStartFragment();
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                    .replace(R.id.fragmentCamera, fragment, "measure_start")
+                    .commit();
+            MainActivity.setAutoMode(true);
+             */
+
+            // INTRO FRAGMENT
+            Fragment fragment = new IntroFragment();
             getActivity().getSupportFragmentManager().beginTransaction()
                     .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
                     .replace(R.id.fragmentCamera, fragment, "measure_start")
