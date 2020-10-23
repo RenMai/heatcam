@@ -121,7 +121,7 @@ public class User_result extends Fragment implements CameraListener {
         text = view.findViewById(R.id.textView);
         text2 = view.findViewById(R.id.textView2);
         //debugs = view.findViewById(R.id.debugs);
-        text2.setText(R.string.otsikko);
+        text2.setText(R.string.title);
         textDistance = view.findViewById(R.id.textDistance);
         textMeasuring = view.findViewById(R.id.textMeasuring);
         imgView = view.findViewById(R.id.imageView);

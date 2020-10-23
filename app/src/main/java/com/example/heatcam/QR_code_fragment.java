@@ -35,7 +35,7 @@ public class QR_code_fragment extends Fragment {
         text2 = view.findViewById(R.id.textView2);
         text.setText(R.string.qr_instruction);
         text1.setText(R.string.FeedBack);
-        text2.setText(R.string.otsikko);
+        text2.setText(R.string.title);
         imgView = view.findViewById(R.id.qr_code);
         imgView.setImageResource(R.drawable.frame);
 
