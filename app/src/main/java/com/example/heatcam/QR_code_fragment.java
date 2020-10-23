@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ public class QR_code_fragment extends Fragment {
 
     private TextView text, text1, text2;
     private ImageView imgView;
+    private long timer;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -38,6 +40,25 @@ public class QR_code_fragment extends Fragment {
         text2.setText(R.string.otsikko);
         imgView = view.findViewById(R.id.qr_code);
         imgView.setImageResource(R.drawable.frame);
+        timer = System.currentTimeMillis();
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                while(timer + 90000 > System.currentTimeMillis()) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                Fragment fragment = new IntroFragment();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                        .replace(R.id.fragmentCamera, fragment, "measure_start")
+                        .commit();
+            }
+        }, 5000);
 
         // Inflate the layout for this fragment
         return view;
