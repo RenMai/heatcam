@@ -12,10 +12,10 @@
         <item>item2</item>
         <item>item3</item>
     </array>
-    <array name="multi_select_labels">
-        <item>multi1</item>
-        <item>multi2</item>
-        <item>multi3</item>
+    <array name="multi_lang_labels">
+        <item>suomi</item>
+        <item>english</item>
+        <item>русский</item>
     </array>
 
     <array name="multi_select_values">
