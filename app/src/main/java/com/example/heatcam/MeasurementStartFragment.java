@@ -17,7 +17,6 @@ import android.graphics.Shader;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CaptureRequest;
 import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,8 +25,12 @@ import android.util.SizeF;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -60,11 +63,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class MeasurementStartFragment extends Fragment {
+public class MeasurementStartFragment extends Fragment implements CameraListener {
 
-    private Executor executor = Executors.newSingleThreadExecutor();
     private final int REQUEST_CODE_PERMISSIONS = 1001;
     private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA"};
+
+    private final int IMAGE_WIDTH = 480;
+    private final int IMAGE_HEIGHT = 640;
 
     private final String TAG = "MeasurementStartFragment";
 
@@ -80,7 +85,6 @@ public class MeasurementStartFragment extends Fragment {
     private float sensorY;
 
     private PreviewView cameraFeed;
-    private RenderScriptTools rs;
     private boolean found = false;
 
     private VisionImageProcessor imageProcessor;
@@ -91,13 +95,26 @@ public class MeasurementStartFragment extends Fragment {
 
     private float preferred_measure_distance;
 
-    private FaceDetector faceDetector;
-    private FaceDetectorOptions options =
-            new FaceDetectorOptions.Builder()
-                    .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
-                    .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
-                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
-                    .build();
+    private Animation scanAnimation;
+    private Button animBtn;
+    private View scanBar;
+
+    private boolean ready;
+    private HuippuLukema huiput = new HuippuLukema();
+    private Rect naamarajat;
+    float korkeussuhde = (float)LeptonCamera.getHeight()/(float)IMAGE_HEIGHT;//32/640
+    float leveyssuhde = (float)LeptonCamera.getWidth()/(float)IMAGE_WIDTH;//24/480
+
+    private double userTemp = 0;
+    private int laskuri = 0;
+    private boolean hasMeasured = false;
+
+    private TextView txtDebug;
+
+    SerialPortModel serialPortModel;
+
+    private MutableLiveData<Face> detectedFace = new MutableLiveData<>();
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -111,15 +128,47 @@ public class MeasurementStartFragment extends Fragment {
         final View view = inflater.inflate(R.layout.measurement_start_layout, container, false);
         // prevent app from dimming
         view.setKeepScreenOn(true);
+        animBtn = view.findViewById(R.id.animBtn);
+        scanBar = view.findViewById(R.id.scanBar);
         createFaceOval(view);
-        rs = new RenderScriptTools(view.getContext());
         cameraFeed = view.findViewById(R.id.measurement_position_video);
-        faceDetector = FaceDetection.getClient(options);
 
         // takes approx. 2 minutes to go from 1000 to 10
         detectedFrames.setValue(1000);
 
-        if (allPermissionsGranted()) {
+        txtDebug = view.findViewById(R.id.txtDebugit);
+
+        serialPortModel = SerialPortModel.getInstance();
+        serialPortModel.setCamListener(this);
+
+        scanAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.scan_animation);
+
+        scanAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                scanBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        animBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                scanBar.setVisibility(View.VISIBLE);
+                scanBar.startAnimation(scanAnimation);
+            }
+        });
+
             getCameraProperties();
             cameraSelector = new CameraSelector.Builder()
                     .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
@@ -136,10 +185,6 @@ public class MeasurementStartFragment extends Fragment {
                             }
                     );
 
-            //startCamera();
-        } else {
-            getActivity().requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
-        }
 
         ProgressBar bar = view.findViewById(R.id.face_check_prog);
         bar.setMax(checkLimit);
@@ -230,7 +275,7 @@ public class MeasurementStartFragment extends Fragment {
         }
 
         analysisCase = new ImageAnalysis.Builder()
-                .setTargetResolution(new Size( 1, 1))
+                .setTargetResolution(new Size( IMAGE_WIDTH, IMAGE_HEIGHT))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();
 
@@ -239,25 +284,10 @@ public class MeasurementStartFragment extends Fragment {
                 // thus we can just runs the analyzer itself on main thread.
                 ContextCompat.getMainExecutor(getContext()),
                 imageProxy -> {
-                    /*
-                    if (needUpdateGraphicOverlayImageSourceInfo) {
-                        boolean isImageFlipped = lensFacing == CameraSelector.LENS_FACING_FRONT;
-                        int rotationDegrees = imageProxy.getImageInfo().getRotationDegrees();
-                        if (rotationDegrees == 0 || rotationDegrees == 180) {
-                            graphicOverlay.setImageSourceInfo(
-                                    imageProxy.getWidth(), imageProxy.getHeight(), isImageFlipped);
-                        } else {
-                            /*
-                            graphicOverlay.setImageSourceInfo(
-                                    imageProxy.getHeight(), imageProxy.getWidth(), isImageFlipped);
-                        }
-                    }
-                     */
                     try {
                         imageProcessor.processImageProxy(imageProxy);
                     } catch (MlKitException e) {
                         Log.e(TAG, "Failed to process image. Error: " + e.getLocalizedMessage());
-
                     }
                 });
 
@@ -304,56 +334,6 @@ public class MeasurementStartFragment extends Fragment {
         ((ImageView)view.findViewById(R.id.start_layout_oval_overlay)).setImageBitmap(overlay);
     }
 
-    private void startCamera() {
-        final ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(getContext());
-
-        cameraProviderFuture.addListener(() -> {
-            try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                bindPreview(cameraProvider);
-            } catch (ExecutionException | InterruptedException e) {
-
-            }
-        }, ContextCompat.getMainExecutor(getContext()));
-    }
-
-    void bindPreview(@NonNull ProcessCameraProvider cameraProvider) {
-        Preview preview = new Preview.Builder().build();
-        CameraSelector cameraSelector = new CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
-                .build();
-
-        CameraManager manager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
-        try {
-            CameraCharacteristics c = manager.getCameraCharacteristics(getFrontFacingCameraId(manager));
-            focalLength = c.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0];
-            SizeF sensor = c.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
-            float angleX = (float) Math.atan(sensor.getWidth() / (2*focalLength));
-            float angleY = (float) Math.atan(sensor.getHeight() / (2*focalLength));
-            System.out.println("fov" + angleX + angleY);
-            sensorX = (float) (Math.tan(Math.toRadians(angleX / 2)) * 2 * focalLength);
-            sensorY = (float) (Math.tan(Math.toRadians(angleY / 2)) * 2 * focalLength);
-            System.out.println("leng" + focalLength);
-
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-
-        ImageAnalysis imageAnalysis =
-                new ImageAnalysis.Builder()
-                        .setTargetResolution(new Size( 1, 1))
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build();
-
-        imageAnalysis.setAnalyzer(executor, new MyAnalyzer());
-
-
-        preview.setSurfaceProvider(cameraFeed.createSurfaceProvider());
-        Camera cam = cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
-
-
-    }
-
     String getFrontFacingCameraId(CameraManager cManager) throws CameraAccessException {
         for(final String cameraId : cManager.getCameraIdList()){
             CameraCharacteristics characteristics = cManager.getCameraCharacteristics(cameraId);
@@ -363,45 +343,7 @@ public class MeasurementStartFragment extends Fragment {
         return null;
     }
 
-    private boolean allPermissionsGranted() {
-        for (String permission : REQUIRED_PERMISSIONS) {
-            if (ContextCompat.checkSelfPermission(getContext(), permission) != PackageManager.PERMISSION_GRANTED) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-
-    public void processImage(InputImage image, ImageProxy imageProxy) {
-
-        Task<List<Face>> result =
-                faceDetector.process(image)
-                        .addOnSuccessListener(
-                                faces -> {
-
-                                    if (faces.size() > 0) {
-                                        Face face = faces.get(0);
-                                        facePositionCheck(face, image.getWidth(), image.getHeight());
-
-                                    } else {
-
-                                    }
-                                    imageProxy.close();
-                                })
-                        .addOnFailureListener(
-                                e -> {
-
-                                    // Task failed with an exception
-                                    // ...
-                                    System.out.println("FAILURE");
-                                    System.out.println(e.getMessage());
-                                    e.printStackTrace();
-                                    imageProxy.close();
-                                });
-    }
-
-    public synchronized void facePositionCheck(Face face, int imgWidth, int imgHeight) {
+    public void facePositionCheck(Face face, int imgWidth, int imgHeight) {
 
         float middleX = imgWidth/2f;
         float middleY = imgHeight/2.05f; // joutuu sit säätää tabletille tää ja deviation
@@ -430,8 +372,10 @@ public class MeasurementStartFragment extends Fragment {
         boolean distanceOK = dist < preferred_measure_distance+offset && dist > preferred_measure_distance-offset;
         if (xOK && yOK && distanceOK) {
             facePositionCheckCounter++;
-            updateProgress();
-            if (facePositionCheckCounter > checkLimit && !found) {
+            startScanAnimation();
+            ready = true;
+           updateProgress();
+            if (facePositionCheckCounter > checkLimit && !found && hasMeasured) {
                 found = true;
                 Fragment f = new User_result();
                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -440,9 +384,14 @@ public class MeasurementStartFragment extends Fragment {
             }
 
         } else {
+            scanBar.clearAnimation();
+            ready = false;
+            laskuri = 0;
+            userTemp = 0;
+            huiput = new HuippuLukema();
             facePositionCheckCounter--;
             if(facePositionCheckCounter < 0) facePositionCheckCounter = 0;
-            updateProgress();
+           updateProgress();
         }
 
     }
@@ -456,7 +405,8 @@ public class MeasurementStartFragment extends Fragment {
         }
     }
 
-    public void incrementDetectedFrames() {
+    public void incrementDetectedFrames(Face face) {
+        naamarajat = face.getBoundingBox();
         if (detectedFrames.getValue() > 1000) {
             detectedFrames.setValue(1000);
         } else {
@@ -472,19 +422,105 @@ public class MeasurementStartFragment extends Fragment {
         }
     }
 
-    private class MyAnalyzer implements ImageAnalysis.Analyzer {
+    private void changeToResultLayout() {
+        Fragment f = new QR_code_fragment();
+        Bundle args = new Bundle();
+        args.putDouble("user_temp", userTemp);
+        f.setArguments(args);
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                .replace(R.id.fragmentCamera, f, "default").commit();
+    }
 
-        @Override
-        public void analyze(@NonNull ImageProxy image) {
-            int rotationDegrees = image.getImageInfo().getRotationDegrees();
-            @SuppressLint("UnsafeExperimentalUsageError") Image img = image.getImage();
-            if (img != null) {
 
-                Bitmap bMap = rs.YUV_420_888_toRGB(img, img.getWidth(), img.getHeight(), rotationDegrees);
+    private void startScanAnimation() {
 
-                InputImage inputImage = InputImage.fromBitmap(bMap, 0);
-                processImage(inputImage, image); // face detection
+        if (!ready) {
+            scanBar.setVisibility(View.VISIBLE);
+            scanBar.bringToFront();
+            scanBar.invalidate();
+            scanBar.startAnimation(scanAnimation);
+        }
+    }
+
+    @Override
+    public void setConnectingImage() {}
+
+    @Override
+    public void setNoFeedImage() {}
+
+    @Override
+    public void updateImage(Bitmap image) {
+
+    }
+
+    @Override
+    public void updateText(String text) {}
+
+    @Override
+    public void disconnect() {}
+
+    @Override
+    public void maxCelsiusValue(double max) {
+        getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(laskuri)));
+        if (ready) {
+            if (laskuri < 30) {
+                huiput = laskeAlue();
+                if (huiput.max > userTemp) {
+                    userTemp = huiput.max;
+                }
+                laskuri++;
+            } else {
+                ready = false;
+                laskuri = 0;
+                //hasMeasured = true;
+                changeToResultLayout();
             }
         }
+    }
+
+    @Override
+    public void minCelsiusValue(double min) {}
+
+    @Override
+    public void detectFace(Bitmap image) {}
+
+    @Override
+    public void writeToFile(byte[] data) {}
+
+    public HuippuLukema laskeAlue(){
+
+        int maxleveys = LeptonCamera.getWidth()-1;
+        int maxkorkeus = LeptonCamera.getHeight()-1;
+
+        int vasen = (int)(naamarajat.left*leveyssuhde); if(vasen < 0) vasen = 0; if(vasen > maxleveys) vasen = maxleveys;
+        int oikea = (int)(naamarajat.right*leveyssuhde); if(oikea < 0) oikea = 0; if(oikea > maxleveys) oikea = maxleveys;
+        int yla = (int)(naamarajat.top*korkeussuhde); if(yla < 0) yla = 0; if(yla > maxkorkeus) yla = maxkorkeus;
+        int ala = (int)(naamarajat.bottom*korkeussuhde); if(ala < 0) ala = 0; if(ala > maxkorkeus) ala = maxkorkeus;
+
+        int[][] tempFrame = LeptonCamera.getTempFrame();
+
+        try{
+            if(tempFrame != null /*&& tempFrame.length > maxkorkeus && tempFrame[tempFrame.length-1].length > maxleveys*/){
+                for(int y = yla; y <= ala; y++){
+                    for(int x = vasen; x <= oikea; x++){
+                        double lampo = (tempFrame[y][x]- 27315)/100.0;
+                        if(lampo > huiput.max){
+                            huiput.max = lampo;
+                            huiput.y = y;
+                            huiput.x = x;
+                        }
+                    }
+                }
+            }
+        }catch (Exception e){
+
+        }
+        return  huiput;
+    }
+    class HuippuLukema{
+        int x = 0;
+        int y = 0;
+        double max = 0;
     }
 }

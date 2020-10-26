@@ -23,6 +23,8 @@ public class QR_code_fragment extends Fragment {
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.qr_code_fragment, container, false);
 
+
+
         //moving background
         ConstraintLayout constraintLayout = (ConstraintLayout) view.findViewById(R.id.ConstraintLayout);
         AnimationDrawable animationDrawable = (AnimationDrawable) constraintLayout.getBackground();
@@ -34,7 +36,13 @@ public class QR_code_fragment extends Fragment {
         text1 = view.findViewById(R.id.textView1);
         text2 = view.findViewById(R.id.textView2);
         text.setText(R.string.qr_instruction);
-        text1.setText(R.string.FeedBack);
+
+        // text1.setText(R.string.FeedBack);
+        if (!getArguments().isEmpty()){
+            System.out.println(getArguments() + " argumentit");
+            double temp = (double)getArguments().get("user_temp");
+            text1.setText("Your temp was: " + temp);
+        }
         text2.setText(R.string.title);
         imgView = view.findViewById(R.id.qr_code);
         imgView.setImageResource(R.drawable.frame);
