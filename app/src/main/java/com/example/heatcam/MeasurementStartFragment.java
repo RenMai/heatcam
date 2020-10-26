@@ -1,9 +1,7 @@
 package com.example.heatcam;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -17,7 +15,6 @@ import android.graphics.Shader;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
@@ -34,10 +31,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
@@ -48,20 +43,16 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 
-import com.google.android.gms.tasks.Task;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.common.MlKitException;
-import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
-import com.google.mlkit.vision.face.FaceDetection;
-import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
 
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.Date;
 
 public class MeasurementStartFragment extends Fragment implements CameraListener {
 
@@ -113,7 +104,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     SerialPortModel serialPortModel;
 
-    private MutableLiveData<Face> detectedFace = new MutableLiveData<>();
+    private MeasurementAccessObject measurementAccessObject;
 
 
     @Override
@@ -133,6 +124,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         scanBar = view.findViewById(R.id.scanBar);
         createFaceOval(view);
         cameraFeed = view.findViewById(R.id.measurement_position_video);
+
+        measurementAccessObject = new MeasurementAccessObject();
 
         // takes approx. 2 minutes to go from 1000 to 10
         detectedFrames.setValue(1000);
@@ -438,6 +431,17 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         }
     }
 
+    private void saveMeasurementToJson() {
+        System.out.println();
+        try {
+            JSONObject obj = measurementAccessObject.newEntry(userTemp, new Date());
+            measurementAccessObject.write(getContext(), obj, true);
+        } catch (JSONException | IOException e) {
+            Log.e(TAG, "Something went wrong while saving measurement to JSON " + e);
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void setConnectingImage() {
     }
@@ -473,6 +477,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                 ready = false;
                 laskuri = 0;
                 //hasMeasured = true;
+                saveMeasurementToJson();
                 changeToResultLayout();
             }
         }
