@@ -102,8 +102,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private boolean ready;
     private HuippuLukema huiput = new HuippuLukema();
     private Rect naamarajat;
-    float korkeussuhde = (float)LeptonCamera.getHeight()/(float)IMAGE_HEIGHT;//32/640
-    float leveyssuhde = (float)LeptonCamera.getWidth()/(float)IMAGE_WIDTH;//24/480
+    float korkeussuhde = (float) LeptonCamera.getHeight() / (float) IMAGE_HEIGHT;//32/640
+    float leveyssuhde = (float) LeptonCamera.getWidth() / (float) IMAGE_WIDTH;//24/480
 
     private double userTemp = 0;
     private int laskuri = 0;
@@ -119,7 +119,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        preferred_measure_distance = Float.parseFloat(PreferenceManager.getDefaultSharedPreferences(getContext()).getString(getString(R.string.preference_measure_distance), "300"));
+        preferred_measure_distance = Float.parseFloat(PreferenceManager.getDefaultSharedPreferences(getContext())
+                .getString(getString(R.string.preference_measure_distance), "300"));
     }
 
     @Nullable
@@ -169,21 +170,21 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             }
         });
 
-            getCameraProperties();
-            cameraSelector = new CameraSelector.Builder()
-                    .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
-                    .build();
+        getCameraProperties();
+        cameraSelector = new CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+                .build();
 
-            new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getActivity().getApplication()))
-                    .get(CameraXViewModel.class)
-                    .getProcessCameraProvider()
-                    .observe(
-                            getViewLifecycleOwner(),
-                            provider -> {
-                                cameraProvider = provider;
-                                bindAllCameraUseCases();
-                            }
-                    );
+        new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getActivity().getApplication()))
+                .get(CameraXViewModel.class)
+                .getProcessCameraProvider()
+                .observe(
+                        getViewLifecycleOwner(),
+                        provider -> {
+                            cameraProvider = provider;
+                            bindAllCameraUseCases();
+                        }
+                );
 
 
         ProgressBar bar = view.findViewById(R.id.face_check_prog);
@@ -192,6 +193,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         detectedFrames.observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
+                // getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(integer)));
+                //System.out.println(integer + " jees");
                 if (integer < 10) {
                     Fragment f = new MenuFragment();
                     getActivity().getSupportFragmentManager().beginTransaction()
@@ -275,7 +278,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         }
 
         analysisCase = new ImageAnalysis.Builder()
-                .setTargetResolution(new Size( IMAGE_WIDTH, IMAGE_HEIGHT))
+                .setTargetResolution(new Size(IMAGE_WIDTH, IMAGE_HEIGHT))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();
 
@@ -300,8 +303,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             CameraCharacteristics c = manager.getCameraCharacteristics(getFrontFacingCameraId(manager));
             focalLength = c.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0];
             SizeF sensor = c.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
-            float angleX = (float) Math.atan(sensor.getWidth() / (2*focalLength));
-            float angleY = (float) Math.atan(sensor.getHeight() / (2*focalLength));
+            float angleX = (float) Math.atan(sensor.getWidth() / (2 * focalLength));
+            float angleY = (float) Math.atan(sensor.getHeight() / (2 * focalLength));
             System.out.println("fov" + angleX + angleY);
             sensorX = (float) (Math.tan(Math.toRadians(angleX / 2)) * 2 * focalLength);
             sensorY = (float) (Math.tan(Math.toRadians(angleY / 2)) * 2 * focalLength);
@@ -322,31 +325,31 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         paint.setAlpha(230);
         paint.setStyle(Paint.Style.FILL);
         paint.setAntiAlias(true);
-        Rect rt = new Rect(0,0, overlay.getWidth(), overlay.getHeight());
+        Rect rt = new Rect(0, 0, overlay.getWidth(), overlay.getHeight());
         canvas.drawRect(rt, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         float x = overlay.getWidth() / 2.0f;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(view.getContext());
-        float width = Float.parseFloat(sp.getString(getString(R.string.preference_oval_width), "750"))/ 2;
+        float width = Float.parseFloat(sp.getString(getString(R.string.preference_oval_width), "750")) / 2;
         float height = Float.parseFloat(sp.getString(getString(R.string.preference_oval_height), "1300"));
-        float fromTop = Float.parseFloat(sp.getString(getString(R.string.preference_oval_pos_from_top), "200"));;
-        canvas.drawOval(x-width,  fromTop, x+width, height, paint);
-        ((ImageView)view.findViewById(R.id.start_layout_oval_overlay)).setImageBitmap(overlay);
+        float fromTop = Float.parseFloat(sp.getString(getString(R.string.preference_oval_pos_from_top), "200"));
+        canvas.drawOval(x - width, fromTop, x + width, height, paint);
+        ((ImageView) view.findViewById(R.id.start_layout_oval_overlay)).setImageBitmap(overlay);
     }
 
     String getFrontFacingCameraId(CameraManager cManager) throws CameraAccessException {
-        for(final String cameraId : cManager.getCameraIdList()){
+        for (final String cameraId : cManager.getCameraIdList()) {
             CameraCharacteristics characteristics = cManager.getCameraCharacteristics(cameraId);
             int cOrientation = characteristics.get(CameraCharacteristics.LENS_FACING);
-            if(cOrientation == CameraCharacteristics.LENS_FACING_FRONT) return cameraId;
+            if (cOrientation == CameraCharacteristics.LENS_FACING_FRONT) return cameraId;
         }
         return null;
     }
 
     public void facePositionCheck(Face face, int imgWidth, int imgHeight) {
 
-        float middleX = imgWidth/2f;
-        float middleY = imgHeight/2.05f; // joutuu sit säätää tabletille tää ja deviation
+        float middleX = imgWidth / 2f;
+        float middleY = imgHeight / 2.05f; // joutuu sit säätää tabletille tää ja deviation
         float maxDeviation = 15f; // eli max +- pixel heitto sijaintiin
         PointF noseP = face.getLandmark(FaceLandmark.NOSE_BASE).getPosition();
         PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
@@ -369,20 +372,11 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         int offset = 50;
 
-        boolean distanceOK = dist < preferred_measure_distance+offset && dist > preferred_measure_distance-offset;
+        boolean distanceOK = dist < preferred_measure_distance + offset && dist > preferred_measure_distance - offset;
         if (xOK && yOK && distanceOK) {
             facePositionCheckCounter++;
             startScanAnimation();
             ready = true;
-           updateProgress();
-            if (facePositionCheckCounter > checkLimit && !found && hasMeasured) {
-                found = true;
-                Fragment f = new User_result();
-                getActivity().getSupportFragmentManager().beginTransaction()
-                            .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
-                            .replace(R.id.fragmentCamera, f, "default").commit();
-            }
-
         } else {
             scanBar.clearAnimation();
             ready = false;
@@ -390,9 +384,9 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             userTemp = 0;
             huiput = new HuippuLukema();
             facePositionCheckCounter--;
-            if(facePositionCheckCounter < 0) facePositionCheckCounter = 0;
-           updateProgress();
+            if (facePositionCheckCounter < 0) facePositionCheckCounter = 0;
         }
+        updateProgress();
 
     }
 
@@ -415,6 +409,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     public void decrementDetectedFrames() {
+        scanBar.clearAnimation();
         if (detectedFrames.getValue() < 0) {
             detectedFrames.setValue(0);
         } else {
@@ -444,10 +439,12 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     @Override
-    public void setConnectingImage() {}
+    public void setConnectingImage() {
+    }
 
     @Override
-    public void setNoFeedImage() {}
+    public void setNoFeedImage() {
+    }
 
     @Override
     public void updateImage(Bitmap image) {
@@ -455,14 +452,16 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     @Override
-    public void updateText(String text) {}
+    public void updateText(String text) {
+    }
 
     @Override
-    public void disconnect() {}
+    public void disconnect() {
+    }
 
     @Override
     public void maxCelsiusValue(double max) {
-        getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(laskuri)));
+        // getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(laskuri)));
         if (ready) {
             if (laskuri < 30) {
                 huiput = laskeAlue();
@@ -480,32 +479,43 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     @Override
-    public void minCelsiusValue(double min) {}
+    public void minCelsiusValue(double min) {
+    }
 
     @Override
-    public void detectFace(Bitmap image) {}
+    public void detectFace(Bitmap image) {
+    }
 
     @Override
-    public void writeToFile(byte[] data) {}
+    public void writeToFile(byte[] data) {
+    }
 
-    public HuippuLukema laskeAlue(){
+    public HuippuLukema laskeAlue() {
 
-        int maxleveys = LeptonCamera.getWidth()-1;
-        int maxkorkeus = LeptonCamera.getHeight()-1;
+        int maxleveys = LeptonCamera.getWidth() - 1;
+        int maxkorkeus = LeptonCamera.getHeight() - 1;
 
-        int vasen = (int)(naamarajat.left*leveyssuhde); if(vasen < 0) vasen = 0; if(vasen > maxleveys) vasen = maxleveys;
-        int oikea = (int)(naamarajat.right*leveyssuhde); if(oikea < 0) oikea = 0; if(oikea > maxleveys) oikea = maxleveys;
-        int yla = (int)(naamarajat.top*korkeussuhde); if(yla < 0) yla = 0; if(yla > maxkorkeus) yla = maxkorkeus;
-        int ala = (int)(naamarajat.bottom*korkeussuhde); if(ala < 0) ala = 0; if(ala > maxkorkeus) ala = maxkorkeus;
+        int vasen = (int) (naamarajat.left * leveyssuhde);
+        if (vasen < 0) vasen = 0;
+        if (vasen > maxleveys) vasen = maxleveys;
+        int oikea = (int) (naamarajat.right * leveyssuhde);
+        if (oikea < 0) oikea = 0;
+        if (oikea > maxleveys) oikea = maxleveys;
+        int yla = (int) (naamarajat.top * korkeussuhde);
+        if (yla < 0) yla = 0;
+        if (yla > maxkorkeus) yla = maxkorkeus;
+        int ala = (int) (naamarajat.bottom * korkeussuhde);
+        if (ala < 0) ala = 0;
+        if (ala > maxkorkeus) ala = maxkorkeus;
 
         int[][] tempFrame = LeptonCamera.getTempFrame();
 
-        try{
-            if(tempFrame != null /*&& tempFrame.length > maxkorkeus && tempFrame[tempFrame.length-1].length > maxleveys*/){
-                for(int y = yla; y <= ala; y++){
-                    for(int x = vasen; x <= oikea; x++){
-                        double lampo = (tempFrame[y][x]- 27315)/100.0;
-                        if(lampo > huiput.max){
+        try {
+            if (tempFrame != null /*&& tempFrame.length > maxkorkeus && tempFrame[tempFrame.length-1].length > maxleveys*/) {
+                for (int y = yla; y <= ala; y++) {
+                    for (int x = vasen; x <= oikea; x++) {
+                        double lampo = (tempFrame[y][x] - 27315) / 100.0;
+                        if (lampo > huiput.max) {
                             huiput.max = lampo;
                             huiput.y = y;
                             huiput.x = x;
@@ -513,12 +523,13 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                     }
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
-        return  huiput;
+        return huiput;
     }
-    class HuippuLukema{
+
+    class HuippuLukema {
         int x = 0;
         int y = 0;
         double max = 0;
