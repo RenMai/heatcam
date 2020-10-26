@@ -19,6 +19,7 @@ public class QR_code_fragment extends Fragment {
     private TextView text, text1, text2;
     private ImageView imgView;
     private long timer;
+    private boolean t = true;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -40,6 +41,10 @@ public class QR_code_fragment extends Fragment {
         text2.setText(R.string.title);
         imgView = view.findViewById(R.id.qr_code);
         imgView.setImageResource(R.drawable.frame);
+
+
+        // freezes sometimes when exiting fragment
+        /*
         timer = System.currentTimeMillis();
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -59,7 +64,7 @@ public class QR_code_fragment extends Fragment {
                         .commit();
             }
         }, 5000);
-
+        */
         // Inflate the layout for this fragment
         return view;
     }
