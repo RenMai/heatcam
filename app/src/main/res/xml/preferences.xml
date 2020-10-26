@@ -44,11 +44,11 @@
         app:entries="@array/labels"
         app:entryValues="@array/values" />
     <MultiSelectListPreference
-        app:key="multList"
-        app:title="Multi Select List"
+        app:key="changeLang"
+        app:title="Change language"
         app:summary="Tap to see selected items"
-        app:entries="@array/multi_select_labels"
-        app:entryValues="@array/multi_select_values"/>
+        app:entries="@array/multi_lang_labels"
+        app:entryValues="@array/multi_lang_labels"/>
     <CheckBoxPreference
         app:key="check"
         app:title="CheckBox" />
