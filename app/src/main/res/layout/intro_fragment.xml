@@ -5,45 +5,28 @@
     android:id="@+id/ConstraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_red_to_blue_list"
-    tools:context=".QR_code_fragment">
-
-    <ImageView
-        android:id="@+id/qr_code"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="32dp"
-        android:contentDescription="TODO"
-        android:text="ImageQR"
-        app:layout_constraintBottom_toTopOf="@+id/guideline14"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline13"
-        app:srcCompat="@drawable/ic_launcher_background" />
+    android:background="@drawable/bg_red_to_blue_list">
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-
+        android:layout_width="702dp"
+        android:layout_height="144dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
         android:fontFamily="sans-serif-light"
-        android:text="How to use it"
+        android:text="@string/instruction"
         android:textAlignment="center"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textColor="#F7F8FA"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display3"
+        android:textColor="#010D5A"
         android:textSize="36sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline15"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline14" />
+        app:layout_constraintTop_toTopOf="@+id/guideline14"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/textView2"
@@ -54,7 +37,7 @@
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="8dp"
         android:fontFamily="sans-serif-thin"
-        android:text="TextView"
+        android:text="@string/information_about_App"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Display4"
         android:textColor="#8E1301"
@@ -68,21 +51,21 @@
 
     <TextView
         android:id="@+id/textView1"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="702dp"
+        android:layout_height="144dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
-        android:text="FeedBack"
-        android:textAlignment="center"
+        android:text="@string/idea_of_App"
+        android:textAlignment="inherit"
         android:textAppearance="@style/TextAppearance.AppCompat.Display3"
-        android:textColor="#F8F8FA"
+        android:textColor="#010D5A"
         android:textSize="36sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline13"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline12"
-        app:layout_constraintVertical_bias="0.96" />
+        app:layout_constraintVertical_bias="0.038" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline11"
@@ -105,7 +88,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_begin="273dp"
         app:layout_constraintGuide_percent="0.30" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -113,8 +96,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="20dp"
-        app:layout_constraintGuide_percent=".70" />
+        app:layout_constraintGuide_percent="0.7001953" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline15"
@@ -123,5 +105,52 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="20dp"
         app:layout_constraintGuide_percent="1.0" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="702dp"
+        android:layout_height="115dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="@string/about_thermalCamera"
+        android:textAlignment="inherit"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display3"
+        android:textColor="#010D5A"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toTopOf="@+id/textView5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.515"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline13"
+        app:layout_constraintVertical_bias="0.038" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="702dp"
+        android:layout_height="188dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="92dp"
+        android:text="@string/who_developed"
+        android:textAlignment="inherit"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display3"
+        android:textColor="#010D5A"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline14"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.484"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/txtDist"
+        android:layout_width="603dp"
+        android:layout_height="111dp"
+        android:text="@string/your_distance"
+        android:textAlignment="center"
+        android:textSize="60sp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline15"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

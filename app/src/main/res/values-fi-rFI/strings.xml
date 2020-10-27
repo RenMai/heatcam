@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lämpökamera</string>
+    <string name="msgLowTmprt">Näyttää siltä, että kehosi lämpötila on matalampi kuin keskimääräinen kehon lämpötila.</string>
+    <string name="msgNormTmprt">Näyttää siltä, että kehosi lämpötila on NORMAALISSA rajoissa.</string>
+    <string name="msgHightTmprt">Näyttää siltä, että kehosi lämpötila on korkeampi kuin keskimääräinen kehon lämpötila.</string>
+    <string name="title">THERMAL CAMERA</string>
+    <string name="start_layout_info_text">Peitä ovaalin alue naamallasi aloittaaksesi lämpötilasi arvioinnin.\n\nVideokuvaa ei tallenneta mihinkään.</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hei tyhjä fragmentti</string>
+    <string name="qr_instruction">Skannaa QR-koodi puhelimen kameralla, jotta saat palautetta kokemuksestasi</string>
+    <string name="FeedBack">Odotamme kuulevamme sinulta tuotteestamme.</string>
+
+    <!-- PREFERENCE KEYS -->
+    <string name="preference_min_filter">PREFERENCE_MIN_FILTER</string>
+    <string name="preference_max_filter">PREFERENCE_MAX_FILTER</string>
+    <string name="preference_measure_distance">PREFERENCE_MEASURE_DISTANCE</string>
+    <string name="preference_oval_width">PREFERENCE_OVAL_WIDTH</string>
+    <string name="preference_oval_height">PREFERENCE_OVAL_HEIGHT</string>
+    <string name="preference_oval_pos_from_top">PREFERENCE_OVAL_POS_FROM_TOP</string>
+
+    <!-- Intro_fragment's text -->
+    <string name="instruction">Jos haluat aloittaa sovelluksen käytön, niin astu vain hieman lähemmäksi. Tämän jälkeen seuraa ruudulle ilmestyviä ohjeita.</string>
+    <string name="information_about_App">Tietoa sovelluksesta</string>
+    <string name="idea_of_App">Sovelluksen idea on arvioida käyttäjän lämpöä. Mittaustulos ei ole absoluuttinen vaan suuntaa-antava.</string>
+    <string name="about_thermalCamera">Mittaukseen käytetään lämpökameraa, joka on sijoitettu tabletin yläosaan.</string>
+    <string name="who_developed">Sovellus on osa Metropolian innovaatioprojekteja. Tämä sovellus on toteutettu yhteistyössä LeViteZer oy:n kanssa.</string>
+    <string name="your_distance">Your Distance</string>
+</resources>
