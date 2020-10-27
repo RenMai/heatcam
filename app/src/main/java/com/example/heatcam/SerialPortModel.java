@@ -185,4 +185,8 @@ public class SerialPortModel extends BroadcastReceiver {
             }
         }
     }
+
+    public void changeTiltAngle(int angle) {
+        System.out.println(angle + " kulma");
+    }
 }

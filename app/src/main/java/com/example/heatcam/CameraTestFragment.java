@@ -21,6 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -65,6 +66,12 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
     // roll y axis
     private float roll;
 
+    private SeekBar sliderAngle;
+    private int sliderMin = 22;
+    private TextView angleText;
+    private TextView telemetryText;
+    private int telemetryCount = 0;
+
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
@@ -79,6 +86,9 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
         textAzimuth = view.findViewById(R.id.textAzimuth);
         textPitch = view.findViewById(R.id.textPitch);
         textRoll = view.findViewById(R.id.textRoll);
+        sliderAngle = view.findViewById(R.id.seekBar);
+        angleText = view.findViewById(R.id.textView6);
+        telemetryText = view.findViewById(R.id.textTelemetry);
         //liveFeed = view.findViewById(R.id.livefeed);
         kerroinTeksti = view.findViewById(R.id.kerroinText);
         resoTeksti = view.findViewById(R.id.resot);
@@ -260,6 +270,24 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
             }
         });
 
+        sliderAngle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int valueSlider = sliderMin;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                valueSlider = sliderMin + seekBar.getProgress();
+                angleText.setText("Angle: " + valueSlider);
+                sModel.changeTiltAngle(valueSlider);
+            }
+        });
+
         return view;
     }
 
@@ -337,6 +365,16 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
 
     }
 
+    public void updateTelemetryText(String telemetry) {
+        if (telemetryCount == 5) {
+            getActivity().runOnUiThread(() -> telemetryText.setText(telemetry + "\n"));
+            telemetryCount = 0;
+        } else {
+            getActivity().runOnUiThread(() -> telemetryText.append(telemetry + "\n"));
+        }
+        telemetryCount++;
+    }
+
     public void updateOrientationText() {
         getActivity().runOnUiThread(() -> {
             textAzimuth.setText(String.format("Azimuth: %.02f", azimuth));
@@ -373,6 +411,7 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
                 roll = values[2] * 57.2957795f;
                 mags = null;
                 accels = null;
+                updateTelemetryText(String.valueOf(azimuth));
                 updateOrientationText();
             }
         }
