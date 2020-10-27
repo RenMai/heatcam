@@ -3,6 +3,8 @@ package com.example.heatcam;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 
+import androidx.annotation.NonNull;
+
 public class LowResolution16BitCamera extends LeptonCamera {
 
     public void setMaxFilter(float maxFilter) {
@@ -31,7 +33,8 @@ public class LowResolution16BitCamera extends LeptonCamera {
             int minRaw = (rawTelemetry[3]&0xFF) + (rawTelemetry[4]&0xFF)*256;
 
             TelemetryData td = new TelemetryData(rawTelemetry);
-
+            // todo: update camera listener interface instead of using this
+            ((CameraTestFragment) getCameraListener()).updateData(td);
             getCameraListener().maxCelsiusValue(kelvinToCelsius(maxRaw));
             getCameraListener().minCelsiusValue(kelvinToCelsius(minRaw));
             int minFilterKelvin = minRaw;
@@ -81,7 +84,7 @@ public class LowResolution16BitCamera extends LeptonCamera {
         return Bitmap.createBitmap(colors, getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
     }
 
-    private class TelemetryData {
+    public class TelemetryData {
         public int cTemp;
         public int refTemp;
         public int inVoltage;
@@ -108,6 +111,19 @@ public class LowResolution16BitCamera extends LeptonCamera {
             servoCurrent = (rawTelemetry[24]&0xFF) + (rawTelemetry[25]&0xFF)*256;
         }
 
+        @NonNull
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("cTemp: ").append(cTemp).append("\n");
+            sb.append("refTemp: ").append(refTemp).append("\n");
+            sb.append("inVoltage: ").append(inVoltage).append("\n");
+            sb.append("tiltAngle: ").append(tiltAngle).append("\n");
+            sb.append("sensor1: ").append(tiltAngle).append("\n");
+            sb.append("sensor2: ").append(tiltAngle).append("\n");
+            sb.append("servoCurrent: ").append(tiltAngle).append("\n");
+            return sb.toString();
+        }
     }
 
 }

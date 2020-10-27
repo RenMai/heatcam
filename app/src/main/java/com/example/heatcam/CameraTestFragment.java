@@ -426,4 +426,8 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
     public void sendHeatmap(Bitmap image) {
         hybridBitmap.setHeatmap(image);
     }
+
+    public void updateData(LowResolution16BitCamera.TelemetryData data) {
+        getActivity().runOnUiThread(() -> telemetryText.setText(data.toString()));
+    }
 }

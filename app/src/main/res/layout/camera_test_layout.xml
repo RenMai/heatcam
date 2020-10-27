@@ -10,14 +10,15 @@
 
     <ImageView
         android:id="@+id/camera_test_view"
-        android:layout_width="match_parent"
+        android:layout_width="500dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="26dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/noimage"
-        tools:layout_editor_absoluteX="230dp"
         android:adjustViewBounds="true"
-        android:scaleType="fitCenter"/>
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/noimage" />
 
     <TextView
         android:id="@+id/camera_max_raw_value"
@@ -123,11 +124,11 @@
         android:id="@+id/kerroinText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="52dp"
-        android:layout_marginTop="44dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="36dp"
         android:text="TextView"
-        app:layout_constraintStart_toStartOf="@+id/camera_min_raw_value"
-        app:layout_constraintTop_toBottomOf="@+id/camera_min_raw_value" />
+        app:layout_constraintStart_toEndOf="@+id/facebounds"
+        app:layout_constraintTop_toBottomOf="@+id/edit_min_filter" />
 
     <Button
         android:id="@+id/oikea"
@@ -198,8 +199,8 @@
         android:id="@+id/opacity"
         android:layout_width="wrap_content"
         android:layout_height="32dp"
-        android:layout_marginStart="88dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
         android:checked="true"
         android:text="Opacity"
         app:layout_constraintStart_toEndOf="@+id/oikea"
@@ -246,7 +247,8 @@
         android:id="@+id/seekBar"
         android:layout_width="204dp"
         android:layout_height="35dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="36dp"
         android:max="73"
         android:progress="45"
         android:rotation="0"
@@ -255,13 +257,14 @@
 
     <TextView
         android:id="@+id/textTelemetry"
-        android:layout_width="316dp"
-        android:layout_height="110dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="48dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.984"
-        app:layout_constraintStart_toEndOf="@+id/seekBar"
-        app:layout_constraintTop_toBottomOf="@+id/resot" />
+        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintStart_toEndOf="@+id/kerroinText"
+        app:layout_constraintTop_toBottomOf="@+id/edit_min_filter" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
