@@ -203,4 +203,20 @@ public class SerialPortModel extends BroadcastReceiver {
             e.printStackTrace();
         }
     }
+
+    public void changeTiltSpeed(int speed) {
+        byte[] data = new byte[] {
+                (byte) 0xff,
+                (byte) 0xff,
+                (byte) 0xff,
+                2,
+                (byte) speed,
+                0
+        };
+        try {
+            usbSerialPort.write(data, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

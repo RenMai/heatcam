@@ -28,8 +28,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.util.Locale;
-
 
 public class CameraTestFragment extends Fragment implements CameraListener, HybridImageListener {
 
@@ -67,8 +65,11 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
     private float roll;
 
     private SeekBar sliderAngle;
-    private int sliderMin = 22;
+    private SeekBar sliderSpeed;
+    private int sliderAngleMin = 22;
+    private int sliderSpeedMin = 2;
     private TextView angleText;
+    private TextView speedText;
     private TextView telemetryText;
     private int telemetryCount = 0;
 
@@ -87,7 +88,9 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
         textPitch = view.findViewById(R.id.textPitch);
         textRoll = view.findViewById(R.id.textRoll);
         sliderAngle = view.findViewById(R.id.seekBar);
+        sliderSpeed = view.findViewById(R.id.seekBarSpeed);
         angleText = view.findViewById(R.id.textView6);
+        speedText = view.findViewById(R.id.textViewSpeed);
         telemetryText = view.findViewById(R.id.textTelemetry);
         //liveFeed = view.findViewById(R.id.livefeed);
         kerroinTeksti = view.findViewById(R.id.kerroinText);
@@ -271,7 +274,7 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
         });
 
         sliderAngle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            int valueSlider = sliderMin;
+            int valueSlider = sliderAngleMin;
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             }
@@ -282,9 +285,30 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                valueSlider = sliderMin + seekBar.getProgress();
+                valueSlider = sliderAngleMin + seekBar.getProgress();
                 angleText.setText("Angle: " + valueSlider);
                 sModel.changeTiltAngle(valueSlider);
+            }
+        });
+
+        sliderSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int speedValue = sliderSpeedMin;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                speedValue = sliderSpeedMin + seekBar.getProgress();
+                speedText.setText("Speed " + speedValue);
+                sModel.changeTiltSpeed(speedValue);
+
             }
         });
 

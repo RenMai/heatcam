@@ -266,5 +266,25 @@
         app:layout_constraintStart_toEndOf="@+id/kerroinText"
         app:layout_constraintTop_toBottomOf="@+id/edit_min_filter" />
 
+    <SeekBar
+        android:id="@+id/seekBarSpeed"
+        android:layout_width="204dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="12dp"
+        android:max="8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+    <TextView
+        android:id="@+id/textViewSpeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="64dp"
+        android:text="Speed"
+        app:layout_constraintEnd_toEndOf="@+id/seekBarSpeed"
+        app:layout_constraintTop_toBottomOf="@+id/seekBarSpeed" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
