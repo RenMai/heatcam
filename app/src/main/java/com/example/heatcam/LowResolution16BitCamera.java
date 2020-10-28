@@ -95,7 +95,7 @@ public class LowResolution16BitCamera extends LeptonCamera {
 
         public TelemetryData(int[] rawTelemetry) {
             // Ref Temp counted from visible pixels
-            cTemp = (rawTelemetry[7]&0xFF) + (rawTelemetry[6]&0xFF)*256;
+            cTemp = (rawTelemetry[6]&0xFF) + (rawTelemetry[6]&0xFF)*256;
             // Ref temp from temperature sensor  (TempCor = (float) cTempK / (float)   RefTemp
             // all send pixels have been multiplied with TempCor
             refTemp = (rawTelemetry[9]&0xFF) + (rawTelemetry[10]&0xFF)*256;
@@ -119,9 +119,9 @@ public class LowResolution16BitCamera extends LeptonCamera {
             sb.append("refTemp: ").append(refTemp).append("\n");
             sb.append("inVoltage: ").append(inVoltage).append("\n");
             sb.append("tiltAngle: ").append(tiltAngle).append("\n");
-            sb.append("sensor1: ").append(tiltAngle).append("\n");
-            sb.append("sensor2: ").append(tiltAngle).append("\n");
-            sb.append("servoCurrent: ").append(tiltAngle).append("\n");
+            sb.append("sensor1: ").append(sensor1).append("\n");
+            sb.append("sensor2: ").append(sensor2).append("\n");
+            sb.append("servoCurrent: ").append(servoCurrent).append("\n");
             return sb.toString();
         }
     }
