@@ -187,12 +187,19 @@ public class SerialPortModel extends BroadcastReceiver {
     }
 
     public void changeTiltAngle(int angle) {
-        byte[] data = new byte[]{(byte) 0xff, (byte) 0xff, 1, 0, 0};
-        data[3] = (byte) (angle & 0xff);
-        data[4] = (byte) (angle >> 8);
+        angle = angle*100;
+        byte[] data = new byte[]{
+                (byte) 0xff,
+                (byte) 0xff,
+                (byte) 0xff,
+                1,
+                (byte) (angle & 0xff),
+                (byte) (angle >> 8)
+        };
+        System.out.println("tilt angle " + ((data[4]&0xFF) + (data[5]&0xFF)*256));
         try {
             usbSerialPort.write(data, 1);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
