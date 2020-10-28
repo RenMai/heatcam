@@ -187,7 +187,7 @@ public class SerialPortModel extends BroadcastReceiver {
     }
 
     public void changeTiltAngle(int angle) {
-        byte[] data = new byte[]{(byte) 0xff, (byte) 0xff, 2, 0, 0};
+        byte[] data = new byte[]{(byte) 0xff, (byte) 0xff, 1, 0, 0};
         data[3] = (byte) (angle & 0xff);
         data[4] = (byte) (angle >> 8);
         try {

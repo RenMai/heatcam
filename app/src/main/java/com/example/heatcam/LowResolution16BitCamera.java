@@ -95,7 +95,7 @@ public class LowResolution16BitCamera extends LeptonCamera {
 
         public TelemetryData(int[] rawTelemetry) {
             // Ref Temp counted from visible pixels
-            cTemp = (rawTelemetry[6]&0xFF) + (rawTelemetry[6]&0xFF)*256;
+            cTemp = (rawTelemetry[6]&0xFF) + (rawTelemetry[7]&0xFF)*256;
             // Ref temp from temperature sensor  (TempCor = (float) cTempK / (float)   RefTemp
             // all send pixels have been multiplied with TempCor
             refTemp = (rawTelemetry[9]&0xFF) + (rawTelemetry[10]&0xFF)*256;
