@@ -8,6 +8,17 @@
     android:paddingStart="60dp"
     android:paddingEnd="60dp">
 
+    <SeekBar
+        android:id="@+id/seekBarCamMode"
+        android:layout_width="204dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="20dp"
+        android:max="4"
+        android:progress="2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewSpeed" />
+
     <ImageView
         android:id="@+id/camera_test_view"
         android:layout_width="500dp"
@@ -285,6 +296,16 @@
         android:text="Speed"
         app:layout_constraintEnd_toEndOf="@+id/seekBarSpeed"
         app:layout_constraintTop_toBottomOf="@+id/seekBarSpeed" />
+
+    <TextView
+        android:id="@+id/textViewCamMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="56dp"
+        android:text="Mode"
+        app:layout_constraintEnd_toEndOf="@+id/seekBarCamMode"
+        app:layout_constraintTop_toBottomOf="@+id/seekBarCamMode" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
