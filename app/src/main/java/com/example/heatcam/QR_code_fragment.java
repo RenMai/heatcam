@@ -13,6 +13,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class QR_code_fragment extends Fragment {
 
@@ -20,6 +23,8 @@ public class QR_code_fragment extends Fragment {
     private ImageView imgView;
     private long timer;
     private boolean t = true;
+
+    private Timer task_timer;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -51,6 +56,20 @@ public class QR_code_fragment extends Fragment {
         imgView.setImageResource(R.drawable.frame);
 
 
+
+
+        task_timer = new Timer();
+        task_timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Fragment fragment = new IntroFragment();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                        .replace(R.id.fragmentCamera, fragment, "measure_start")
+                        .commit();
+            }
+        }, 10000);
+
         // freezes sometimes when exiting fragment
         /*
         timer = System.currentTimeMillis();
@@ -75,5 +94,13 @@ public class QR_code_fragment extends Fragment {
         */
         // Inflate the layout for this fragment
         return view;
+    }
+
+    @Override
+    public void onPause() {
+        if(task_timer != null) {
+            task_timer.cancel();
+        }
+        super.onPause();
     }
 }
