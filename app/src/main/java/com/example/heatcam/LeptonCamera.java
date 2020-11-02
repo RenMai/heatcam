@@ -21,6 +21,7 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
     private int[][] rawFrame;
     int[] rawTelemetry; // default visibility for tests
     private byte[] rawData;
+    public static final byte[] START_BYTES = new byte[]{-1, -1, -1};
 
     public int getRawDataIndex() {
         return rawDataIndex;
@@ -88,9 +89,8 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
         int byteindx = 0;
         int lineNumber;
         int i;
-        byte[] startBytes = new byte[] {-1, -1, -1};
         String rowBytes = new String(data, StandardCharsets.UTF_8);
-        String pattern = new String(startBytes, StandardCharsets.UTF_8);
+        String pattern = new String(START_BYTES, StandardCharsets.UTF_8);
         byteindx = rowBytes.indexOf(pattern);
 
         for (i = byteindx; i < bytesRead; i += (width+4)) {
@@ -124,9 +124,8 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
         int byteindx = 0;
         int lineNumber;
         int i;
-        byte[] startBytes = new byte[] {-1, -1, -1};
         String rowBytes = new String(data, StandardCharsets.UTF_8);
-        String pattern = new String(startBytes, StandardCharsets.UTF_8);
+        String pattern = new String(START_BYTES, StandardCharsets.UTF_8);
         byteindx = rowBytes.indexOf(pattern);
 
         for(i = byteindx; i < bytesRead; i += (width*2+4)) { // row
