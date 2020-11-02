@@ -213,6 +213,7 @@ public class SerialPortModel extends BroadcastReceiver {
                 (byte) speed,
                 0
         };
+        System.out.println("tilt speed " + ((data[4]&0xFF) + (data[5]&0xFF)*256));
         try {
             usbSerialPort.write(data, 1);
         } catch (Exception e) {
@@ -234,7 +235,9 @@ public class SerialPortModel extends BroadcastReceiver {
                 3,
                 (byte) mode,
                 0
+
         };
+        System.out.println("video mode " + ((data[4]&0xFF) + (data[5]&0xFF)*256 -2));
         try {
             usbSerialPort.write(data, 1);
         } catch (Exception e) {

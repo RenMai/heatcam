@@ -5,6 +5,10 @@ import android.graphics.Matrix;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class LowResolution16BitCamera extends LeptonCamera {
 
     public void setMaxFilter(float maxFilter) {
@@ -29,16 +33,18 @@ public class LowResolution16BitCamera extends LeptonCamera {
             extractRow(data);
             parse16bitData();
             setRawDataIndex(0);
-            int maxRaw = (rawTelemetry[0]&0xFF) + (rawTelemetry[1]&0xFF)*256;
-            int minRaw = (rawTelemetry[3]&0xFF) + (rawTelemetry[4]&0xFF)*256;
-
+            //int maxRaw = (rawTelemetry[0]&0xFF) + (rawTelemetry[1]&0xFF)*256;
+            //int minRaw = (rawTelemetry[3]&0xFF) + (rawTelemetry[4]&0xFF)*256;
             TelemetryData td = new TelemetryData(rawTelemetry);
             // todo: update camera listener interface instead of using this
-            ((CameraTestFragment) getCameraListener()).updateData(td);
-            getCameraListener().maxCelsiusValue(kelvinToCelsius(maxRaw));
-            getCameraListener().minCelsiusValue(kelvinToCelsius(minRaw));
-            int minFilterKelvin = minRaw;
-            int maxFilterKelvin = maxRaw;
+            if(getCameraListener() instanceof CameraTestFragment) {
+                ((CameraTestFragment) getCameraListener()).updateData(td);
+            }
+
+            getCameraListener().maxCelsiusValue(kelvinToCelsius(max));
+            getCameraListener().minCelsiusValue(kelvinToCelsius(min));
+            int minFilterKelvin = min;
+            int maxFilterKelvin = max;
             if(maxFilter > 0) {
                 maxFilterKelvin = (int) ((maxFilter + 273.15) *100);
             }
@@ -46,13 +52,14 @@ public class LowResolution16BitCamera extends LeptonCamera {
                 minFilterKelvin = (int) ((minFilter + 273.15) *100);
             }
             //Bitmap bMap = convertTo8bit(29915, 30515);
-            Bitmap bMap = convertTo8bit(minRaw, maxRaw, minFilterKelvin, maxFilterKelvin);
+            Bitmap bMap = convertTo8bit(min, max, minFilterKelvin, maxFilterKelvin);
             Matrix m = new Matrix();
             m.postRotate(180);
             bMap = Bitmap.createBitmap(bMap, 0,0, bMap.getWidth(), bMap.getHeight(), m, true);
             getCameraListener().updateImage(bMap);
             //getCameraListener().updateText(""+ kelvinToCelsius(maxRaw));
-
+            max = 0;
+            min = 0;
         } else {
             extractRow(data);
             setRawDataIndex(getRawDataIndex()+data.length);
