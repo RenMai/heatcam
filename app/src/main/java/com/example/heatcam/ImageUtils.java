@@ -6,6 +6,9 @@ import java.util.Vector;
 
 public final class ImageUtils {
 
+    public static final int LOWEST_COLOR = -10197879;
+    public static final int HIGHEST_COLOR = -65536;
+
     public static Vector<Integer> createColorTable() {
         Vector<Integer> table = new Vector<>();
         double a, b;

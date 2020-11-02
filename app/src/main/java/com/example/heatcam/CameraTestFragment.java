@@ -21,13 +21,12 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
-import java.util.Locale;
 
 
 public class CameraTestFragment extends Fragment implements CameraListener, HybridImageListener {
@@ -65,6 +64,17 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
     // roll y axis
     private float roll;
 
+    private SeekBar sliderAngle;
+    private SeekBar sliderSpeed;
+    private SeekBar sliderCamMode;
+    private int sliderAngleMin = 22;
+    private int sliderSpeedMin = 2;
+    private TextView angleText;
+    private TextView speedText;
+    private TextView camModeText;
+    private TextView telemetryText;
+    private int telemetryCount = 0;
+
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
@@ -79,6 +89,13 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
         textAzimuth = view.findViewById(R.id.textAzimuth);
         textPitch = view.findViewById(R.id.textPitch);
         textRoll = view.findViewById(R.id.textRoll);
+        sliderAngle = view.findViewById(R.id.seekBar);
+        sliderSpeed = view.findViewById(R.id.seekBarSpeed);
+        sliderCamMode = view.findViewById(R.id.seekBarCamMode);
+        angleText = view.findViewById(R.id.textView6);
+        speedText = view.findViewById(R.id.textViewSpeed);
+        camModeText = view.findViewById(R.id.textViewCamMode);
+        telemetryText = view.findViewById(R.id.textTelemetry);
         //liveFeed = view.findViewById(R.id.livefeed);
         kerroinTeksti = view.findViewById(R.id.kerroinText);
         resoTeksti = view.findViewById(R.id.resot);
@@ -260,6 +277,63 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
             }
         });
 
+        sliderAngle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int valueSlider = sliderAngleMin;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                valueSlider = sliderAngleMin + seekBar.getProgress();
+                angleText.setText("Angle: " + valueSlider);
+                sModel.changeTiltAngle(valueSlider);
+            }
+        });
+
+        sliderSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int speedValue = sliderSpeedMin;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                speedValue = sliderSpeedMin + seekBar.getProgress();
+                speedText.setText("Speed " + speedValue);
+                sModel.changeTiltSpeed(speedValue);
+
+            }
+        });
+
+        sliderCamMode.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                camModeText.setText("Mode: " + seekBar.getProgress());
+                sModel.changeVideoMode(seekBar.getProgress());
+            }
+        });
+
         return view;
     }
 
@@ -337,6 +411,16 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
 
     }
 
+    public void updateTelemetryText(String telemetry) {
+        if (telemetryCount == 5) {
+            getActivity().runOnUiThread(() -> telemetryText.setText(telemetry + "\n"));
+            telemetryCount = 0;
+        } else {
+            getActivity().runOnUiThread(() -> telemetryText.append(telemetry + "\n"));
+        }
+        telemetryCount++;
+    }
+
     public void updateOrientationText() {
         getActivity().runOnUiThread(() -> {
             textAzimuth.setText(String.format("Azimuth: %.02f", azimuth));
@@ -386,5 +470,9 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
     @Override
     public void sendHeatmap(Bitmap image) {
         hybridBitmap.setHeatmap(image);
+    }
+
+    public void updateData(LowResolution16BitCamera.TelemetryData data) {
+        getActivity().runOnUiThread(() -> telemetryText.setText(data.toString()));
     }
 }

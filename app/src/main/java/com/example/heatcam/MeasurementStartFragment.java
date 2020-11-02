@@ -467,7 +467,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     public void maxCelsiusValue(double max) {
         // getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(laskuri)));
         if (ready) {
-            if (laskuri < 30) {
+            if (laskuri < 100) {
                 huiput = laskeAlue();
                 if (huiput.max > userTemp) {
                     userTemp = huiput.max;
