@@ -50,6 +50,7 @@ public class FacePositionProcessor extends VisionProcessorBase<List<Face>> {
             Face face = results.get(0);
             msf.facePositionCheck(face, originalCameraImage.getWidth(), originalCameraImage.getHeight());
             msf.faceDetected(face);
+
         } else {
             msf.faceNotDetected();
         }

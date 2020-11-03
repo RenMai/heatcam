@@ -49,6 +49,7 @@ import com.google.mlkit.vision.face.FaceLandmark;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -60,6 +61,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MeasurementStartFragment extends Fragment implements CameraListener {
+
+    private final int IMAGE_WIDTH = 480;
+    private final int IMAGE_HEIGHT = 640;
+
 
     private final int IMAGE_WIDTH = 480;
     private final int IMAGE_HEIGHT = 640;
@@ -76,6 +81,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private float sensorY;
 
     private PreviewView cameraFeed;
+
+
 
     private VisionImageProcessor imageProcessor;
     private ProcessCameraProvider cameraProvider;
@@ -97,6 +104,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     private double userTemp = 0;
     private List<Double> userTempList;
+
     private int laskuri = 0;
     private boolean hasMeasured = false;
 
@@ -105,13 +113,13 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     SerialPortModel serialPortModel;
 
     private MeasurementAccessObject measurementAccessObject;
-    
     private Timer tiltTimer = new Timer();
     private int currentTiltAngle;
     private boolean tiltTimerRunning = false;
     private int timerDelay = 200;
 
     private ScheduledThreadPoolExecutor idleExecutor;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -135,6 +143,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         createFaceOval(view);
         cameraFeed = view.findViewById(R.id.measurement_position_video);
 
+
         measurementAccessObject = new MeasurementAccessObject();
 
         txtDebug = view.findViewById(R.id.txtDebugit);
@@ -146,7 +155,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         scanAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
+    public void onAnimationStart(Animation animation) {
 
             }
 
@@ -170,6 +179,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                 scanBar.startAnimation(scanAnimation);
                  */
                 changeToResultLayout();
+
             }
         });
 
@@ -346,6 +356,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         float middleX = imgWidth / 2f;
         float middleY = imgHeight / 2.05f; // joutuu sit säätää tabletille tää ja deviation
         float maxDeviation = 25f; // eli max +- pixel heitto sijaintiin
+
         PointF noseP = face.getLandmark(FaceLandmark.NOSE_BASE).getPosition();
         PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
         PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
@@ -406,11 +417,13 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                     }, timerDelay);
                 }
             }
+
         } else {
             scanBar.clearAnimation();
             ready = false;
             laskuri = 0;
             userTempList = null;
+
             userTemp = 0;
             huiput = new HuippuLukema();
             facePositionCheckCounter--;
@@ -428,6 +441,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         }
     }
+
 
     public void faceDetected(Face face) {
         naamarajat = face.getBoundingBox();
@@ -495,6 +509,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     private void saveMeasurementToJson() {
+
         try {
             JSONObject obj = measurementAccessObject.newEntry(userTemp, new Date());
             measurementAccessObject.write(getContext(), obj, true);
@@ -508,6 +523,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     public void setConnectingImage() {
     }
 
+
     @Override
     public void setNoFeedImage() {
     }
@@ -518,6 +534,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     @Override
+
     public void updateText(String text) {
     }
 
@@ -529,12 +546,13 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     public void maxCelsiusValue(double max) {
         // getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(laskuri)));
         if (ready) {
-            if (userTempList == null) {
+        if (userTempList == null) {
                 userTempList = new ArrayList<>();
             }
             if (laskuri < 100) {
                 huiput = laskeAlue();
                 userTempList.add(huiput.max);
+
                 if (huiput.max > userTemp) {
                     userTemp = huiput.max;
                 }
@@ -545,6 +563,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                 //hasMeasured = true;
                 saveMeasurementToJson();
                 changeToResultLayout();
+
+
             }
         }
     }
@@ -563,6 +583,64 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     public void updateData(LowResolution16BitCamera.TelemetryData data) {
         currentTiltAngle = data.tiltAngle;
+    }
+
+    public HuippuLukema laskeAlue() {
+
+        int maxleveys = LeptonCamera.getWidth() - 1;
+        int maxkorkeus = LeptonCamera.getHeight() - 1;
+
+        int vasen = (int) (naamarajat.left * leveyssuhde);
+        if (vasen < 0) vasen = 0;
+        if (vasen > maxleveys) vasen = maxleveys;
+        int oikea = (int) (naamarajat.right * leveyssuhde);
+        if (oikea < 0) oikea = 0;
+        if (oikea > maxleveys) oikea = maxleveys;
+        int yla = (int) (naamarajat.top * korkeussuhde);
+        if (yla < 0) yla = 0;
+        if (yla > maxkorkeus) yla = maxkorkeus;
+        int ala = (int) (naamarajat.bottom * korkeussuhde);
+        if (ala < 0) ala = 0;
+        if (ala > maxkorkeus) ala = maxkorkeus;
+
+        int[][] tempFrame = LeptonCamera.getTempFrame();
+
+        try {
+            if (tempFrame != null /*&& tempFrame.length > maxkorkeus && tempFrame[tempFrame.length-1].length > maxleveys*/) {
+                for (int y = yla; y <= ala; y++) {
+                    for (int x = vasen; x <= oikea; x++) {
+                        double lampo = (tempFrame[y][x] - 27315) / 100.0;
+                        if (lampo > huiput.max) {
+                            huiput.max = lampo;
+                            huiput.y = y;
+                            huiput.x = x;
+                        }
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+
+        }
+        return huiput;
+    }
+
+    class HuippuLukema {
+        int x = 0;
+        int y = 0;
+        double max = 0;
+    }
+
+    @Override
+    public void minCelsiusValue(double min) {
+    }
+
+    @Override
+    public void detectFace(Bitmap image) {
+    }
+
+    @Override
+    public void writeToFile(byte[] data) {
     }
 
     public HuippuLukema laskeAlue() {
