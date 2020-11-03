@@ -38,8 +38,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 
@@ -52,15 +50,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MeasurementStartFragment extends Fragment implements CameraListener {
-
-    private final int REQUEST_CODE_PERMISSIONS = 1001;
-    private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA"};
 
     private final int IMAGE_WIDTH = 480;
     private final int IMAGE_HEIGHT = 640;
@@ -72,14 +71,11 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     private final int AVERAGE_EYE_DISTANCE = 63; // in mm
 
-    private MutableLiveData<Integer> detectedFrames = new MutableLiveData<>();
-
     private float focalLength;
     private float sensorX;
     private float sensorY;
 
     private PreviewView cameraFeed;
-    private boolean found = false;
 
     private VisionImageProcessor imageProcessor;
     private ProcessCameraProvider cameraProvider;
@@ -100,6 +96,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     float leveyssuhde = (float) LeptonCamera.getWidth() / (float) IMAGE_WIDTH;//24/480
 
     private double userTemp = 0;
+    private List<Double> userTempList;
     private int laskuri = 0;
     private boolean hasMeasured = false;
 
@@ -108,12 +105,13 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     SerialPortModel serialPortModel;
 
     private MeasurementAccessObject measurementAccessObject;
-
-
+    
     private Timer tiltTimer = new Timer();
     private int currentTiltAngle;
     private boolean tiltTimerRunning = false;
     private int timerDelay = 200;
+
+    private ScheduledThreadPoolExecutor idleExecutor;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -138,9 +136,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         cameraFeed = view.findViewById(R.id.measurement_position_video);
 
         measurementAccessObject = new MeasurementAccessObject();
-
-        // takes approx. 2 minutes to go from 1000 to 10
-        detectedFrames.setValue(1000);
 
         txtDebug = view.findViewById(R.id.txtDebugit);
 
@@ -170,8 +165,11 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
             @Override
             public void onClick(View v) {
+                /*
                 scanBar.setVisibility(View.VISIBLE);
                 scanBar.startAnimation(scanAnimation);
+                 */
+                changeToResultLayout();
             }
         });
 
@@ -195,20 +193,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         ProgressBar bar = view.findViewById(R.id.face_check_prog);
         bar.setMax(checkLimit);
 
-        detectedFrames.observe(getViewLifecycleOwner(), new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer integer) {
-                // getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(integer)));
-                //System.out.println(integer + " jees");
-                if (integer < 10) {
-                    Fragment f = new MenuFragment();
-                    getActivity().getSupportFragmentManager().beginTransaction()
-                            .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
-                            .replace(R.id.fragmentCamera, f, "menu").commit();
-                }
-            }
-        });
-
         return view;
     }
 
@@ -222,6 +206,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     @Override
     public void onPause() {
         tiltTimer.cancel();
+        stopIdleExecutor();
         super.onPause();
         if (imageProcessor != null) {
             imageProcessor.stop();
@@ -391,7 +376,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         // angle correction if target is in specified distance and y position is not OK.
         else if(dist < 500 && !yOK) {
             synchronized (this) {
-                // timer purpose is not throttle angle correction commands.
+                // timer purpose is to not throttle angle correction commands.
                 if(!tiltTimerRunning) {
                     tiltTimerRunning = true;
                     // single angle correction. e.g. value 200 == 2 degrees
@@ -419,12 +404,13 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                             tiltTimerRunning = false;
                         }
                     }, timerDelay);
-                };
+                }
             }
         } else {
             scanBar.clearAnimation();
             ready = false;
             laskuri = 0;
+            userTempList = null;
             userTemp = 0;
             huiput = new HuippuLukema();
             facePositionCheckCounter--;
@@ -443,28 +429,54 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         }
     }
 
-    public void incrementDetectedFrames(Face face) {
+    public void faceDetected(Face face) {
         naamarajat = face.getBoundingBox();
-        if (detectedFrames.getValue() > 1000) {
-            detectedFrames.setValue(1000);
-        } else {
-            detectedFrames.setValue(detectedFrames.getValue() + 1);
+        stopIdleExecutor();
+    }
+
+    public void faceNotDetected() {
+        scanBar.clearAnimation();
+        startIdleExecutor();
+    }
+
+    private void startIdleExecutor() {
+        if (idleExecutor == null) {
+            idleExecutor = new ScheduledThreadPoolExecutor(1);
+        }
+        // schedule the layout change if there isn't already a task going for it
+        if (idleExecutor.getTaskCount() == 0) {
+            idleExecutor.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    changeToMenuLayout();
+                }
+            }, 60, TimeUnit.SECONDS);
         }
     }
 
-    public void decrementDetectedFrames() {
-        scanBar.clearAnimation();
-        if (detectedFrames.getValue() < 0) {
-            detectedFrames.setValue(0);
-        } else {
-            detectedFrames.setValue(detectedFrames.getValue() - 1);
+    private void stopIdleExecutor() {
+        if (idleExecutor != null) {
+            System.out.println(idleExecutor.shutdownNow());
+            idleExecutor = null;
         }
+    }
+
+    private void changeToMenuLayout() {
+        Fragment f = new MenuFragment();
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                .replace(R.id.fragmentCamera, f, "menu").commit();
     }
 
     private void changeToResultLayout() {
+        double avgUserTemp = userTempList.stream()
+                .mapToDouble(v -> v)
+                .average()
+                .getAsDouble();
         Fragment f = new QR_code_fragment();
         Bundle args = new Bundle();
         args.putDouble("user_temp", userTemp);
+        args.putDouble("avg_user_temp", avgUserTemp);
         f.setArguments(args);
         getActivity().getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
@@ -483,7 +495,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     private void saveMeasurementToJson() {
-        System.out.println();
         try {
             JSONObject obj = measurementAccessObject.newEntry(userTemp, new Date());
             measurementAccessObject.write(getContext(), obj, true);
@@ -518,8 +529,12 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     public void maxCelsiusValue(double max) {
         // getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(laskuri)));
         if (ready) {
+            if (userTempList == null) {
+                userTempList = new ArrayList<>();
+            }
             if (laskuri < 100) {
                 huiput = laskeAlue();
+                userTempList.add(huiput.max);
                 if (huiput.max > userTemp) {
                     userTemp = huiput.max;
                 }

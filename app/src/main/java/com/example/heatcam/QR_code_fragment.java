@@ -46,10 +46,12 @@ public class QR_code_fragment extends Fragment {
         text.setText(R.string.qr_instruction);
 
         // text1.setText(R.string.FeedBack);
-        if (!getArguments().isEmpty()){
+        if (getArguments() != null && !getArguments().isEmpty()){
             System.out.println(getArguments() + " argumentit");
             double temp = (double)getArguments().get("user_temp");
+            double avgTemp = (double) getArguments().get("avg_user_temp");
             text1.setText("Your temp was: " + temp);
+            text1.append("\nYour avg temp was: " + avgTemp);
         }
         text2.setText(R.string.title);
         imgView = view.findViewById(R.id.qr_code);
@@ -68,7 +70,7 @@ public class QR_code_fragment extends Fragment {
                         .replace(R.id.fragmentCamera, fragment, "measure_start")
                         .commit();
             }
-        }, 10000);
+        }, 20000);
 
         // freezes sometimes when exiting fragment
         /*
