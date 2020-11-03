@@ -185,4 +185,63 @@ public class SerialPortModel extends BroadcastReceiver {
             }
         }
     }
+
+    public void changeTiltAngle(int angle) {
+        angle = angle*100;
+        byte[] data = new byte[]{
+                (byte) 0xff,
+                (byte) 0xff,
+                (byte) 0xff,
+                1,
+                (byte) (angle & 0xff),
+                (byte) (angle >> 8)
+        };
+        System.out.println("tilt angle " + ((data[4]&0xFF) + (data[5]&0xFF)*256));
+        try {
+            usbSerialPort.write(data, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void changeTiltSpeed(int speed) {
+        byte[] data = new byte[]{
+                (byte) 0xff,
+                (byte) 0xff,
+                (byte) 0xff,
+                2,
+                (byte) speed,
+                0
+        };
+        System.out.println("tilt speed " + ((data[4]&0xFF) + (data[5]&0xFF)*256));
+        try {
+            usbSerialPort.write(data, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // to change thermal camera mode
+    // mode 0: average of 64 frames from thermal cam - use this or mode 2 for temp measurement
+    // mode 1: average of 4 frames
+    // mode 2: combination of modes 0 & 1, this is on by default
+    // mode 3: shows movement only and highlights it for 2 seconds
+    // mode 4: shows movement only, no highlight
+    public void changeVideoMode(int mode) {
+        byte[] data = new byte[] {
+                (byte) 0xff,
+                (byte) 0xff,
+                (byte) 0xff,
+                3,
+                (byte) mode,
+                0
+
+        };
+        System.out.println("video mode " + ((data[4]&0xFF) + (data[5]&0xFF)*256 -2));
+        try {
+            usbSerialPort.write(data, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

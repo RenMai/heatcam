@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.media.Image;
 
 public class ModifyHeatmap {
     private CameraTestFragment cameraTestFragment;
@@ -41,9 +42,8 @@ public class ModifyHeatmap {
             for(int j=0; j<image.getHeight(); j++){
                 int pixel = image.getPixel(i, j);
                 int r = Color.red(pixel), g = Color.green(pixel), b = Color.blue(pixel);
-                if (b < 200)
-                {
-                    O.setPixel(i, j, Color.argb(20, i, j, pixel));
+                if (pixel > ImageUtils.LOWEST_COLOR) {
+                    O.setPixel(i, j, Color.argb(230, r, g, b));
                 }
             }
         }
