@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Lämpökamera</string>
-    <string name="msgLowTmprt">Näyttää siltä, että kehosi lämpötila on matalampi kuin keskimääräinen kehon lämpötila.</string>
+    <string name="msgLowTmprt">Näyttää siltä, että kehosi lämpötila on matalampi kuin keskimääräinen kehon lämpötila.
+        Tuloksen saamisesta huolimatta sinun ei pitäisi huolehtia, koska sovellus on testitilassa eikä sen tulosta voida käyttää lääketieteellisenä raporttina.</string>
     <string name="msgNormTmprt">Näyttää siltä, että kehosi lämpötila on NORMAALISSA rajoissa.</string>
-    <string name="msgHightTmprt">Näyttää siltä, että kehosi lämpötila on korkeampi kuin keskimääräinen kehon lämpötila.</string>
+    <string name="msgHightTmprt">Näyttää siltä, että kehosi lämpötila on korkeampi kuin keskimääräinen kehon lämpötila.
+        Tuloksen saamisesta huolimatta sinun ei pitäisi huolehtia, koska sovellus on testitilassa eikä sen tulosta voida käyttää lääketieteellisenä raporttina.</string>
     <string name="title">THERMAL CAMERA</string>
     <string name="start_layout_info_text">Peitä ovaalin alue naamallasi aloittaaksesi lämpötilasi arvioinnin.\n\nVideokuvaa ei tallenneta mihinkään.</string>
     <!-- TODO: Remove or change this placeholder text -->

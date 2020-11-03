@@ -44,7 +44,15 @@ public class QR_code_fragment extends Fragment {
         if (!getArguments().isEmpty()){
             System.out.println(getArguments() + " argumentit");
             double temp = (double)getArguments().get("user_temp");
-            text1.setText("Your temp was: " + temp);
+            //text1.setText("Your temp was: " + temp);
+            if (37.5 >= temp && temp >= 35.5) {
+                text1.setText(R.string.msgNormTmprt);
+
+            } else if (temp > 37.5) {
+                text1.setText(R.string.msgHightTmprt);
+            } else {
+                text1.setText(R.string.msgLowTmprt);
+            }
         }
         text2.setText(R.string.title);
         imgView = view.findViewById(R.id.qr_code);
