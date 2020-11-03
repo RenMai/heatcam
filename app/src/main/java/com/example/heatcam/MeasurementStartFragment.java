@@ -65,10 +65,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private final int IMAGE_WIDTH = 480;
     private final int IMAGE_HEIGHT = 640;
 
-
-    private final int IMAGE_WIDTH = 480;
-    private final int IMAGE_HEIGHT = 640;
-
     private final String TAG = "MeasurementStartFragment";
 
     private int facePositionCheckCounter = 0;
@@ -81,7 +77,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private float sensorY;
 
     private PreviewView cameraFeed;
-
 
 
     private VisionImageProcessor imageProcessor;
@@ -631,60 +626,4 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         double max = 0;
     }
 
-    @Override
-    public void minCelsiusValue(double min) {
-    }
-
-    @Override
-    public void detectFace(Bitmap image) {
-    }
-
-    @Override
-    public void writeToFile(byte[] data) {
-    }
-
-    public HuippuLukema laskeAlue() {
-
-        int maxleveys = LeptonCamera.getWidth() - 1;
-        int maxkorkeus = LeptonCamera.getHeight() - 1;
-
-        int vasen = (int) (naamarajat.left * leveyssuhde);
-        if (vasen < 0) vasen = 0;
-        if (vasen > maxleveys) vasen = maxleveys;
-        int oikea = (int) (naamarajat.right * leveyssuhde);
-        if (oikea < 0) oikea = 0;
-        if (oikea > maxleveys) oikea = maxleveys;
-        int yla = (int) (naamarajat.top * korkeussuhde);
-        if (yla < 0) yla = 0;
-        if (yla > maxkorkeus) yla = maxkorkeus;
-        int ala = (int) (naamarajat.bottom * korkeussuhde);
-        if (ala < 0) ala = 0;
-        if (ala > maxkorkeus) ala = maxkorkeus;
-
-        int[][] tempFrame = LeptonCamera.getTempFrame();
-
-        try {
-            if (tempFrame != null /*&& tempFrame.length > maxkorkeus && tempFrame[tempFrame.length-1].length > maxleveys*/) {
-                for (int y = yla; y <= ala; y++) {
-                    for (int x = vasen; x <= oikea; x++) {
-                        double lampo = (tempFrame[y][x] - 27315) / 100.0;
-                        if (lampo > huiput.max) {
-                            huiput.max = lampo;
-                            huiput.y = y;
-                            huiput.x = x;
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-
-        }
-        return huiput;
-    }
-
-    class HuippuLukema {
-        int x = 0;
-        int y = 0;
-        double max = 0;
-    }
 }
