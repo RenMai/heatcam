@@ -27,6 +27,8 @@ public class LowResolution16BitCamera extends LeptonCamera {
         super(24, 32,32, 16);
     }
 
+    private TelemetryData td;
+
     @Override
     public void onNewData(byte[] data) {
         if(getHeight() == data[3]) {
@@ -35,10 +37,13 @@ public class LowResolution16BitCamera extends LeptonCamera {
             setRawDataIndex(0);
             //int maxRaw = (rawTelemetry[0]&0xFF) + (rawTelemetry[1]&0xFF)*256;
             //int minRaw = (rawTelemetry[3]&0xFF) + (rawTelemetry[4]&0xFF)*256;
-            TelemetryData td = new TelemetryData(rawTelemetry);
+            td = new TelemetryData(rawTelemetry);
             // todo: update camera listener interface instead of using this
             if(getCameraListener() instanceof CameraTestFragment) {
                 ((CameraTestFragment) getCameraListener()).updateData(td);
+            }
+            if(getCameraListener() instanceof MeasurementStartFragment) {
+                ((MeasurementStartFragment) getCameraListener()).updateData(td);
             }
 
             getCameraListener().maxCelsiusValue(kelvinToCelsius(max));

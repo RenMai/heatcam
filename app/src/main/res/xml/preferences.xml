@@ -35,6 +35,13 @@
         android:digits="0123456789"
         android:defaultValue="80"
         app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        app:key="PREFERENCE_TILT_CORRECTION_DELAY"
+        app:title="Tilt correction delay"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="200"
+        app:useSimpleSummaryProvider="true" />
 
     <ListPreference
         app:key="list"

@@ -53,6 +53,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class MeasurementStartFragment extends Fragment implements CameraListener {
 
@@ -107,6 +110,11 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private MeasurementAccessObject measurementAccessObject;
 
 
+    private Timer tiltTimer = new Timer();
+    private int currentTiltAngle;
+    private boolean tiltTimerRunning = false;
+    private int timerDelay = 200;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,6 +126,10 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.measurement_start_layout, container, false);
+
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
+        timerDelay = Integer.parseInt(sharedPrefs.getString("PREFERENCE_TILT_CORRECTION_DELAY", "200"));
+
         // prevent app from dimming
         view.setKeepScreenOn(true);
         animBtn = view.findViewById(R.id.animBtn);
@@ -209,6 +221,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     @Override
     public void onPause() {
+        tiltTimer.cancel();
         super.onPause();
         if (imageProcessor != null) {
             imageProcessor.stop();
@@ -274,14 +287,18 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                 .setTargetResolution(new Size(IMAGE_WIDTH, IMAGE_HEIGHT))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();
-
+        AtomicLong throttleTimer = new AtomicLong(System.currentTimeMillis());
         analysisCase.setAnalyzer(
                 // imageProcessor.processImageProxy will use another thread to run the detection underneath,
                 // thus we can just runs the analyzer itself on main thread.
                 ContextCompat.getMainExecutor(getContext()),
                 imageProxy -> {
                     try {
-                        imageProcessor.processImageProxy(imageProxy);
+                        if(System.currentTimeMillis() > throttleTimer.get()){
+                            throttleTimer.set(System.currentTimeMillis()+100);
+                            imageProcessor.processImageProxy(imageProxy);
+                        }
+
                     } catch (MlKitException e) {
                         Log.e(TAG, "Failed to process image. Error: " + e.getLocalizedMessage());
                     }
@@ -343,7 +360,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         float middleX = imgWidth / 2f;
         float middleY = imgHeight / 2.05f; // joutuu sit säätää tabletille tää ja deviation
-        float maxDeviation = 15f; // eli max +- pixel heitto sijaintiin
+        float maxDeviation = 25f; // eli max +- pixel heitto sijaintiin
         PointF noseP = face.getLandmark(FaceLandmark.NOSE_BASE).getPosition();
         PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
         PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
@@ -370,6 +387,40 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             facePositionCheckCounter++;
             startScanAnimation();
             ready = true;
+        }
+        // angle correction if target is in specified distance and y position is not OK.
+        else if(dist < 500 && !yOK) {
+            synchronized (this) {
+                // timer purpose is not throttle angle correction commands.
+                if(!tiltTimerRunning) {
+                    tiltTimerRunning = true;
+                    // single angle correction. e.g. value 200 == 2 degrees
+                    int correctionAngle = 200;
+
+                    // higher tilt angle == is more rotated towards floor
+                    // rotate up if head pos is high
+                    if(noseP.y < (middleY - maxDeviation)){
+                        // just to make sure currentTiltAngle value isn't fucked
+                        if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
+                            serialPortModel.changeTiltAngle((currentTiltAngle - correctionAngle ) /100);
+
+                        }
+                    }
+                    // rotate down if head pos is low
+                    else if(noseP.y > (middleY + maxDeviation)){
+                        if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
+                            serialPortModel.changeTiltAngle((currentTiltAngle + correctionAngle ) /100);
+
+                        }
+                    }
+                    tiltTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            tiltTimerRunning = false;
+                        }
+                    }, timerDelay);
+                };
+            }
         } else {
             scanBar.clearAnimation();
             ready = false;
@@ -493,6 +544,10 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     @Override
     public void writeToFile(byte[] data) {
+    }
+
+    public void updateData(LowResolution16BitCamera.TelemetryData data) {
+        currentTiltAngle = data.tiltAngle;
     }
 
     public HuippuLukema laskeAlue() {
