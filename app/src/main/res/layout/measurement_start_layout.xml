@@ -5,6 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.example.heatcam.AnimatedOval
+        android:id="@+id/animatedOval"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="10dp"
+        android:visibility="invisible"/>
 
     <View
         android:id="@+id/scanBar"

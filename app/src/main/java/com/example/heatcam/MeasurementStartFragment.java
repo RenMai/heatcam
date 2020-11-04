@@ -49,7 +49,6 @@ import com.google.mlkit.vision.face.FaceLandmark;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -115,6 +114,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     private ScheduledThreadPoolExecutor idleExecutor;
 
+    private AnimatedOval animatedOval;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -137,6 +138,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         scanBar = view.findViewById(R.id.scanBar);
         createFaceOval(view);
         cameraFeed = view.findViewById(R.id.measurement_position_video);
+
+        animatedOval = view.findViewById(R.id.animatedOval);
 
 
         measurementAccessObject = new MeasurementAccessObject();
@@ -169,12 +172,16 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
             @Override
             public void onClick(View v) {
+                // can add here some functionality for debugging
                 /*
                 scanBar.setVisibility(View.VISIBLE);
                 scanBar.startAnimation(scanAnimation);
-                 */
+
                 changeToResultLayout();
 
+                animatedOval.init();
+                animatedOval.setVisibility(View.VISIBLE);
+                 */
             }
         });
 
@@ -414,6 +421,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             }
 
         } else {
+            animatedOval.stopAnimation();
+            animatedOval.setVisibility(View.INVISIBLE);
             scanBar.clearAnimation();
             ready = false;
             laskuri = 0;
@@ -445,6 +454,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     public void faceNotDetected() {
         scanBar.clearAnimation();
+        animatedOval.stopAnimation();
+        animatedOval.setVisibility(View.INVISIBLE);
         startIdleExecutor();
     }
 
@@ -496,6 +507,9 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private void startScanAnimation() {
 
         if (!ready) {
+            animatedOval.init();
+            animatedOval.setVisibility(View.VISIBLE);
+
             scanBar.setVisibility(View.VISIBLE);
             scanBar.bringToFront();
             scanBar.invalidate();
@@ -555,6 +569,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             } else {
                 ready = false;
                 laskuri = 0;
+                userTempList = null;
                 //hasMeasured = true;
                 saveMeasurementToJson();
                 changeToResultLayout();
