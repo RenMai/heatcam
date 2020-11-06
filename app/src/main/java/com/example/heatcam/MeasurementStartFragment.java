@@ -173,11 +173,12 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             @Override
             public void onClick(View v) {
                 // can add here some functionality for debugging
+                changeToResultLayout();
                 /*
                 scanBar.setVisibility(View.VISIBLE);
                 scanBar.startAnimation(scanAnimation);
 
-                changeToResultLayout();
+
 
                 animatedOval.init();
                 animatedOval.setVisibility(View.VISIBLE);
@@ -489,10 +490,13 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     private void changeToResultLayout() {
-        double avgUserTemp = userTempList.stream()
-                .mapToDouble(v -> v)
-                .average()
-                .getAsDouble();
+        double avgUserTemp = 0;
+        if (userTempList != null) {
+            avgUserTemp = userTempList.stream()
+                    .mapToDouble(v -> v)
+                    .average()
+                    .getAsDouble();
+        }
         Fragment f = new QR_code_fragment();
         Bundle args = new Bundle();
         args.putDouble("user_temp", userTemp);

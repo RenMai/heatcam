@@ -8,6 +8,7 @@
     android:background="@drawable/bg_red_to_blue_list"
     tools:context=".QR_code_fragment">
 
+    <!-- Commented off to test graphs
     <ImageView
         android:id="@+id/qr_code"
         android:layout_width="0dp"
@@ -23,6 +24,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline13"
         app:srcCompat="@drawable/ic_launcher_background" />
+        -->
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/measuresChart"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:elevation="10dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline14"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline13" />
 
     <TextView
         android:id="@+id/textView"
