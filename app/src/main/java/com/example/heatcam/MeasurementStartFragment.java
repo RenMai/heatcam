@@ -477,7 +477,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     private void stopIdleExecutor() {
         if (idleExecutor != null) {
-            System.out.println(idleExecutor.shutdownNow());
+            idleExecutor.shutdownNow();
             idleExecutor = null;
         }
     }
@@ -573,7 +573,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             } else {
                 ready = false;
                 laskuri = 0;
-                userTempList = null;
                 //hasMeasured = true;
                 saveMeasurementToJson();
                 changeToResultLayout();

@@ -48,6 +48,9 @@ public class QR_code_fragment extends Fragment {
     private MeasurementAccessObject measurementAccessObject;
     private JSONArray measurementsJSON;
 
+    private ArrayList<Double> previouslyMeasuredTemps;
+    private double userTemp;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -71,14 +74,13 @@ public class QR_code_fragment extends Fragment {
 
         measurementAccessObject = new MeasurementAccessObject();
 
-        getPreviousMeasurements();
-        initChart();
 
         // text1.setText(R.string.FeedBack);
-        if (getArguments() != null && !getArguments().isEmpty()){
+        if (getArguments() != null && !getArguments().isEmpty()) {
             System.out.println(getArguments() + " argumentit");
             double temp = (double)getArguments().get("user_temp");
             double avgTemp = (double) getArguments().get("avg_user_temp");
+            userTemp = avgTemp;
             //text1.setText("Your temp was: " + temp);
             //text1.append("\nYour avg temp was: " + avgTemp);
             if (37.5 >= temp && temp >= 35.5) {
@@ -97,7 +99,22 @@ public class QR_code_fragment extends Fragment {
         // imgView = view.findViewById(R.id.qr_code);
         // imgView.setImageResource(R.drawable.frame);
 
+        previouslyMeasuredTemps = new ArrayList<>();
+        getPreviousMeasurements();
+        initChart();
 
+        // uncomment in the future
+        /*
+        if (previouslyMeasuredTemps.size() > 0) {
+            if (checkForHighTemp()) {
+                // display high temp layout
+                text1.setText(R.string.msgHightTmprt);
+            } else {
+                // display normal temp layout
+                text1.setText(R.string.msgNormTmprt);
+            }
+        }
+         */
 
 
         task_timer = new Timer();
@@ -136,6 +153,16 @@ public class QR_code_fragment extends Fragment {
         */
         // Inflate the layout for this fragment
         return view;
+    }
+
+    private boolean checkForHighTemp() {
+        double avgFromPrevious = previouslyMeasuredTemps.stream()
+                .mapToDouble(v -> v)
+                .average()
+                .getAsDouble();
+
+        // probably need to change this logic
+        return userTemp > avgFromPrevious;
     }
 
     private void getPreviousMeasurements() {
@@ -186,6 +213,7 @@ public class QR_code_fragment extends Fragment {
                 if (y != -1 && y < measurementsJSON.length() - 1) { // we loop through the last indexes
                     try {
                         measurements.add(new Entry(z, (float) measurementsJSON.getJSONObject(y).getDouble("Measured")));
+                        previouslyMeasuredTemps.add(measurementsJSON.getJSONObject(y).getDouble("Measured"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
