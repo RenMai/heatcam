@@ -144,16 +144,24 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
             }
             return false;
         });
-        view.findViewById(R.id.plus).setOnClickListener(v -> {
-            ModifyHeatmap.setScale(Math.round((ModifyHeatmap.getScale() + 0.2f)*10.0f)/10.0f);
+       /* view.findViewById(R.id.plus).setOnClickListener(v -> {
+            ModifyHeatmap.setRes(1.1);
             getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
         });
         view.findViewById(R.id.miinus).setOnClickListener(v -> {
-            ModifyHeatmap.setScale(Math.round((ModifyHeatmap.getScale() - 0.2f)*10.0f)/10.0f);
+            ModifyHeatmap.setRes(0.9);
+            getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+        });*/
+        view.findViewById(R.id.scaleplus).setOnClickListener(v -> {
+            ModifyHeatmap.setScale(1.1);
             getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
         });
-        view.findViewById(R.id.heatmap).setOnClickListener(v -> {
-            HybridImageOptions.heatmap = ((CheckBox) v).isChecked();
+        view.findViewById(R.id.scalemiinus).setOnClickListener(v -> {
+            ModifyHeatmap.setScale(0.9);
+            getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+        });
+        view.findViewById(R.id.smooth).setOnClickListener(v -> {
+            HybridImageOptions.smooth = ((CheckBox) v).isChecked();
         });
         view.findViewById(R.id.opacity).setOnClickListener(v -> {
             HybridImageOptions.opacity = ((CheckBox) v).isChecked();

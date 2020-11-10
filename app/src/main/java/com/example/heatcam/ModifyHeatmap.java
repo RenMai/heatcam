@@ -7,34 +7,14 @@ import android.graphics.Matrix;
 import android.media.Image;
 
 public class ModifyHeatmap {
-    private CameraTestFragment cameraTestFragment;
 
-    public static int xOffset = -47;
-    public static int yOffset = -54;
-    public static float scale = 1.6f;
+    public static int xOffset = -32;
+    public static int yOffset = -71;
+    public static int scaledWidth = LeptonCamera.getWidth() ;
+    public static int scaledHeight = LeptonCamera.getHeight() ;
+    public static float scale = 8.79f;
 
-    public ModifyHeatmap(){
-    }
-
-    public static Bitmap overlay(Bitmap live, Bitmap heat, boolean opacity) {
-        //getActivity().runOnUiThread(() -> resoTeksti.setText(live.getWidth()+", y: "+live.getHeight()+" / "+heat.getWidth()+", y: "+heat.getHeight()));
-
-        if(opacity) heat = setOpacity(heat);
-
-        //heat.setWidth(live.getWidth());
-        //heat.setHeight(live.getHeight());
-        Matrix m = new Matrix();
-        m.postScale(scale,scale);
-        m.postTranslate(xOffset, yOffset);
-
-        heat = Bitmap.createScaledBitmap(heat, live.getWidth(), live.getHeight(), true);
-        Bitmap bmOverlay = Bitmap.createBitmap(live.getWidth(), live.getHeight(), live.getConfig());
-        Canvas canvas = new Canvas(bmOverlay);
-        canvas.drawBitmap(live, new Matrix(), null);
-        canvas.drawBitmap(heat, m, null);
-
-        return bmOverlay;
-    }
+    public ModifyHeatmap(){ }
 
     public static Bitmap setOpacity(Bitmap image){
         Bitmap O = Bitmap.createBitmap(image.getWidth(),image.getHeight(), image.getConfig());
@@ -70,11 +50,31 @@ public class ModifyHeatmap {
         return scale;
     }
 
-    public static void setScale(float scale) {
-        ModifyHeatmap.scale = scale;
+    public static void setScale(double newscale) {
+        scale *= newscale;
+        scale = Math.round(scale*100f)/100f;
+        if(scale < 1)
+            scale = 1f;
+    }
+    public static void setRes(double newres) {
+        if(scaledWidth*newres < LeptonCamera.getWidth() || scaledHeight*newres < LeptonCamera.getHeight()){
+            double oldscale = (double)scaledHeight / (double)(LeptonCamera.getHeight());
+            setScale(oldscale);
+
+            scaledWidth = LeptonCamera.getWidth();
+            scaledHeight = LeptonCamera.getHeight();
+            return;
+        }
+
+        double oldscale = (double)scaledHeight / (double)(scaledHeight*newres);
+        setScale(oldscale);
+
+        scaledHeight *= newres;
+        scaledWidth *= newres;
+
     }
 
     public static String teksti(){
-        return "x: "+xOffset+" y: "+yOffset+" s: "+scale;
+        return "x: "+xOffset+" y: "+yOffset+" w/h: "+ ModifyHeatmap.scaledWidth+"/"+ModifyHeatmap.scaledHeight+" s: "+ModifyHeatmap.scale;
     }
 }

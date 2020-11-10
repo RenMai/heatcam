@@ -47,8 +47,38 @@ public class Interpolate {
         }
         return uusikuva;
     }
+    public static int[][] scale2(int[][] kuva, int currentResX, int currentResY, int newResX, float newResY) {
+        int newWidth = (int) (newResX);
+        int newHeight = (int) (newResY);
+        int[][] uusikuva = new int[newWidth][newHeight];
+        //BufferedImage newImage = new BufferedImage(newWidth, newHeight, self.getType());
+        for (int x = 0; x < newWidth; ++x) {
+            for (int y = 0; y < newHeight; ++y) {
+                float gx = ((float) x) / newWidth * (currentResX - 1);
+                float gy = ((float) y) / newHeight * (currentResY - 1);
+                int gxi = (int) gx;
+                int gyi = (int) gy;
+                int rgb = 0;
+                int c00 = kuva[gxi][ gyi];
+                int c10 = kuva[gxi + 1][ gyi];
+                int c01 = kuva[gxi][ gyi + 1];
+                int c11 = kuva[gxi + 1][ gyi + 1];
+                for (int i = 0; i <= 2; ++i) {
+                    float b00 = get(c00, i);
+                    float b10 = get(c10, i);
+                    float b01 = get(c01, i);
+                    float b11 = get(c11, i);
+                    int ble = ((int) blerp(b00, b10, b01, b11, gx - gxi, gy - gyi)) ;
+                    rgb = rgb | ble;
+                }
+                uusikuva[x][y] = rgb;
+                //newImage.setRGB(x, y, rgb);
+            }
+        }
+        return uusikuva;
+    }
     public static int[][] testikuva() {
-        int[][] kuva = new int[32][24];
+        int[][] kuva = new int[LeptonCamera.getHeight()][LeptonCamera.getWidth()];
 
         for(int y = 0; y < kuva.length; y++){
             for(int x = 0; x < kuva[kuva.length-1].length; x++){

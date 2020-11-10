@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 
 public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputManager.Listener {
-    private Vector<Integer> colorTable = ImageUtils.createColorTable();
+    private static Vector<Integer> colorTable = ImageUtils.createColorTable();
 
     // max width and height of image
     private static int width;
@@ -158,7 +158,7 @@ public abstract class LeptonCamera implements ThermalCamera, SerialInputOutputMa
         return false;
     }
 
-    public Vector<Integer> getColorTable() {
+    public static Vector<Integer> getColorTable() {
         return colorTable;
     }
 

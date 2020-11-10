@@ -3,6 +3,7 @@ package com.example.heatcam;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -33,10 +34,14 @@ public class HybridBitmapBuilder{
     private Rect faceBounds = new Rect();
     private HuippuLukema huiput = new HuippuLukema();
     private HybridImageListener listener;
+    private MeasurementStartFragment msf;
 
     public HybridBitmapBuilder(LifecycleOwner owner, View view){
         cameraBitmap = new CameraBitmap(owner, this, view);
         fTool = new HybridFaceDetector(this);
+        if(owner instanceof MeasurementStartFragment)
+            this.msf = (MeasurementStartFragment)owner;
+
         this.listener = (HybridImageListener)owner;
     }
 
@@ -56,96 +61,111 @@ public class HybridBitmapBuilder{
     }
 
     private void drawFaceBounds(Bitmap image){
-        huiput = laskeAlue();
+
         Canvas canvas = new Canvas(image);
         Paint paint = new Paint();
         paint.setColor(Color.GREEN);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(1);
 
-        canvas.drawRect(faceBounds, paint);
+        Rect rect = new Rect();
+        rect.set((int)(vasen*ModifyHeatmap.scale + ModifyHeatmap.getxOffset()), (int)(yla*ModifyHeatmap.scale + ModifyHeatmap.getyOffset()), (int)(oikea*ModifyHeatmap.scale + ModifyHeatmap.getxOffset()), (int)(ala*ModifyHeatmap.scale + ModifyHeatmap.getyOffset()));
+        canvas.drawRect(rect, paint);
     }
 
     private void drawTemperature(Bitmap image){
-        huiput = laskeAlue();
+
         Canvas canvas = new Canvas(image);
 
         Paint paint2 = new Paint();
         paint2.setColor(Color.CYAN);
         paint2.setStyle(Paint.Style.FILL);
-        //paint2.setStrokeWidth(1);
 
         Paint paint3 = new Paint();
         paint3.setColor(Color.GREEN);
         paint3.setStyle(Paint.Style.FILL);
-        //paint3.set
 
         canvas.drawText(huiput.max+"", huiput.x, huiput.y, paint2);
         canvas.drawCircle(huiput.x, huiput.y, 2, paint3);
     }
 
-    private void updateLiveImage(Bitmap image){
+    private Bitmap overlay(Bitmap live, Bitmap heat, boolean opacity) {
 
+        if(opacity)
+            heat = ModifyHeatmap.setOpacity(heat);
+
+        Matrix m = new Matrix();
+        //m.postScale(ModifyHeatmap.scale, ModifyHeatmap.scale);
+        m.postTranslate(ModifyHeatmap.xOffset, ModifyHeatmap.yOffset);
+        heat = Bitmap.createScaledBitmap(heat, (int)(heat.getWidth()*ModifyHeatmap.scale), (int)(heat.getHeight()*ModifyHeatmap.scale), HybridImageOptions.smooth);
+        Canvas canvas = new Canvas(live);
+        canvas.drawBitmap(heat, m, null);
+
+        return live;
+    }
+
+    private void updateLiveImage(Bitmap img){
+        // copy image to make it mutable
+        Bitmap image = img.copy(Bitmap.Config.ARGB_8888, true);
         if(heatMap != null && liveMap != null){
-            Bitmap uusi = image;
+            huiput = laskeAlue();
             if(HybridImageOptions.opacity)
-                uusi = ModifyHeatmap.overlay(liveMap,heatMap,true);
-            if(HybridImageOptions.heatmap && !HybridImageOptions.opacity)
-                uusi = heatMap;
-            else if(!HybridImageOptions.heatmap && !HybridImageOptions.opacity)
-                uusi = liveMap;
+                image = overlay(liveMap,heatMap,true);
+            else
+                image = heatMap.copy(Bitmap.Config.ARGB_8888, true);
+
             if(HybridImageOptions.facebounds)
-                drawFaceBounds(uusi);
+                drawFaceBounds(image);
             if(HybridImageOptions.temperature)
-                drawTemperature(uusi);
-            listener.onNewHybridImage(uusi);
+                drawTemperature(image);
+            listener.onNewHybridImage(image);
         }
-        if(heatMap == null && liveMap != null){
+        else if(heatMap == null && liveMap != null){
             if(HybridImageOptions.facebounds)
                 drawFaceBounds(image);
             listener.onNewHybridImage(image);
         }
     }
 
+    public void setMsfNull(){
+        msf = null;
+    }
     protected void updateDetectedFace(Face face){
         if(face != null){
+            if(msf != null)
+                msf.faceDetected(face);
             this.face = face;
             faceBounds = face.getBoundingBox();
         }
         else{
+            if(msf != null)
+                msf.faceNotDetected();
             faceBounds = new Rect();
             faceBounds.set(0,0,0,0);
         }
     }
 
+    int yla,vasen,oikea,ala = 0;
     private HuippuLukema laskeAlue(){
-        int[][] tempFrame = LeptonCamera.getTempFrame();
+        int[][] scaledTempFrame = ScaledHeatmap.scaledTempFrame;
         huiput = new HuippuLukema();
-        if(heatMap == null) tempFrame = Interpolate.testikuva();
-        int[][] scaledTempFrame = Interpolate.scale(tempFrame, LeptonCamera.getHeight(), LeptonCamera.getWidth(), (liveMap.getHeight()/LeptonCamera.getHeight()), (liveMap.getWidth()/LeptonCamera.getWidth()));
+        if(scaledTempFrame == null)
+            scaledTempFrame = LeptonCamera.getTempFrame();
 
-        int temp;
-        for (int y = 0; y < scaledTempFrame.length; y++) {
-            for (int x = 0; x < scaledTempFrame[y].length/2; x++) {
-                temp = scaledTempFrame[y][x];
-                scaledTempFrame[y][x] = scaledTempFrame[y][scaledTempFrame[y].length - 1 - x];
-                scaledTempFrame[y][scaledTempFrame[y].length - 1 - x] = temp;
-            }
-        }
-        for (int y = 0; y < scaledTempFrame.length / 2; y++) {
-            for (int x = 0; x < scaledTempFrame[y].length; x++) {
-                temp = scaledTempFrame[y][x];
-                scaledTempFrame[y][x] = scaledTempFrame[scaledTempFrame.length - 1 - y][x];
-                scaledTempFrame[scaledTempFrame.length - 1 -y][x] = temp;
-            }
-        }
+        int livekorkeus = liveMap.getHeight();
+        int liveleveys = liveMap.getWidth();
+        int heatleveys = scaledTempFrame[scaledTempFrame.length-1].length;
+        int heatkorkeus = scaledTempFrame.length;
 
-        int maxleveys = scaledTempFrame[scaledTempFrame.length-1].length;
-        int maxkorkeus = scaledTempFrame.length;
-        int vasen = (int)(faceBounds.left); if(vasen < 0) vasen = 0; if(vasen > maxleveys) vasen = maxleveys;
-        int oikea = (int)(faceBounds.right); if(oikea < 0) oikea = 0; if(oikea > maxleveys) oikea = maxleveys;
-        int yla = (int)(faceBounds.top); if(yla < 0) yla = 0; if(yla > maxkorkeus) yla = maxkorkeus;
-        int ala = (int)(faceBounds.bottom); if(ala < 0) ala = 0; if(ala > maxkorkeus) ala = maxkorkeus;
+        int top = (int)(((double)faceBounds.top / (double)livekorkeus) * heatkorkeus);
+        int left = (int)(((double)faceBounds.left / (double)liveleveys) * heatleveys);
+        int right = (int)(((double)faceBounds.right / (double)liveleveys) * heatleveys);
+        int bottom = (int)(((double)faceBounds.bottom / (double)livekorkeus) * heatkorkeus);
+
+        vasen = left; if(vasen < 0) vasen = 0; if(vasen > heatleveys) vasen = heatleveys;
+        oikea = right; if(oikea < 0) oikea = 0; if(oikea > heatleveys) oikea = heatleveys;
+        yla = top; if(yla < 0) yla = 0; if(yla > heatkorkeus) yla = heatkorkeus;
+        ala = bottom; if(ala < 0) ala = 0; if(ala > heatkorkeus) ala = heatkorkeus;
 
         try{
             if(scaledTempFrame != null /*&& tempFrame.length > maxkorkeus && tempFrame[tempFrame.length-1].length > maxleveys*/){
@@ -154,15 +174,15 @@ public class HybridBitmapBuilder{
                         double lampo = (scaledTempFrame[y][x]- 27315)/100.0;
                         if(lampo > huiput.max){
                             huiput.max = lampo;
-                            huiput.y = y;
-                            huiput.x = x;
+                            huiput.y = (int)(y*ModifyHeatmap.scale) + ModifyHeatmap.getyOffset();
+                            huiput.x = (int)(x*ModifyHeatmap.scale) + ModifyHeatmap.getxOffset();
                         }
                     }
                 }
-
             }
+
         }catch (Exception e){
-            //getActivity().runOnUiThread(() -> resoTeksti.setText(e.getMessage()));
+            //System.out.println(e.getMessage());
         }
 
         return  huiput;
@@ -171,6 +191,9 @@ public class HybridBitmapBuilder{
     public double getHighestFaceTemperature(){
         return huiput.max;
     }
+    public Bitmap getLiveMap(){
+        return liveMap;
+    }
 
     class HuippuLukema{
         int x = 0;
@@ -178,12 +201,10 @@ public class HybridBitmapBuilder{
         double max = 0;
     }
 
-
 }
 class HybridImageOptions{
     static boolean opacity = true;
-    static boolean heatmap = true;
-    static boolean livemap = true;
+    static boolean smooth = true;
     static boolean facebounds = true;
     static boolean temperature = true;
 }
@@ -217,27 +238,12 @@ class HybridFaceDetector {
                 faceDetector.process(image)
                         .addOnSuccessListener(
                                 faces -> {
-                                    // Task completed successfully
-                                    // [START_EXCLUDE]
-                                    // [START get_face_info]
                                     //faces.sort(((a, b) -> Integer.compare(a.getBoundingBox().width(), b.getBoundingBox().width())));
-                                    if (faces.size() > 0) {
-                                        for (Face face : faces) {
-
-                                            int id = face.getTrackingId();
-                                            PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
-                                            PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
-
-                                            //float faceDist = userResult.calculateFaceDistance(leftEyeP, rightEyeP);
-
-                                            imagebuilder.updateDetectedFace(face);
-
-                                        }
-                                    } else {
+                                    if (faces.size() > 0)
+                                        imagebuilder.updateDetectedFace(faces.get(0));
+                                     else
                                         imagebuilder.updateDetectedFace(null);
-                                    }
-                                    // [END get_face_info]
-                                    // [END_EXCLUDE]
+
                                 })
                         .addOnCompleteListener(res -> {
                             imageProxy.close();

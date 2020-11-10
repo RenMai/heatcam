@@ -170,7 +170,7 @@
         app:layout_constraintTop_toBottomOf="@+id/ylos" />
 
     <Button
-        android:id="@+id/plus"
+        android:id="@+id/scaleplus"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginTop="12dp"
@@ -179,14 +179,14 @@
         app:layout_constraintTop_toBottomOf="@+id/alas" />
 
     <Button
-        android:id="@+id/miinus"
+        android:id="@+id/scalemiinus"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginTop="4dp"
         android:text="-"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/plus"
-        app:layout_constraintTop_toBottomOf="@+id/plus"
+        app:layout_constraintStart_toStartOf="@+id/scaleplus"
+        app:layout_constraintTop_toBottomOf="@+id/scaleplus"
         app:layout_constraintVertical_bias="0.014" />
 
     <Button
@@ -232,15 +232,15 @@
         android:layout_height="wrap_content"
         android:checked="true"
         android:text="Temperature"
-        app:layout_constraintStart_toStartOf="@+id/heatmap"
-        app:layout_constraintTop_toBottomOf="@+id/heatmap" />
+        app:layout_constraintStart_toStartOf="@+id/smooth"
+        app:layout_constraintTop_toBottomOf="@+id/smooth" />
 
     <CheckBox
-        android:id="@+id/heatmap"
+        android:id="@+id/smooth"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:checked="true"
-        android:text="Heatmap"
+        android:text="Smooth pixels"
         app:layout_constraintStart_toStartOf="@+id/facebounds"
         app:layout_constraintTop_toBottomOf="@+id/facebounds" />
 
@@ -264,7 +264,7 @@
         android:progress="45"
         android:rotation="0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/miinus" />
+        app:layout_constraintTop_toBottomOf="@+id/scalemiinus" />
 
     <TextView
         android:id="@+id/textTelemetry"
