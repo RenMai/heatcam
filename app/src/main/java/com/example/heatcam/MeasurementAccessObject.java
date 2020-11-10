@@ -97,6 +97,10 @@ public class MeasurementAccessObject {
     public JSONArray read(Context context) throws IOException, JSONException {
 
         File file = new File(context.getFilesDir(), fileName);
+        if(!file.exists()) {
+            file.createNewFile();
+        }
+
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
         StringBuilder stringBuilder = new StringBuilder();
         String line = bufferedReader.readLine();

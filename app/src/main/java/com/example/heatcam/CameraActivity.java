@@ -2,6 +2,7 @@ package com.example.heatcam;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -33,7 +34,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Objects;
 
 public class CameraActivity extends Fragment implements CameraListener {
 
@@ -90,13 +90,23 @@ public class CameraActivity extends Fragment implements CameraListener {
 
         faces = new SparseArray<>();
 
-        camera = new LeptonCamera(this);
-        sModel = new SerialPortModel(this, camera);
+        camera = new LowResolutionCamera();
+        camera.setCameraListener(this);
+        //sModel = new SerialPortModel(this, camera);
+        sModel = SerialPortModel.getInstance();
+        sModel.setCamListener(this);
+        sModel.setSioListener(camera);
+
+        // register intent receiver for request
+        IntentFilter filter = new IntentFilter("android.hardware.usb.action.USB_DEVICE_ATTACHED");
+        getContext().registerReceiver(sModel, filter);
 
         // camera.setListener(this);
-        testFileReader = new TestFileReader(view.getContext(), camera);
+        LeptonCamera testCam = new HighResolutionCamera();
+        testCam.setCameraListener(this);
+        testFileReader = new TestFileReader(view.getContext(), testCam);
 
-        scanBtn.setOnClickListener(v -> sModel.scanDevices(Objects.requireNonNull(getContext())));
+        scanBtn.setOnClickListener(v -> sModel.scanDevices(requireContext()));
         analysisBtn.setOnClickListener(v -> sModel.toggleAnalysisMode());
         testBtn.setOnClickListener(v -> testFileReader.readTestFile(testDataPath + testDataFileName));
         videoBtn.setOnClickListener(v -> {
@@ -126,6 +136,9 @@ public class CameraActivity extends Fragment implements CameraListener {
                 camera.setFrameListener(null);
             }
         });
+
+        view.findViewById(R.id.logs_button).setOnClickListener(v ->
+                startActivity(new Intent(CameraActivity.super.getContext(), LogView.class)));
 
         //initWriter();
 

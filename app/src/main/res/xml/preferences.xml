@@ -8,8 +8,39 @@
         app:title="Enable something"/>
 
     <EditTextPreference
-        app:key="edittext"
-        app:title="Edit Text"
+        app:key="@string/preference_measure_distance"
+        app:title="Preferred measure distance"
+        android:defaultValue="300"
+        android:inputType="number"
+        android:digits="0123456789"
+        app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        app:key="@string/preference_oval_width"
+        app:title="Oval width"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="950"
+        app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        app:key="@string/preference_oval_height"
+        app:title="Oval height"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="1450"
+        app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        app:key="@string/preference_oval_pos_from_top"
+        app:title="Oval position from top"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="80"
+        app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        app:key="PREFERENCE_TILT_CORRECTION_DELAY"
+        app:title="Tilt correction delay"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="200"
         app:useSimpleSummaryProvider="true" />
 
     <ListPreference
@@ -20,11 +51,11 @@
         app:entries="@array/labels"
         app:entryValues="@array/values" />
     <MultiSelectListPreference
-        app:key="multList"
-        app:title="Multi Select List"
+        app:key="changeLang"
+        app:title="Change language"
         app:summary="Tap to see selected items"
-        app:entries="@array/multi_select_labels"
-        app:entryValues="@array/multi_select_values"/>
+        app:entries="@array/multi_lang_labels"
+        app:entryValues="@array/multi_lang_labels"/>
     <CheckBoxPreference
         app:key="check"
         app:title="CheckBox" />

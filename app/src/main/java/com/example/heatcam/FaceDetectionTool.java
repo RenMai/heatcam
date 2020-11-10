@@ -24,25 +24,27 @@ import java.util.List;
 public class FaceDetectionTool {
 
 
-    /*
+
     FaceDetectorOptions options =
             new FaceDetectorOptions.Builder()
-                    .setClassificationMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
-                    .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+                    .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
                     .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
-                    .setMinFaceSize(0.15f)
+                    .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+                    .setMinFaceSize(0.35f)
                     .enableTracking()
                     .build();
 
-     */
 
-    FaceDetectorOptions options =
+
+   /* FaceDetectorOptions options =
             new FaceDetectorOptions.Builder()
                     .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
-                    .build();
+                    .build();*/
 
     FaceDetector faceDetector;
     LiveCameraActivity a;
+
+    private volatile boolean isProcessing = false;
 
     public FaceDetectionTool(LiveCameraActivity a) {
         faceDetector = FaceDetection.getClient(options);
@@ -50,6 +52,8 @@ public class FaceDetectionTool {
     }
 
     public void processImage(InputImage image, ImageProxy imageProxy) {
+
+        isProcessing = true;
 
         Task<List<Face>> result =
                 faceDetector.process(image)
@@ -60,10 +64,10 @@ public class FaceDetectionTool {
                                     // [START_EXCLUDE]
                                     // [START get_face_info]
                                     if (faces.size() > 0) {
-
+                                        a.incrementDetectedFrames();
                                         for (Face face : faces) {
-                                            System.out.println(face.getAllContours() + " CONTOUR");
-                                            System.out.println(face.getAllLandmarks() + " LANDMARK");
+                                            //System.out.println(face.getAllContours() + " CONTOUR");
+                                            //System.out.println(face.getAllLandmarks() + " LANDMARK");
                                             Rect bounds = face.getBoundingBox();
 
                                             Bitmap b = image.getBitmapInternal();
@@ -76,27 +80,37 @@ public class FaceDetectionTool {
 
                                             Paint contourPaint = new Paint();
                                             contourPaint.setColor(Color.RED);
-                                            paint.setStyle(Paint.Style.STROKE);
-                                            paint.setStrokeWidth(5.0f);
+                                            contourPaint.setStyle(Paint.Style.STROKE);
+                                            contourPaint.setStrokeWidth(7.0f);
 
-                                           // Path facePath = new Path();
+                                            a.headTilt(face.getHeadEulerAngleX(), face.getHeadEulerAngleY());
+
+                                           Path facePath = new Path();
 
                                             for (FaceContour contour : face.getAllContours()) {
                                                 if (contour.getFaceContourType() == FaceContour.FACE) {
-                                                   // facePath.moveTo(contour.getPoints().get(0).x, contour.getPoints().get(0).y);
+                                                    facePath.moveTo(contour.getPoints().get(0).x, contour.getPoints().get(0).y);
+                                                    //PointF temp = contour.getPoints().get(0);
                                                     for (PointF point : contour.getPoints()) {
-                                                        // facePath.lineTo(point.x, point.y);
-                                                        canvas.drawCircle(point.x, point.y, 5.0f, contourPaint);
+                                                         facePath.lineTo(point.x, point.y);
+                                                       // canvas.drawCircle(point.x, point.y, 5.0f, contourPaint);
+                                                      //  canvas.drawLine(temp.x, temp.y, point.x, point.y, contourPaint);
+                                                      //  temp = point;
                                                     }
                                                 }
 
                                             }
 
-                                           // facePath.close();
-                                           // canvas.drawPath(facePath, contourPaint);
+                                            facePath.close();
+                                            canvas.drawPath(facePath, contourPaint);
 
 
                                             a.drawImage(b);
+
+                                            PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
+                                            PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
+
+                                            a.calculateFaceDistance(leftEyeP, rightEyeP);
 
 
 
@@ -128,9 +142,13 @@ public class FaceDetectionTool {
                                     }
                                     // [END get_face_info]
                                     // [END_EXCLUDE]
-                                    System.out.println("SUCCESS");
-                                    imageProxy.close();
+                                    //System.out.println("SUCCESS");
+                                     //imageProxy.close();
                                 })
+                        .addOnCompleteListener(res -> {
+                            imageProxy.close();
+                            isProcessing = false;
+                        })
                         .addOnFailureListener(
                                 e -> {
 
@@ -140,6 +158,11 @@ public class FaceDetectionTool {
                                     System.out.println(e.getMessage());
                                     e.printStackTrace();
                                     imageProxy.close();
+                                    isProcessing = false;
                                 });
+    }
+
+    public boolean isProcessing() {
+        return isProcessing;
     }
 }

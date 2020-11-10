@@ -42,14 +42,36 @@ public class SerialPortModel extends BroadcastReceiver {
 
     private boolean analysisMode;
 
-    public SerialPortModel(CameraListener camListener, SerialInputOutputManager.Listener sioListener) {
-        this.camListener = camListener;
+    private static SerialPortModel instance;
+
+    public static SerialPortModel getInstance() {
+        if (instance == null) {
+            instance = new SerialPortModel();
+        }
+        return instance;
+    }
+
+    public void setSioListener(SerialInputOutputManager.Listener sioListener) {
         this.sioListener = sioListener;
+    }
+
+    public void setCamListener(CameraListener camListener) {
+        this.camListener = camListener;
+        if(sioListener != null) {
+            ((LeptonCamera) sioListener).setCameraListener(this.camListener);
+        }
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+
+        if("android.hardware.usb.action.USB_DEVICE_ATTACHED".equals(action)) {
+            synchronized (this) {
+                scanDevices(context);
+            }
+        }
+
         if (INTENT_ACTION_GRANT_USB.equals(action)) {
             synchronized (this) {
                 UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
@@ -65,12 +87,13 @@ public class SerialPortModel extends BroadcastReceiver {
         }
     }
 
+
     public void scanDevices(Context context) {
         // Find all available drivers from attached devices.
         manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
         List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(Objects.requireNonNull(manager));
         if (availableDrivers.isEmpty())  {
-            Log.i("scanDevices", "No USB serial drivers for the connected device");
+            Log.i("heatcam", "No USB serial drivers for the connected device");
             return;
         }
         driver = availableDrivers.get(0);
@@ -84,6 +107,7 @@ public class SerialPortModel extends BroadcastReceiver {
 
             // check device permission
             if (!manager.hasPermission(foundDevice)) {
+                Log.d("heatcam", "No permission, requesting...");
                 usbPermission = UsbPermission.Requested;
                 PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(INTENT_ACTION_GRANT_USB), 0);
 
@@ -105,14 +129,16 @@ public class SerialPortModel extends BroadcastReceiver {
         if (usbIoManager != null) {
             return;
         }
-
+        Log.d("hetacam","Connecting...");
         camListener.setConnectingImage();
         UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
         usbSerialPort = driver.getPorts().get(0); // Most devices have just one port (port 0)
         try {
             usbSerialPort.open(connection);
             usbSerialPort.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-            calibrate();
+            usbSerialPort.setDTR(true);
+            usbSerialPort.setRTS(true);
+            //calibrate();
         } catch (Exception e) {
             e.printStackTrace();
             camListener.setNoFeedImage();
@@ -157,6 +183,65 @@ public class SerialPortModel extends BroadcastReceiver {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void changeTiltAngle(int angle) {
+        angle = angle*100;
+        byte[] data = new byte[]{
+                (byte) 0xff,
+                (byte) 0xff,
+                (byte) 0xff,
+                1,
+                (byte) (angle & 0xff),
+                (byte) (angle >> 8)
+        };
+        System.out.println("tilt angle " + ((data[4]&0xFF) + (data[5]&0xFF)*256));
+        try {
+            usbSerialPort.write(data, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void changeTiltSpeed(int speed) {
+        byte[] data = new byte[]{
+                (byte) 0xff,
+                (byte) 0xff,
+                (byte) 0xff,
+                2,
+                (byte) speed,
+                0
+        };
+        System.out.println("tilt speed " + ((data[4]&0xFF) + (data[5]&0xFF)*256));
+        try {
+            usbSerialPort.write(data, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // to change thermal camera mode
+    // mode 0: average of 64 frames from thermal cam - use this or mode 2 for temp measurement
+    // mode 1: average of 4 frames
+    // mode 2: combination of modes 0 & 1, this is on by default
+    // mode 3: shows movement only and highlights it for 2 seconds
+    // mode 4: shows movement only, no highlight
+    public void changeVideoMode(int mode) {
+        byte[] data = new byte[] {
+                (byte) 0xff,
+                (byte) 0xff,
+                (byte) 0xff,
+                3,
+                (byte) mode,
+                0
+
+        };
+        System.out.println("video mode " + ((data[4]&0xFF) + (data[5]&0xFF)*256 -2));
+        try {
+            usbSerialPort.write(data, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
