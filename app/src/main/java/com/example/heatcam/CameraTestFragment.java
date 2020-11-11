@@ -75,6 +75,8 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
     private TextView telemetryText;
     private int telemetryCount = 0;
 
+    private CheckBox temperature, opacity, smooth, bounds;
+
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
@@ -82,7 +84,7 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
         final View view = inflater.inflate(R.layout.camera_test_layout, container, false);
 
         camFeed = view.findViewById(R.id.camera_test_view);
-
+        hybridBitmap = new HybridBitmapBuilder(this, view);
         sModel = SerialPortModel.getInstance();
         sModel.setCamListener(this);
 
@@ -99,7 +101,15 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
         //liveFeed = view.findViewById(R.id.livefeed);
         kerroinTeksti = view.findViewById(R.id.kerroinText);
         resoTeksti = view.findViewById(R.id.resot);
-        hybridBitmap = new HybridBitmapBuilder(this, view);
+        temperature = view.findViewById(R.id.temperature);
+        temperature.setChecked(HybridImageOptions.temperature);
+        bounds = view.findViewById(R.id.facebounds);
+        bounds.setChecked(HybridImageOptions.facebounds);
+        opacity = view.findViewById(R.id.opacity);
+        opacity.setChecked(HybridImageOptions.opacity);
+        smooth = view.findViewById(R.id.smooth);
+        smooth.setChecked(HybridImageOptions.smooth);
+
 
         sManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         sManager.registerListener(myDeviceOrientationListener, sManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
@@ -118,29 +128,33 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
 
         view.findViewById(R.id.ylos).setOnTouchListener((v, e)-> {
             if(e.getAction() == MotionEvent.ACTION_MOVE || e.getAction() == MotionEvent.ACTION_DOWN){
-                ModifyHeatmap.setyOffset(ModifyHeatmap.getyOffset()-1);
-                getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+                HybridImageOptions.yOffset--;
+                getActivity().runOnUiThread(() -> kerroinTeksti.setText(hybridBitmap.teksti()));
+                getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putInt("offsety", HybridImageOptions.yOffset).apply();
             }
             return false;
         });
         view.findViewById(R.id.alas).setOnTouchListener((v, e)-> {
             if(e.getAction() == MotionEvent.ACTION_MOVE || e.getAction() == MotionEvent.ACTION_DOWN){
-                ModifyHeatmap.setyOffset(ModifyHeatmap.getyOffset()+1);
-                getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+                HybridImageOptions.yOffset++;
+                getActivity().runOnUiThread(() -> kerroinTeksti.setText(hybridBitmap.teksti()));
+                getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putInt("offsety", HybridImageOptions.yOffset).apply();
             }
             return false;
         });
         view.findViewById(R.id.oikea).setOnTouchListener((v, e)-> {
             if(e.getAction() == MotionEvent.ACTION_MOVE || e.getAction() == MotionEvent.ACTION_DOWN){
-                ModifyHeatmap.setxOffset(ModifyHeatmap.getxOffset()+1);
-                getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+                HybridImageOptions.xOffset++;
+                getActivity().runOnUiThread(() -> kerroinTeksti.setText(hybridBitmap.teksti()));
+                getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putInt("offsetx", HybridImageOptions.xOffset).apply();
             }
             return false;
         });
         view.findViewById(R.id.vasen).setOnTouchListener((v, e)-> {
             if(e.getAction() == MotionEvent.ACTION_MOVE || e.getAction() == MotionEvent.ACTION_DOWN){
-                ModifyHeatmap.setxOffset(ModifyHeatmap.getxOffset()-1);
-                getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+                HybridImageOptions.xOffset--;
+                getActivity().runOnUiThread(() -> kerroinTeksti.setText(hybridBitmap.teksti()));
+                getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putInt("offsetx", HybridImageOptions.xOffset).apply();
             }
             return false;
         });
@@ -153,24 +167,30 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
             getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
         });*/
         view.findViewById(R.id.scaleplus).setOnClickListener(v -> {
-            ModifyHeatmap.setScale(1.1);
-            getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+            hybridBitmap.setScale(1.1);
+            getActivity().runOnUiThread(() -> kerroinTeksti.setText(hybridBitmap.teksti()));
+            getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putFloat("scale", HybridImageOptions.scale).apply();
         });
         view.findViewById(R.id.scalemiinus).setOnClickListener(v -> {
-            ModifyHeatmap.setScale(0.9);
-            getActivity().runOnUiThread(() -> kerroinTeksti.setText(ModifyHeatmap.teksti()));
+            hybridBitmap.setScale(0.9);
+            getActivity().runOnUiThread(() -> kerroinTeksti.setText(hybridBitmap.teksti()));
+            getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putFloat("scale", HybridImageOptions.scale).apply();
         });
         view.findViewById(R.id.smooth).setOnClickListener(v -> {
             HybridImageOptions.smooth = ((CheckBox) v).isChecked();
+            getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putBoolean("smooth", HybridImageOptions.smooth).apply();
         });
         view.findViewById(R.id.opacity).setOnClickListener(v -> {
             HybridImageOptions.opacity = ((CheckBox) v).isChecked();
+            getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putBoolean("opacity", HybridImageOptions.opacity).apply();
         });
         view.findViewById(R.id.temperature).setOnClickListener(v -> {
             HybridImageOptions.temperature = ((CheckBox) v).isChecked();
+            getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putBoolean("temperature", HybridImageOptions.temperature).apply();
         });
         view.findViewById(R.id.facebounds).setOnClickListener(v -> {
             HybridImageOptions.facebounds = ((CheckBox) v).isChecked();
+            getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putBoolean("facebounds", HybridImageOptions.facebounds).apply();
         });
 
         Spinner setting = view.findViewById(R.id.camera_setting_spinner);

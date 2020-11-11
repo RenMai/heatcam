@@ -11,7 +11,7 @@ public class ScaledHeatmap {
         int height = rawFrame.length;
         int width = rawFrame[rawFrame.length-1].length;
 
-        int[][] tempFrame = Interpolate.scale2(rawFrame, height, width, ModifyHeatmap.scaledHeight, ModifyHeatmap.scaledWidth);
+        int[][] tempFrame = Interpolate.scale2(rawFrame, height, width, HybridImageOptions.getScaledHeight(), HybridImageOptions.getScaledWidth());
         scaledTempFrame = reverseArray(tempFrame);
         Bitmap bMap = convertTo8bit(minRaw, maxRaw, minFilterKelvin, maxFilterKelvin, tempFrame.length, tempFrame[tempFrame.length-1].length, tempFrame);
         Matrix m = new Matrix();

@@ -279,7 +279,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         int offset = 50;
         float et = dist;
-        //if(getActivity() != null)
+        if(getActivity() != null)
             getActivity().runOnUiThread(() -> txtDebug.setText(et+""));
         boolean distanceOK = dist < preferred_measure_distance + offset && dist > preferred_measure_distance - offset;
         if (xOK && yOK && distanceOK) {
@@ -413,6 +413,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     private void changeToMenuLayout() {
+        hbb.setMsfNull();
         Fragment f = new MenuFragment();
         getActivity().getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
