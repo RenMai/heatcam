@@ -25,4 +25,5 @@
     <string name="about_thermalCamera">There\'s a thermal camera at the top of the tablet, which is used for the measurement.</string>
     <string name="who_developed">The application is a part of Metropolia\'s innovation projects. This app has been implemented in cooperation with LeViteZer oy.</string>
     <string name="your_distance">Your Distance</string>
+    <string name="passwordHint">password</string>
 </resources>
