@@ -289,10 +289,21 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             facePositionCheckCounter++;
             startScanAnimation();
             ready = true;
+        } else {
+            animatedOval.stopAnimation();
+            animatedOval.setVisibility(View.INVISIBLE);
+            scanBar.clearAnimation();
+            ready = false;
+            laskuri = 0;
+            userTempList = null;
+
+            userTemp = 0;
+            facePositionCheckCounter--;
+            if (facePositionCheckCounter < 0) facePositionCheckCounter = 0;
         }
 
         // angle correction if target is in specified distance and y position is not OK.
-        else if(dist < 500 && !yOK) {
+        if(dist < 500 && !yOK) {
             synchronized (this) {
 
                 if(currentTiltAngle == setTiltAngle && tiltTimerRunning && !isAtSetAngle) {
@@ -346,17 +357,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                 }
             }
 
-        } else {
-            animatedOval.stopAnimation();
-            animatedOval.setVisibility(View.INVISIBLE);
-            scanBar.clearAnimation();
-            ready = false;
-            laskuri = 0;
-            userTempList = null;
-
-            userTemp = 0;
-            facePositionCheckCounter--;
-            if (facePositionCheckCounter < 0) facePositionCheckCounter = 0;
         }
         updateProgress();
 
