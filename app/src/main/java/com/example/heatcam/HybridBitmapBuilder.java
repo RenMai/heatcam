@@ -1,8 +1,12 @@
 package com.example.heatcam;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -10,6 +14,7 @@ import android.view.View;
 
 import androidx.camera.core.ImageProxy;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.common.InputImage;
@@ -19,9 +24,12 @@ import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Properties;
 
 public class HybridBitmapBuilder{
     private CameraBitmap cameraBitmap;
@@ -33,11 +41,42 @@ public class HybridBitmapBuilder{
     private Rect faceBounds = new Rect();
     private HuippuLukema huiput = new HuippuLukema();
     private HybridImageListener listener;
+    private MeasurementStartFragment msf;
 
-    public HybridBitmapBuilder(LifecycleOwner owner, View view){
+    public HybridBitmapBuilder(LifecycleOwner owner, View view) {
         cameraBitmap = new CameraBitmap(owner, this, view);
         fTool = new HybridFaceDetector(this);
+        if(owner instanceof MeasurementStartFragment)
+            this.msf = (MeasurementStartFragment)owner;
+
         this.listener = (HybridImageListener)owner;
+        SharedPreferences sp = view.getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE);
+
+        HybridImageOptions.temperature = sp.getBoolean("temperature", true);
+        HybridImageOptions.opacity = sp.getBoolean("opacity", true);
+        HybridImageOptions.smooth = sp.getBoolean("smooth", true);
+        HybridImageOptions.facebounds = sp.getBoolean("facebounds", true);
+
+        HybridImageOptions.scale = sp.getFloat("scale", 8.97f);
+        HybridImageOptions.xOffset = sp.getInt("offsetx", -32);
+        HybridImageOptions.yOffset = sp.getInt("offsety", -71);
+        //HybridImageOptions.scaledWidth = sp.getInt("resx", LeptonCamera.getWidth());
+        //HybridImageOptions.scaledHeight = sp.getInt("resy", LeptonCamera.getHeight());
+
+    }
+
+    public static Bitmap setOpacity(Bitmap image){
+        Bitmap O = Bitmap.createBitmap(image.getWidth(),image.getHeight(), image.getConfig());
+        for(int i=0; i<image.getWidth(); i++){
+            for(int j=0; j<image.getHeight(); j++){
+                int pixel = image.getPixel(i, j);
+                int r = Color.red(pixel), g = Color.green(pixel), b = Color.blue(pixel);
+                if (pixel > ImageUtils.LOWEST_COLOR) {
+                    O.setPixel(i, j, Color.argb(230, r, g, b));
+                }
+            }
+        }
+        return O;
     }
 
     long aika = System.currentTimeMillis();
@@ -56,120 +95,160 @@ public class HybridBitmapBuilder{
     }
 
     private void drawFaceBounds(Bitmap image){
-        huiput = laskeAlue();
+
         Canvas canvas = new Canvas(image);
         Paint paint = new Paint();
         paint.setColor(Color.GREEN);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(1);
 
-        canvas.drawRect(faceBounds, paint);
+        Rect rect = new Rect();
+        rect.set((int)(vasen*HybridImageOptions.scale + HybridImageOptions.xOffset), (int)(yla*HybridImageOptions.scale + HybridImageOptions.yOffset), (int)(oikea*HybridImageOptions.scale + HybridImageOptions.xOffset), (int)(ala*HybridImageOptions.scale + HybridImageOptions.yOffset));
+        canvas.drawRect(rect, paint);
     }
 
     private void drawTemperature(Bitmap image){
-        huiput = laskeAlue();
+
         Canvas canvas = new Canvas(image);
 
         Paint paint2 = new Paint();
         paint2.setColor(Color.CYAN);
         paint2.setStyle(Paint.Style.FILL);
-        //paint2.setStrokeWidth(1);
 
         Paint paint3 = new Paint();
         paint3.setColor(Color.GREEN);
         paint3.setStyle(Paint.Style.FILL);
-        //paint3.set
 
         canvas.drawText(huiput.max+"", huiput.x, huiput.y, paint2);
         canvas.drawCircle(huiput.x, huiput.y, 2, paint3);
     }
 
-    private void updateLiveImage(Bitmap image){
+    private Bitmap overlay(Bitmap live, Bitmap heat, boolean opacity) {
 
+        if(opacity)
+            heat = setOpacity(heat);
+
+        Matrix m = new Matrix();
+        //m.postScale(ModifyHeatmap.scale, ModifyHeatmap.scale);
+        m.postTranslate(HybridImageOptions.xOffset, HybridImageOptions.yOffset);
+        heat = Bitmap.createScaledBitmap(heat, (int)(heat.getWidth()*HybridImageOptions.scale), (int)(heat.getHeight()*HybridImageOptions.scale), HybridImageOptions.smooth);
+        Canvas canvas = new Canvas(live);
+        canvas.drawBitmap(heat, m, null);
+
+        return live;
+    }
+
+    private void updateLiveImage(Bitmap img){
+        // copy image to make it mutable
+        Bitmap image = img.copy(Bitmap.Config.ARGB_8888, true);
         if(heatMap != null && liveMap != null){
-            Bitmap uusi = image;
+            huiput = laskeAlue();
             if(HybridImageOptions.opacity)
-                uusi = ModifyHeatmap.overlay(liveMap,heatMap,true);
-            if(HybridImageOptions.heatmap && !HybridImageOptions.opacity)
-                uusi = heatMap;
-            else if(!HybridImageOptions.heatmap && !HybridImageOptions.opacity)
-                uusi = liveMap;
+                image = overlay(liveMap,heatMap,true);
+            else
+                image = heatMap.copy(Bitmap.Config.ARGB_8888, true);
+
             if(HybridImageOptions.facebounds)
-                drawFaceBounds(uusi);
+                drawFaceBounds(image);
             if(HybridImageOptions.temperature)
-                drawTemperature(uusi);
-            listener.onNewHybridImage(uusi);
+                drawTemperature(image);
+            listener.onNewHybridImage(image);
         }
-        if(heatMap == null && liveMap != null){
+        else if(heatMap == null && liveMap != null){
             if(HybridImageOptions.facebounds)
                 drawFaceBounds(image);
             listener.onNewHybridImage(image);
         }
     }
 
+    public void setMsfNull(){
+        msf = null;
+    }
     protected void updateDetectedFace(Face face){
         if(face != null){
+            if(msf != null)
+                msf.faceDetected(face);
             this.face = face;
             faceBounds = face.getBoundingBox();
         }
         else{
+            if(msf != null)
+                msf.faceNotDetected();
             faceBounds = new Rect();
             faceBounds.set(0,0,0,0);
         }
     }
 
+    int yla,vasen,oikea,ala = 0;
+    List<HuippuLukema> lukemat = new ArrayList<>();
     private HuippuLukema laskeAlue(){
-        int[][] tempFrame = LeptonCamera.getTempFrame();
+
+        int[][] scaledTempFrame = ScaledHeatmap.scaledTempFrame;
         huiput = new HuippuLukema();
-        if(heatMap == null) tempFrame = Interpolate.testikuva();
-        int[][] scaledTempFrame = Interpolate.scale(tempFrame, LeptonCamera.getHeight(), LeptonCamera.getWidth(), (liveMap.getHeight()/LeptonCamera.getHeight()), (liveMap.getWidth()/LeptonCamera.getWidth()));
+        if(scaledTempFrame == null)
+            scaledTempFrame = LeptonCamera.getTempFrame();
 
-        int temp;
-        for (int y = 0; y < scaledTempFrame.length; y++) {
-            for (int x = 0; x < scaledTempFrame[y].length/2; x++) {
-                temp = scaledTempFrame[y][x];
-                scaledTempFrame[y][x] = scaledTempFrame[y][scaledTempFrame[y].length - 1 - x];
-                scaledTempFrame[y][scaledTempFrame[y].length - 1 - x] = temp;
-            }
-        }
-        for (int y = 0; y < scaledTempFrame.length / 2; y++) {
-            for (int x = 0; x < scaledTempFrame[y].length; x++) {
-                temp = scaledTempFrame[y][x];
-                scaledTempFrame[y][x] = scaledTempFrame[scaledTempFrame.length - 1 - y][x];
-                scaledTempFrame[scaledTempFrame.length - 1 -y][x] = temp;
-            }
-        }
+        int livekorkeus = liveMap.getHeight();
+        int liveleveys = liveMap.getWidth();
+        int heatleveys = scaledTempFrame[scaledTempFrame.length-1].length;
+        int heatkorkeus = scaledTempFrame.length;
 
-        int maxleveys = scaledTempFrame[scaledTempFrame.length-1].length;
-        int maxkorkeus = scaledTempFrame.length;
-        int vasen = (int)(faceBounds.left); if(vasen < 0) vasen = 0; if(vasen > maxleveys) vasen = maxleveys;
-        int oikea = (int)(faceBounds.right); if(oikea < 0) oikea = 0; if(oikea > maxleveys) oikea = maxleveys;
-        int yla = (int)(faceBounds.top); if(yla < 0) yla = 0; if(yla > maxkorkeus) yla = maxkorkeus;
-        int ala = (int)(faceBounds.bottom); if(ala < 0) ala = 0; if(ala > maxkorkeus) ala = maxkorkeus;
+        int top = (int)(((double)faceBounds.top / (double)livekorkeus) * heatkorkeus);
+        int left = (int)(((double)faceBounds.left / (double)liveleveys) * heatleveys);
+        int right = (int)(((double)faceBounds.right / (double)liveleveys) * heatleveys);
+        int bottom = (int)(((double)faceBounds.bottom / (double)livekorkeus) * heatkorkeus);
+
+        vasen = left; if(vasen < 0) vasen = 0; if(vasen > heatleveys) vasen = heatleveys;
+        oikea = right; if(oikea < 0) oikea = 0; if(oikea > heatleveys) oikea = heatleveys;
+        yla = top; if(yla < 0) yla = 0; if(yla > heatkorkeus) yla = heatkorkeus;
+        ala = bottom; if(ala < 0) ala = 0; if(ala > heatkorkeus) ala = heatkorkeus;
 
         try{
-            if(scaledTempFrame != null /*&& tempFrame.length > maxkorkeus && tempFrame[tempFrame.length-1].length > maxleveys*/){
+            if(scaledTempFrame != null){
                 for(int y = yla; y < ala; y++){
                     for(int x = vasen; x < oikea; x++){
                         double lampo = (scaledTempFrame[y][x]- 27315)/100.0;
                         if(lampo > huiput.max){
+
                             huiput.max = lampo;
-                            huiput.y = y;
-                            huiput.x = x;
+                            huiput.y = (int)(y*HybridImageOptions.scale) + HybridImageOptions.yOffset;
+                            huiput.x = (int)(x*HybridImageOptions.scale) + HybridImageOptions.xOffset;
+
+                            //lukemat.add(huiput);
+                            //if(lukemat.size() > 50)
+                            //    lukemat.remove(0);
                         }
                     }
                 }
-
             }
+
         }catch (Exception e){
-            //getActivity().runOnUiThread(() -> resoTeksti.setText(e.getMessage()));
+            //System.out.println(e.getMessage());
         }
+
+        /*tulosten keskiarvotus
+        if(lukemat.size() > 0){
+            int x = 0, y = 0;
+            double keskilampo = 0;
+            for(int i = 0; i < lukemat.size(); i++){
+                x += lukemat.get(i).x;
+                y += lukemat.get(i).y;
+                keskilampo += lukemat.get(i).max;
+            }
+            huiput.x = x/lukemat.size();
+            huiput.y = y/lukemat.size();
+            huiput.max = keskilampo/lukemat.size();
+        }*/
+
 
         return  huiput;
     }
 
     public double getHighestFaceTemperature(){
         return huiput.max;
+    }
+    public Bitmap getLiveMap(){
+        return liveMap;
     }
 
     class HuippuLukema{
@@ -178,14 +257,58 @@ public class HybridBitmapBuilder{
         double max = 0;
     }
 
+    public static void setScale(double newscale) {
+        HybridImageOptions.scale *= newscale;
+        HybridImageOptions.scale = Math.round(HybridImageOptions.scale*100f)/100f;
+        if(HybridImageOptions.scale < 1)
+            HybridImageOptions.scale = 1f;
+    }
+    public static void setRes(double newres) {
+        if(HybridImageOptions.scaledWidth*newres < LeptonCamera.getWidth() || HybridImageOptions.scaledHeight*newres < LeptonCamera.getHeight()){
+            double oldscale = (double)HybridImageOptions.scaledHeight / (double)(LeptonCamera.getHeight());
+            setScale(oldscale);
 
+            HybridImageOptions.scaledWidth = LeptonCamera.getWidth();
+            HybridImageOptions.scaledHeight = LeptonCamera.getHeight();
+            return;
+        }
+
+        double oldscale = (double)HybridImageOptions.scaledHeight / (double)(HybridImageOptions.scaledHeight*newres);
+        setScale(oldscale);
+
+        HybridImageOptions.scaledHeight *= newres;
+        HybridImageOptions.scaledWidth *= newres;
+
+    }
+
+    public static String teksti(){
+        return "x: "+HybridImageOptions.xOffset+" y: "+HybridImageOptions.yOffset+" w/h: "+ HybridImageOptions.scaledWidth+"/"+HybridImageOptions.scaledHeight+" s: "+HybridImageOptions.scale;
+    }
 }
+
 class HybridImageOptions{
     static boolean opacity = true;
-    static boolean heatmap = true;
-    static boolean livemap = true;
+    static boolean smooth = true;
     static boolean facebounds = true;
-    static boolean temperature = true;
+    static boolean temperature = false;
+
+    static int xOffset = -32;
+    static int yOffset = -71;
+    static int scaledWidth = LeptonCamera.getWidth();
+    static int scaledHeight = LeptonCamera.getHeight();
+    static float scale = 8.79f;
+
+    public static int getScaledWidth() {
+        if(scaledWidth == 0)
+            scaledWidth = LeptonCamera.getWidth();
+        return scaledWidth;
+    }
+
+    public static int getScaledHeight() {
+        if(scaledHeight == 0)
+            scaledHeight = LeptonCamera.getHeight();
+        return scaledHeight;
+    }
 }
 
 class HybridFaceDetector {
@@ -217,27 +340,12 @@ class HybridFaceDetector {
                 faceDetector.process(image)
                         .addOnSuccessListener(
                                 faces -> {
-                                    // Task completed successfully
-                                    // [START_EXCLUDE]
-                                    // [START get_face_info]
                                     //faces.sort(((a, b) -> Integer.compare(a.getBoundingBox().width(), b.getBoundingBox().width())));
-                                    if (faces.size() > 0) {
-                                        for (Face face : faces) {
-
-                                            int id = face.getTrackingId();
-                                            PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
-                                            PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
-
-                                            //float faceDist = userResult.calculateFaceDistance(leftEyeP, rightEyeP);
-
-                                            imagebuilder.updateDetectedFace(face);
-
-                                        }
-                                    } else {
+                                    if (faces.size() > 0)
+                                        imagebuilder.updateDetectedFace(faces.get(0));
+                                     else
                                         imagebuilder.updateDetectedFace(null);
-                                    }
-                                    // [END get_face_info]
-                                    // [END_EXCLUDE]
+
                                 })
                         .addOnCompleteListener(res -> {
                             imageProxy.close();

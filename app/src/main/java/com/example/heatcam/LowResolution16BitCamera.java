@@ -61,7 +61,9 @@ public class LowResolution16BitCamera extends LeptonCamera {
             Matrix m = new Matrix();
             m.postRotate(180);
             bMap = Bitmap.createBitmap(bMap, 0,0, bMap.getWidth(), bMap.getHeight(), m, true);
-            getCameraListener().updateImage(bMap);
+
+            Bitmap scaledBMap = ScaledHeatmap.scaleHeatmap(min, max, minFilterKelvin, maxFilterKelvin, getRawFrame());
+            getCameraListener().updateImage(scaledBMap);
             //getCameraListener().updateText(""+ kelvinToCelsius(maxRaw));
             max = 0;
             min = 0;
