@@ -81,13 +81,13 @@ public class HybridBitmapBuilder{
 
     long aika = System.currentTimeMillis();
     public void onNewBitmap(Bitmap image, ImageProxy proxy){
-        liveMap = image;
+        liveMap = image.copy(image.getConfig(), true);
         InputImage inputImage = InputImage.fromBitmap(image, 0);
         if(System.currentTimeMillis() > aika){
             aika = System.currentTimeMillis()+100;
             fTool.processImage(inputImage, proxy); // face detection
         }
-        updateLiveImage(image);
+        updateLiveImage(liveMap);
     }
 
     public void setHeatmap(Bitmap image) {
