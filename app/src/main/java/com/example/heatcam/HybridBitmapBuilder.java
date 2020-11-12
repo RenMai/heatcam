@@ -1,5 +1,8 @@
 package com.example.heatcam;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -11,6 +14,7 @@ import android.view.View;
 
 import androidx.camera.core.ImageProxy;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.common.InputImage;
@@ -20,9 +24,12 @@ import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Properties;
 
 public class HybridBitmapBuilder{
     private CameraBitmap cameraBitmap;
@@ -36,24 +43,51 @@ public class HybridBitmapBuilder{
     private HybridImageListener listener;
     private MeasurementStartFragment msf;
 
-    public HybridBitmapBuilder(LifecycleOwner owner, View view){
+    public HybridBitmapBuilder(LifecycleOwner owner, View view) {
         cameraBitmap = new CameraBitmap(owner, this, view);
         fTool = new HybridFaceDetector(this);
         if(owner instanceof MeasurementStartFragment)
             this.msf = (MeasurementStartFragment)owner;
 
         this.listener = (HybridImageListener)owner;
+        SharedPreferences sp = view.getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE);
+
+        HybridImageOptions.temperature = sp.getBoolean("temperature", true);
+        HybridImageOptions.opacity = sp.getBoolean("opacity", true);
+        HybridImageOptions.smooth = sp.getBoolean("smooth", true);
+        HybridImageOptions.facebounds = sp.getBoolean("facebounds", true);
+
+        HybridImageOptions.scale = sp.getFloat("scale", 8.97f);
+        HybridImageOptions.xOffset = sp.getInt("offsetx", -32);
+        HybridImageOptions.yOffset = sp.getInt("offsety", -71);
+        //HybridImageOptions.scaledWidth = sp.getInt("resx", LeptonCamera.getWidth());
+        //HybridImageOptions.scaledHeight = sp.getInt("resy", LeptonCamera.getHeight());
+
+    }
+
+    public static Bitmap setOpacity(Bitmap image){
+        Bitmap O = Bitmap.createBitmap(image.getWidth(),image.getHeight(), image.getConfig());
+        for(int i=0; i<image.getWidth(); i++){
+            for(int j=0; j<image.getHeight(); j++){
+                int pixel = image.getPixel(i, j);
+                int r = Color.red(pixel), g = Color.green(pixel), b = Color.blue(pixel);
+                if (pixel > ImageUtils.LOWEST_COLOR) {
+                    O.setPixel(i, j, Color.argb(230, r, g, b));
+                }
+            }
+        }
+        return O;
     }
 
     long aika = System.currentTimeMillis();
     public void onNewBitmap(Bitmap image, ImageProxy proxy){
-        liveMap = image;
+        liveMap = image.copy(image.getConfig(), true);
         InputImage inputImage = InputImage.fromBitmap(image, 0);
         if(System.currentTimeMillis() > aika){
             aika = System.currentTimeMillis()+100;
             fTool.processImage(inputImage, proxy); // face detection
         }
-        updateLiveImage(image);
+        updateLiveImage(liveMap);
     }
 
     public void setHeatmap(Bitmap image) {
@@ -69,7 +103,7 @@ public class HybridBitmapBuilder{
         paint.setStrokeWidth(1);
 
         Rect rect = new Rect();
-        rect.set((int)(vasen*ModifyHeatmap.scale + ModifyHeatmap.getxOffset()), (int)(yla*ModifyHeatmap.scale + ModifyHeatmap.getyOffset()), (int)(oikea*ModifyHeatmap.scale + ModifyHeatmap.getxOffset()), (int)(ala*ModifyHeatmap.scale + ModifyHeatmap.getyOffset()));
+        rect.set((int)(vasen*HybridImageOptions.scale + HybridImageOptions.xOffset), (int)(yla*HybridImageOptions.scale + HybridImageOptions.yOffset), (int)(oikea*HybridImageOptions.scale + HybridImageOptions.xOffset), (int)(ala*HybridImageOptions.scale + HybridImageOptions.yOffset));
         canvas.drawRect(rect, paint);
     }
 
@@ -92,12 +126,12 @@ public class HybridBitmapBuilder{
     private Bitmap overlay(Bitmap live, Bitmap heat, boolean opacity) {
 
         if(opacity)
-            heat = ModifyHeatmap.setOpacity(heat);
+            heat = setOpacity(heat);
 
         Matrix m = new Matrix();
         //m.postScale(ModifyHeatmap.scale, ModifyHeatmap.scale);
-        m.postTranslate(ModifyHeatmap.xOffset, ModifyHeatmap.yOffset);
-        heat = Bitmap.createScaledBitmap(heat, (int)(heat.getWidth()*ModifyHeatmap.scale), (int)(heat.getHeight()*ModifyHeatmap.scale), HybridImageOptions.smooth);
+        m.postTranslate(HybridImageOptions.xOffset, HybridImageOptions.yOffset);
+        heat = Bitmap.createScaledBitmap(heat, (int)(heat.getWidth()*HybridImageOptions.scale), (int)(heat.getHeight()*HybridImageOptions.scale), HybridImageOptions.smooth);
         Canvas canvas = new Canvas(live);
         canvas.drawBitmap(heat, m, null);
 
@@ -146,7 +180,9 @@ public class HybridBitmapBuilder{
     }
 
     int yla,vasen,oikea,ala = 0;
+    List<HuippuLukema> lukemat = new ArrayList<>();
     private HuippuLukema laskeAlue(){
+
         int[][] scaledTempFrame = ScaledHeatmap.scaledTempFrame;
         huiput = new HuippuLukema();
         if(scaledTempFrame == null)
@@ -168,14 +204,19 @@ public class HybridBitmapBuilder{
         ala = bottom; if(ala < 0) ala = 0; if(ala > heatkorkeus) ala = heatkorkeus;
 
         try{
-            if(scaledTempFrame != null /*&& tempFrame.length > maxkorkeus && tempFrame[tempFrame.length-1].length > maxleveys*/){
+            if(scaledTempFrame != null){
                 for(int y = yla; y < ala; y++){
                     for(int x = vasen; x < oikea; x++){
                         double lampo = (scaledTempFrame[y][x]- 27315)/100.0;
                         if(lampo > huiput.max){
+
                             huiput.max = lampo;
-                            huiput.y = (int)(y*ModifyHeatmap.scale) + ModifyHeatmap.getyOffset();
-                            huiput.x = (int)(x*ModifyHeatmap.scale) + ModifyHeatmap.getxOffset();
+                            huiput.y = (int)(y*HybridImageOptions.scale) + HybridImageOptions.yOffset;
+                            huiput.x = (int)(x*HybridImageOptions.scale) + HybridImageOptions.xOffset;
+
+                            //lukemat.add(huiput);
+                            //if(lukemat.size() > 50)
+                            //    lukemat.remove(0);
                         }
                     }
                 }
@@ -184,6 +225,21 @@ public class HybridBitmapBuilder{
         }catch (Exception e){
             //System.out.println(e.getMessage());
         }
+
+        /*tulosten keskiarvotus
+        if(lukemat.size() > 0){
+            int x = 0, y = 0;
+            double keskilampo = 0;
+            for(int i = 0; i < lukemat.size(); i++){
+                x += lukemat.get(i).x;
+                y += lukemat.get(i).y;
+                keskilampo += lukemat.get(i).max;
+            }
+            huiput.x = x/lukemat.size();
+            huiput.y = y/lukemat.size();
+            huiput.max = keskilampo/lukemat.size();
+        }*/
+
 
         return  huiput;
     }
@@ -201,12 +257,58 @@ public class HybridBitmapBuilder{
         double max = 0;
     }
 
+    public static void setScale(double newscale) {
+        HybridImageOptions.scale *= newscale;
+        HybridImageOptions.scale = Math.round(HybridImageOptions.scale*100f)/100f;
+        if(HybridImageOptions.scale < 1)
+            HybridImageOptions.scale = 1f;
+    }
+    public static void setRes(double newres) {
+        if(HybridImageOptions.scaledWidth*newres < LeptonCamera.getWidth() || HybridImageOptions.scaledHeight*newres < LeptonCamera.getHeight()){
+            double oldscale = (double)HybridImageOptions.scaledHeight / (double)(LeptonCamera.getHeight());
+            setScale(oldscale);
+
+            HybridImageOptions.scaledWidth = LeptonCamera.getWidth();
+            HybridImageOptions.scaledHeight = LeptonCamera.getHeight();
+            return;
+        }
+
+        double oldscale = (double)HybridImageOptions.scaledHeight / (double)(HybridImageOptions.scaledHeight*newres);
+        setScale(oldscale);
+
+        HybridImageOptions.scaledHeight *= newres;
+        HybridImageOptions.scaledWidth *= newres;
+
+    }
+
+    public static String teksti(){
+        return "x: "+HybridImageOptions.xOffset+" y: "+HybridImageOptions.yOffset+" w/h: "+ HybridImageOptions.scaledWidth+"/"+HybridImageOptions.scaledHeight+" s: "+HybridImageOptions.scale;
+    }
 }
+
 class HybridImageOptions{
     static boolean opacity = true;
     static boolean smooth = true;
     static boolean facebounds = true;
-    static boolean temperature = true;
+    static boolean temperature = false;
+
+    static int xOffset = -32;
+    static int yOffset = -71;
+    static int scaledWidth = LeptonCamera.getWidth();
+    static int scaledHeight = LeptonCamera.getHeight();
+    static float scale = 8.79f;
+
+    public static int getScaledWidth() {
+        if(scaledWidth == 0)
+            scaledWidth = LeptonCamera.getWidth();
+        return scaledWidth;
+    }
+
+    public static int getScaledHeight() {
+        if(scaledHeight == 0)
+            scaledHeight = LeptonCamera.getHeight();
+        return scaledHeight;
+    }
 }
 
 class HybridFaceDetector {

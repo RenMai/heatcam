@@ -73,9 +73,7 @@ public class QR_code_fragment extends Fragment {
         measuresChart = view.findViewById(R.id.measuresChart);
 
         measurementAccessObject = new MeasurementAccessObject();
-        previouslyMeasuredTemps = new ArrayList<>();
-        getPreviousMeasurements();
-        initChart();
+
 
         // text1.setText(R.string.FeedBack);
         if (getArguments() != null && !getArguments().isEmpty()) {
@@ -101,6 +99,7 @@ public class QR_code_fragment extends Fragment {
         // imgView = view.findViewById(R.id.qr_code);
         // imgView.setImageResource(R.drawable.frame);
 
+        previouslyMeasuredTemps = new ArrayList<>();
         getPreviousMeasurements();
         initChart();
 
@@ -184,7 +183,7 @@ public class QR_code_fragment extends Fragment {
         xAxis.setGridColor(Color.WHITE);
 
         YAxis yAxis = measuresChart.getAxisLeft();
-        yAxis.setAxisMinimum(30f);
+        yAxis.setAxisMinimum(20f);
         yAxis.setAxisMaximum(38f);
         yAxis.setAxisLineWidth(2f);
         yAxis.setGridLineWidth(3f);

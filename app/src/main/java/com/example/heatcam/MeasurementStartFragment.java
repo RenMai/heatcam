@@ -77,6 +77,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private float focalLength;
     private float sensorX;
     private float sensorY;
+    private SizeF sensor;
 
     private float preferred_measure_distance;
 
@@ -100,6 +101,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private MeasurementAccessObject measurementAccessObject;
     private Timer tiltTimer = new Timer();
     private int currentTiltAngle;
+    private int setTiltAngle = 0;
+    private boolean isAtSetAngle = true;
     private boolean tiltTimerRunning = false;
     private int timerDelay = 200;
 
@@ -208,7 +211,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         try {
             CameraCharacteristics c = manager.getCameraCharacteristics(getFrontFacingCameraId(manager));
             focalLength = c.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0];
-            SizeF sensor = c.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+            sensor = c.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
             float angleX = (float) Math.atan(sensor.getWidth() / (2 * focalLength));
             float angleY = (float) Math.atan(sensor.getHeight() / (2 * focalLength));
             System.out.println("fov" + angleX + angleY);
@@ -279,24 +282,60 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         int offset = 50;
         float et = dist;
-        //if(getActivity() != null)
+        if(getActivity() != null)
             getActivity().runOnUiThread(() -> txtDebug.setText(et+""));
         boolean distanceOK = dist < preferred_measure_distance + offset && dist > preferred_measure_distance - offset;
         if (xOK && yOK && distanceOK) {
             facePositionCheckCounter++;
             startScanAnimation();
             ready = true;
+        } else {
+            animatedOval.stopAnimation();
+            animatedOval.setVisibility(View.INVISIBLE);
+            scanBar.clearAnimation();
+            scanBar.setVisibility(View.INVISIBLE);
+            ready = false;
+            laskuri = 0;
+            userTempList = null;
+
+            userTemp = 0;
+            facePositionCheckCounter--;
+            if (facePositionCheckCounter < 0) facePositionCheckCounter = 0;
         }
 
         // angle correction if target is in specified distance and y position is not OK.
-        else if(dist < 500 && !yOK) {
+        if(dist < 500 && !yOK) {
             synchronized (this) {
-                // timer purpose is to not throttle angle correction commands.
-                if(!tiltTimerRunning) {
-                    tiltTimerRunning = true;
-                    // single angle correction. e.g. value 200 == 2 degrees
-                    int correctionAngle = 200;
 
+                if(currentTiltAngle == setTiltAngle && tiltTimerRunning && !isAtSetAngle) {
+                    isAtSetAngle = true;
+                    tiltTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            tiltTimerRunning = false;
+                        }
+                    }, timerDelay);
+                }
+
+                if(!tiltTimerRunning && isAtSetAngle ) {
+                    tiltTimerRunning = true;
+                    isAtSetAngle = false;
+                    // single angle correction. e.g. value 200 == 2 degrees
+                    int correctionAngle = 0;
+                    float objHeightPix = middleY - noseP.y;
+                    float objHeightSensor = (sensor.getHeight() * objHeightPix) / imgHeight;
+                    float realObjHeight = (dist * objHeightSensor) / focalLength;
+                    System.out.println("realObjHeight : " + realObjHeight);
+                    //double c = Math.sqrt(Math.pow(dist, 2) + Math.pow(objHeight, 2));
+                    int a = (int) Math.round(Math.sin(realObjHeight*0.8 / dist)*100) *100;
+                    if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
+                        setTiltAngle = currentTiltAngle - a;
+                        serialPortModel.changeTiltAngle((setTiltAngle) /100);
+                        System.out.println("angle correction " + a);
+                        getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(a)));
+
+                    }
+/*
                     // higher tilt angle == is more rotated towards floor
                     // rotate up if head pos is high
                     if(noseP.y < (middleY - maxDeviation)){
@@ -313,26 +352,12 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
                         }
                     }
-                    tiltTimer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            tiltTimerRunning = false;
-                        }
-                    }, timerDelay);
+
+
+ */
                 }
             }
 
-        } else {
-            animatedOval.stopAnimation();
-            animatedOval.setVisibility(View.INVISIBLE);
-            scanBar.clearAnimation();
-            ready = false;
-            laskuri = 0;
-            userTempList = null;
-
-            userTemp = 0;
-            facePositionCheckCounter--;
-            if (facePositionCheckCounter < 0) facePositionCheckCounter = 0;
         }
         updateProgress();
 
@@ -413,6 +438,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     private void changeToMenuLayout() {
+        hbb.setMsfNull();
         Fragment f = new MenuFragment();
         getActivity().getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
@@ -509,6 +535,9 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     public void updateData(LowResolution16BitCamera.TelemetryData data) {
         currentTiltAngle = data.tiltAngle;
+        if(setTiltAngle == 0) {
+            setTiltAngle = currentTiltAngle;
+        }
     }
 
 
