@@ -293,6 +293,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             animatedOval.stopAnimation();
             animatedOval.setVisibility(View.INVISIBLE);
             scanBar.clearAnimation();
+            scanBar.setVisibility(View.INVISIBLE);
             ready = false;
             laskuri = 0;
             userTempList = null;
