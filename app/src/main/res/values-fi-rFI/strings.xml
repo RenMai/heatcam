@@ -30,4 +30,9 @@
     <string name="about_thermalCamera">Mittaukseen käytetään lämpökameraa, joka on sijoitettu tabletin yläosaan.</string>
     <string name="who_developed">Sovellus on osa Metropolian innovaatioprojekteja. Tämä sovellus on toteutettu yhteistyössä LeViteZer oy:n kanssa.</string>
     <string name="your_distance">Etäisyytesi</string>
+
+    <!-- Graph text -->
+    <string name="prev_measurements">Mittaukset</string>
+    <string name="user_measurement">Sinä</string>
+    <string name="vertical_temp_text">L\nä\nm\np\nö\nt\ni\nl\na</string>
 </resources>
