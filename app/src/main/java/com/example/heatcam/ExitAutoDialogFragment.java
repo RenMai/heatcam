@@ -1,11 +1,13 @@
 package com.example.heatcam;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,7 +16,7 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
-public class ExitAutoDialogFragment extends AppCompatDialogFragment {
+public class ExitAutoDialogFragment extends DialogFragment {
     private EditText editTextPassword;
 
     @NonNull
@@ -22,34 +24,27 @@ public class ExitAutoDialogFragment extends AppCompatDialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.enter_password_dialog, null);
+        View pView = inflater.inflate(R.layout.enter_password_dialog, null);
 
-        builder.setView(view);
+        builder.setView(pView);
             builder.setMessage("Enter password to exit auto mode.");
-
-
-
-            builder.setPositiveButton("OK", (dialogInterface, i) -> {
-                String password = editTextPassword.getText().toString();
-                Fragment f = new MenuFragment();
-                getActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragmentCamera, f, "menu")
-                        .commit();
-                MainActivity.setAutoMode(false);
-
-
+            builder.setPositiveButton("OK", (dialog, id) -> {
+                editTextPassword = pView.findViewById(R.id.input_password);
+               if (editTextPassword.getText().toString().equals("heatcam123")) {
+                    Fragment f = new MenuFragment();
+                    getActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragmentCamera, f, "menu")
+                            .commit();
+                    MainActivity.setAutoMode(false);
+                } else if (editTextPassword.getText().toString().equals("")) {
+                    //MainActivity.setAutoMode(true);
+                   Toast.makeText(getContext(), "Password was not entered", Toast.LENGTH_SHORT).show();
+                } else {
+                   Toast.makeText(getContext(), "Wrong password", Toast.LENGTH_SHORT).show();
+               }
             });
-
-
         // User cancelled the dialog
-        builder.setNegativeButton("Cancel", (dialogInterface, i) -> {
-        });
-
-        editTextPassword = view.findViewById(R.id.input_password);
-
+        builder.setNegativeButton("Cancel", (dialog, id) -> dialog.dismiss());
         return builder.create();
-
-
-
     }
 }
