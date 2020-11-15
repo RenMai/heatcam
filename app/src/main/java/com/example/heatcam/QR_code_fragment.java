@@ -1,19 +1,16 @@
 package com.example.heatcam;
 
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
-
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
-
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -28,9 +25,6 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -127,7 +121,7 @@ public class QR_code_fragment extends Fragment {
                         .replace(R.id.fragmentCamera, fragment, "measure_start")
                         .commit();
             }
-        }, 10000);
+        }, 60000);
 
         // freezes sometimes when exiting fragment
         /*
@@ -176,20 +170,29 @@ public class QR_code_fragment extends Fragment {
     private void initChart() {
         XAxis xAxis = measuresChart.getXAxis();
         xAxis.setAxisMinimum(0f);
-        xAxis.setAxisMaximum(6f);
+        xAxis.setAxisMaximum(10f);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setAxisLineWidth(2f);
         xAxis.setGridLineWidth(3f);
         xAxis.setGridColor(Color.WHITE);
+        xAxis.setDrawLabels(false);
+        xAxis.setLabelCount(10);
+        //xAxis.setDrawGridLines(false);
 
         YAxis yAxis = measuresChart.getAxisLeft();
-        yAxis.setAxisMinimum(20f);
-        yAxis.setAxisMaximum(38f);
+        yAxis.setAxisMinimum(33f);
+        yAxis.setAxisMaximum(40f);
         yAxis.setAxisLineWidth(2f);
         yAxis.setGridLineWidth(3f);
         yAxis.setGridColor(Color.WHITE);
+        yAxis.setDrawLabels(false);
+        //yAxis.setDrawGridLines(false);
 
 
+        measuresChart.setVisibleXRangeMaximum(10);
+       // measuresChart.fitScreen();
+        measuresChart.setDrawBorders(true);
+        //measuresChart.setDrawGridBackground(true);
         measuresChart.getDescription().setEnabled(false);
         measuresChart.getAxisRight().setEnabled(false);
         measuresChart.getLegend().setTextSize(20f);
@@ -203,11 +206,11 @@ public class QR_code_fragment extends Fragment {
         ArrayList<Entry> userMeasurement = new ArrayList<>();
         int y = -1;
         int z = 0;
-        // we want to get only the last 6 measurements, the last will be the most recent measurement
+        // we want to get only the last 11 measurements, the last will be the most recent measurement
         // meaning the last is what the user just measured
-        if (measurementsJSON.length() > 6) { // if there are more than 6 measurements
+        if (measurementsJSON.length() > 11) { // if there are more than 6 measurements
             for (int x = 0; x < measurementsJSON.length(); x++) {
-                if (x + 6 == measurementsJSON.length()) { // to check if there are only 6 left in JSON
+                if (x + 11 == measurementsJSON.length()) { // to check if there are only 6 left in JSON
                     y = x;
                 }
                 if (y != -1 && y < measurementsJSON.length() - 1) { // we loop through the last indexes
@@ -222,7 +225,7 @@ public class QR_code_fragment extends Fragment {
                 }
 
             }
-        } else { // there are less than 6 measurements so we can just loop the json without tricks
+        } else { // there are less than 11 measurements so we can just loop the json without tricks
             for (int x = 0; x < measurementsJSON.length() - 1; x++) {
                 try {
                     measurements.add(new Entry(z, (float) measurementsJSON.getJSONObject(x).getDouble("Measured")));
@@ -235,6 +238,7 @@ public class QR_code_fragment extends Fragment {
 
         // need to add the last measurement to its own arraylist
         // so we can color the last dot in the graph with different color
+        // TODO: use userTemp variable from bundle arguments instead of reading JSON
         try {
             userMeasurement.add(new Entry(z, (float) measurementsJSON.getJSONObject(measurementsJSON.length()-1).getDouble("Measured")));
         } catch (JSONException e) {
@@ -253,11 +257,12 @@ public class QR_code_fragment extends Fragment {
             measuresChart.notifyDataSetChanged();
         } else {
             // change style for measurements before the user
-            lineDataSet = new LineDataSet(measurements, "Mittaukset");
+            String prevMeasurementLocalized = (String) getContext().getResources().getText(R.string.prev_measurements);
+            lineDataSet = new LineDataSet(measurements, prevMeasurementLocalized);
             lineDataSet.setCircleRadius(5f);
             lineDataSet.setColor(Color.GREEN);
             lineDataSet.setCircleColor(Color.GREEN);
-            lineDataSet.setValueTextSize(18f);
+            lineDataSet.setValueTextSize(0f); // to draw only dots on the graph
             lineDataSet.setDrawCircleHole(false);
             lineDataSet.setDrawFilled(false);
             lineDataSet.setFormLineWidth(4f);
@@ -265,12 +270,12 @@ public class QR_code_fragment extends Fragment {
             lineDataSet.enableDashedLine(0, 1, 0);
 
             //change style for the measurement the user got
-            userDataSet = new LineDataSet(userMeasurement, "Sinä");
+            String userMeasurementLocalized = (String) getContext().getResources().getText(R.string.user_measurement);
+            userDataSet = new LineDataSet(userMeasurement, userMeasurementLocalized);
             userDataSet.setDrawCircleHole(false);
-            userDataSet.setValueTextSize(18f);
+            userDataSet.setValueTextSize(0f); // to draw only dots on the graph
             userDataSet.setColor(Color.RED);
             userDataSet.setCircleRadius(5f);
-            userDataSet.setValueTextSize(18f);
             userDataSet.setDrawFilled(false);
             userDataSet.setCircleColor(Color.RED);
             userDataSet.setFormLineWidth(4f);

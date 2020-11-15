@@ -26,4 +26,9 @@
     <string name="who_developed">The application is a part of Metropolia\'s innovation projects. This app has been implemented in cooperation with LeViteZer oy.</string>
     <string name="your_distance">Your Distance</string>
     <string name="passwordHint">password</string>
+
+    <!-- Graph text -->
+    <string name="prev_measurements">Measurements</string>
+    <string name="user_measurement">You</string>
+    <string name="vertical_temp_text">T\ne\nm\np\ne\nr\na\nt\nu\nr\ne</string>
 </resources>
