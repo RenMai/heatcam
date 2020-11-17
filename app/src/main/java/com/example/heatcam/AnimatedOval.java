@@ -18,6 +18,7 @@ public class AnimatedOval extends View {
     private final int COLOR_ORANGE = Color.rgb(255, 128, 51);
     private final int COLOR_YELLOW = Color.rgb(255, 218,51);
     private final int COLOR_GREEN = Color.rgb(76, 255, 51);
+    private final int COLOR_WHITE_RED = Color.rgb(255, 154, 165);
 
     private Paint paint;
     private Path path;
@@ -55,7 +56,7 @@ public class AnimatedOval extends View {
 
         paint = new Paint();
         paint.setColor(COLOR_RED);
-        paint.setStrokeWidth(10);
+        paint.setStrokeWidth(12);
         paint.setStyle(Paint.Style.STROKE);
 
         pMeasure = new PathMeasure(path, false);
@@ -69,16 +70,15 @@ public class AnimatedOval extends View {
 
     public void setPhase(float phase) {
         float val = phase * 100;
-        if (val < 66.0f) {
-            paint.setColor(COLOR_ORANGE);
-        }
-        if (val < 44.0f) {
+
+
+        if (val < 88.0f) {
             paint.setColor(COLOR_YELLOW);
         }
-        if (val < 16.0f) {
+        if (val < 8.0f) {
             paint.setColor(COLOR_GREEN);
         }
-        paint.setPathEffect(createPathEffect(length, phase, 0.0f));
+        //paint.setPathEffect(createPathEffect(length, phase, 0.0f));
         invalidate();
     }
 
