@@ -53,7 +53,7 @@ public class HybridBitmapBuilder{
         SharedPreferences sp = view.getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE);
 
         HybridImageOptions.temperature = sp.getBoolean("temperature", true);
-        HybridImageOptions.opacity = sp.getBoolean("opacity", true);
+        HybridImageOptions.transparency = sp.getInt("transparency", 200);
         HybridImageOptions.smooth = sp.getBoolean("smooth", true);
         HybridImageOptions.facebounds = sp.getBoolean("facebounds", true);
 
@@ -72,7 +72,7 @@ public class HybridBitmapBuilder{
                 int pixel = image.getPixel(i, j);
                 int r = Color.red(pixel), g = Color.green(pixel), b = Color.blue(pixel);
                 if (pixel > ImageUtils.LOWEST_COLOR) {
-                    O.setPixel(i, j, Color.argb(230, r, g, b));
+                    O.setPixel(i, j, Color.argb(HybridImageOptions.transparency, r, g, b));
                 }
             }
         }
@@ -143,10 +143,9 @@ public class HybridBitmapBuilder{
         Bitmap image = img.copy(Bitmap.Config.ARGB_8888, true);
         if(heatMap != null && liveMap != null){
             huiput = laskeAlue();
-            if(HybridImageOptions.opacity)
-                image = overlay(liveMap,heatMap,true);
-            else
-                image = heatMap.copy(Bitmap.Config.ARGB_8888, true);
+            image = overlay(liveMap,heatMap,true);
+            //else
+            //    image = heatMap.copy(Bitmap.Config.ARGB_8888, true);
 
             if(HybridImageOptions.facebounds)
                 drawFaceBounds(image);
@@ -182,9 +181,9 @@ public class HybridBitmapBuilder{
     int yla,vasen,oikea,ala = 0;
     List<HuippuLukema> lukemat = new ArrayList<>();
     private HuippuLukema laskeAlue(){
-
+        lukemat.clear();
         int[][] scaledTempFrame = ScaledHeatmap.scaledTempFrame;
-        huiput = new HuippuLukema();
+        //huiput = new HuippuLukema();
         if(scaledTempFrame == null)
             scaledTempFrame = LeptonCamera.getTempFrame();
 
@@ -197,26 +196,25 @@ public class HybridBitmapBuilder{
         int left = (int)(((double)faceBounds.left / (double)liveleveys) * heatleveys);
         int right = (int)(((double)faceBounds.right / (double)liveleveys) * heatleveys);
         int bottom = (int)(((double)faceBounds.bottom / (double)livekorkeus) * heatkorkeus);
-
         vasen = left; if(vasen < 0) vasen = 0; if(vasen > heatleveys) vasen = heatleveys;
         oikea = right; if(oikea < 0) oikea = 0; if(oikea > heatleveys) oikea = heatleveys;
         yla = top; if(yla < 0) yla = 0; if(yla > heatkorkeus) yla = heatkorkeus;
         ala = bottom; if(ala < 0) ala = 0; if(ala > heatkorkeus) ala = heatkorkeus;
-
+        HuippuLukema temp = new HuippuLukema();
         try{
             if(scaledTempFrame != null){
                 for(int y = yla; y < ala; y++){
                     for(int x = vasen; x < oikea; x++){
                         double lampo = (scaledTempFrame[y][x]- 27315)/100.0;
-                        if(lampo > huiput.max){
+                        if(lampo > temp.max){
 
-                            huiput.max = lampo;
-                            huiput.y = (int)(y*HybridImageOptions.scale) + HybridImageOptions.yOffset;
-                            huiput.x = (int)(x*HybridImageOptions.scale) + HybridImageOptions.xOffset;
+                            temp.max = lampo;
+                            temp.y = (int)(y*HybridImageOptions.scale) + HybridImageOptions.yOffset;
+                            temp.x = (int)(x*HybridImageOptions.scale) + HybridImageOptions.xOffset;
 
-                            //lukemat.add(huiput);
-                            //if(lukemat.size() > 50)
-                            //    lukemat.remove(0);
+                            lukemat.add(temp);
+                            if(lukemat.size() > 5)
+                                lukemat.remove(0);
                         }
                     }
                 }
@@ -226,7 +224,7 @@ public class HybridBitmapBuilder{
             //System.out.println(e.getMessage());
         }
 
-        /*tulosten keskiarvotus
+        //tulosten keskiarvotus
         if(lukemat.size() > 0){
             int x = 0, y = 0;
             double keskilampo = 0;
@@ -235,13 +233,15 @@ public class HybridBitmapBuilder{
                 y += lukemat.get(i).y;
                 keskilampo += lukemat.get(i).max;
             }
-            huiput.x = x/lukemat.size();
-            huiput.y = y/lukemat.size();
-            huiput.max = keskilampo/lukemat.size();
-        }*/
+            temp.x = x/lukemat.size();
+            temp.y = y/lukemat.size();
+            temp.max = Math.round(keskilampo/lukemat.size()*100.0)/100.0;
+        }
 
+        if(temp.max > huiput.max+0.2 || temp.max < huiput.max-0.2)
+            huiput = temp;
 
-        return  huiput;
+        return huiput;
     }
 
     public double getHighestFaceTemperature(){
@@ -287,7 +287,7 @@ public class HybridBitmapBuilder{
 }
 
 class HybridImageOptions{
-    static boolean opacity = true;
+    static int transparency = 200;
     static boolean smooth = true;
     static boolean facebounds = true;
     static boolean temperature = false;
