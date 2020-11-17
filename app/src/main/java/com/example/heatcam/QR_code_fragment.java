@@ -104,8 +104,8 @@ public class QR_code_fragment extends Fragment {
         text2.setText(R.string.title);
 
         // commented off to test graph from measurement data
-        // imgView = view.findViewById(R.id.qr_code);
-        // imgView.setImageResource(R.drawable.frame);
+        //imgView = view.findViewById(R.id.qr_code);
+        //imgView.setImageResource(R.drawable.qr_code);
 
         previouslyMeasuredTemps = new ArrayList<>();
         getPreviousMeasurements();
