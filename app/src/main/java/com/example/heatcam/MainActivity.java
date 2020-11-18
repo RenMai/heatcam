@@ -63,9 +63,10 @@ public class MainActivity extends AppCompatActivity {
 
  */
          btn.setVisibility(View.INVISIBLE);
-        Fragment f = new MenuFragment();
+        Fragment f = new IntroFragment();
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragmentCamera, f, "menu").commit();
+                .replace(R.id.fragmentCamera, f, "intro").commit();
+        MainActivity.setAutoMode(true);
 
 
         /*
