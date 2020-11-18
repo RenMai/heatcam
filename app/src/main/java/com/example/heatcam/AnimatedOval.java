@@ -46,6 +46,7 @@ public class AnimatedOval extends View {
 
 
     public void init() {
+        // TODO: get these values from shared preferences like in createFaceOval()
         float x =  width / 2.0f;
         float w = (950/2.0f);
         float h = 1450.0f;
@@ -69,15 +70,9 @@ public class AnimatedOval extends View {
     }
 
     public void setPhase(float phase) {
-        float val = phase * 100;
-
-
-        if (val < 88.0f) {
-            paint.setColor(COLOR_YELLOW);
-        }
-        if (val < 8.0f) {
-            paint.setColor(COLOR_GREEN);
-        }
+        // color changes from red to orange to yellow to green
+        int color = Color.HSVToColor(new float[]{(float) (1 - phase) * 120f, 1f, 1f});
+        paint.setColor(color);
         //paint.setPathEffect(createPathEffect(length, phase, 0.0f));
         invalidate();
     }
