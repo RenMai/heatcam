@@ -51,6 +51,10 @@ public class SerialPortModel extends BroadcastReceiver {
         return instance;
     }
 
+    public boolean hasCamera() {
+        return sioListener != null;
+    }
+
     public void setSioListener(SerialInputOutputManager.Listener sioListener) {
         this.sioListener = sioListener;
     }
