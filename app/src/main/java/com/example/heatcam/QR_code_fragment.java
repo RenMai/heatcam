@@ -39,8 +39,8 @@ public class QR_code_fragment extends Fragment {
 
     private final int PREV_MEASUREMENT_COLOR = Color.rgb(36, 252, 223);
     private final int USER_MEASUREMENT_COLOR = Color.rgb(25, 45, 223);
-    private final int HIGH_TEMP_LINE_COLOR = Color.rgb(239, 15, 15);
-    private final int HIGH_TEMP_LINE_TEXT_COLOR = Color.rgb(222, 20, 67);
+    private final int HIGH_TEMP_LINE_COLOR = Color.rgb(175, 70, 70);
+    private final int HIGH_TEMP_LINE_TEXT_COLOR = Color.rgb(129, 48, 48);
 
     // at which y coordinate to draw the horizontal line to indicate high temp
     private float highTempLineValue = 38f;
