@@ -45,7 +45,7 @@ public class IntroFragment extends Fragment {
 
     private final int AVERAGE_EYE_DISTANCE = 63; // in mm
 
-    private TextView txtV;
+    //private TextView txtV;
 
 
     @Nullable
@@ -55,7 +55,7 @@ public class IntroFragment extends Fragment {
 
         view.setKeepScreenOn(true);
 
-        txtV = view.findViewById(R.id.txtDist);
+       // txtV = view.findViewById(R.id.txtDist);
 
         //moving background
         ConstraintLayout constraintLayout = (ConstraintLayout) view.findViewById(R.id.ConstraintLayout);
@@ -214,8 +214,8 @@ public class IntroFragment extends Fragment {
             dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorY) * (imgHeight / deltaY) / 100;
         }
 
-        float finalDist = dist;
-        getActivity().runOnUiThread(() -> txtV.setText("D: " + finalDist));
+//        float finalDist = dist;
+//        getActivity().runOnUiThread(() -> txtV.setText("D: " + finalDist));
 
         if (dist > 0 && dist < 600) {
             switchToMeasurementStartFragment();
