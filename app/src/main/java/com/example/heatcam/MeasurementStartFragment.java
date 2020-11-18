@@ -144,13 +144,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         txtDebug = view.findViewById(R.id.txtDebugit);
 
         serialPortModel = SerialPortModel.getInstance();
-        if(!serialPortModel.hasCamera()) {
-            SharedPreferences sp = getActivity().getPreferences(Context.MODE_PRIVATE);
-            LowResolution16BitCamera cam = new LowResolution16BitCamera();
-            cam.setMaxFilter(sp.getFloat(getString(R.string.preference_max_filter), -1));
-            cam.setMinFilter(sp.getFloat(getString(R.string.preference_min_filter), -1));
-            serialPortModel.setSioListener(cam);
-        }
         serialPortModel.setCamListener(this);
 
         scanAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.scan_animation);
