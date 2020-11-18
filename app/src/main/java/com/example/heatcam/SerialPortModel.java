@@ -51,6 +51,10 @@ public class SerialPortModel extends BroadcastReceiver {
         return instance;
     }
 
+    public boolean hasCamera() {
+        return sioListener != null;
+    }
+
     public void setSioListener(SerialInputOutputManager.Listener sioListener) {
         this.sioListener = sioListener;
     }
@@ -103,7 +107,7 @@ public class SerialPortModel extends BroadcastReceiver {
         if(ALLOWED_PRODUCTS.contains(foundDevice.getProductId()) && ALLOWED_VENDORS.contains(foundDevice.getVendorId())) {
             String deviceInfo = foundDevice.getProductName() + " - " + foundDevice.getManufacturerName() +
                     " - " + foundDevice.getProductId() + " - " + foundDevice.getVendorId();
-            camListener.updateText(deviceInfo);
+            if (camListener != null) camListener.updateText(deviceInfo);
 
             // check device permission
             if (!manager.hasPermission(foundDevice)) {
@@ -130,7 +134,7 @@ public class SerialPortModel extends BroadcastReceiver {
             return;
         }
         Log.d("hetacam","Connecting...");
-        camListener.setConnectingImage();
+        if (camListener != null) camListener.setConnectingImage();
         UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
         usbSerialPort = driver.getPorts().get(0); // Most devices have just one port (port 0)
         try {
@@ -141,7 +145,7 @@ public class SerialPortModel extends BroadcastReceiver {
             //calibrate();
         } catch (Exception e) {
             e.printStackTrace();
-            camListener.setNoFeedImage();
+            if (camListener != null) camListener.setNoFeedImage();
         }
 
         usbIoManager = new SerialInputOutputManager(usbSerialPort, sioListener);
@@ -155,7 +159,7 @@ public class SerialPortModel extends BroadcastReceiver {
         usbIoManager = null;
         usbSerialPort.close();
         //usbPermission = UsbPermission.Unknown;
-        camListener.updateText("Disconnected");
+        if (camListener != null) camListener.updateText("Disconnected");
     }
 
     public void calibrate() throws IOException {
