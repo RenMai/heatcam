@@ -336,7 +336,14 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                     //double c = Math.sqrt(Math.pow(dist, 2) + Math.pow(objHeight, 2));
                     int a = (int) Math.round(Math.sin(realObjHeight*0.8 / dist)*100) *100;
                     if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
-                        setTiltAngle = currentTiltAngle - a;
+                        int angle = currentTiltAngle - a;
+                        if (setTiltAngle < 2200) {
+                            setTiltAngle = 2200;
+                        } else if (setTiltAngle > 9500) {
+                            setTiltAngle = 9500;
+                        } else {
+                            setTiltAngle = angle;
+                        }
                         serialPortModel.changeTiltAngle((setTiltAngle) /100);
                         System.out.println("angle correction " + a);
                         getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(a)));
