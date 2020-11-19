@@ -10,7 +10,7 @@
     <EditTextPreference
         app:key="@string/preference_measure_distance"
         app:title="Preferred measure distance"
-        android:defaultValue="300"
+        android:defaultValue="250"
         android:inputType="number"
         android:digits="0123456789"
         app:useSimpleSummaryProvider="true" />
@@ -40,7 +40,7 @@
         app:title="Tilt correction delay"
         android:inputType="number"
         android:digits="0123456789"
-        android:defaultValue="200"
+        android:defaultValue="1000"
         app:useSimpleSummaryProvider="true" />
 
     <ListPreference

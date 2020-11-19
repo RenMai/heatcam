@@ -129,8 +129,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         serialPortModel = SerialPortModel.getInstance();
         serialPortModel.setCamListener(this);
-        serialPortModel.changeTiltSpeed(7);
-        serialPortModel.changeTiltAngle(22);
 
         scanAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.scan_animation);
 
@@ -244,9 +242,9 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     public float facePositionCheck(Face face, int imgWidth, int imgHeight) {
 
         float middleX = imgWidth / 2f;
-        float middleY = imgHeight / 2.05f; // joutuu sit säätää tabletille tää ja deviation
-        float maxDeviation = 25f; // eli max +- pixel heitto sijaintiin
-        float maxYdeviation = 10f;
+        float middleY =  imgHeight / 2.2f; //2.146f; //imgHeight / 2.05f; // joutuu sit säätää tabletille tää ja deviation
+        float maxDeviationX = 25f; // eli max +- pixel heitto sijaintiin
+        float maxDeviationY = 15f;
         PointF noseP = face.getLandmark(FaceLandmark.NOSE_BASE).getPosition();
         PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
         PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
@@ -263,8 +261,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         //System.out.println(imgWidth+" "+imgWidth + " dist");
 
-        boolean xOK = noseP.x > (middleX - maxDeviation) && noseP.x < (middleX + maxDeviation);
-        boolean yOK = noseP.y > (middleY - maxYdeviation) && noseP.y < (middleY + maxYdeviation);
+        boolean xOK = noseP.x > (middleX - maxDeviationX) && noseP.x < (middleX + maxDeviationX);
+        boolean yOK = noseP.y > (middleY - maxDeviationY) && noseP.y < (middleY + maxDeviationY);
 
         int offset = 50;
         float et = dist;
@@ -293,6 +291,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         if(dist < 500 && !yOK) {
             synchronized (this) {
 
+                /*
                 if(currentTiltAngle == setTiltAngle && tiltTimerRunning && !isAtSetAngle) {
                     isAtSetAngle = true;
                     tiltTimer.schedule(new TimerTask() {
@@ -301,9 +300,9 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                             tiltTimerRunning = false;
                         }
                     }, timerDelay);
-                }
+                }*/
 
-                if(!tiltTimerRunning && isAtSetAngle ) {
+                if(!tiltTimerRunning /*&&isAtSetAngle*/ ) {
                     tiltTimerRunning = true;
                     isAtSetAngle = false;
                     // single angle correction. e.g. value 200 == 2 degrees
@@ -313,7 +312,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                     float realObjHeight = (dist * objHeightSensor) / focalLength;
                     System.out.println("realObjHeight : " + realObjHeight);
                     //double c = Math.sqrt(Math.pow(dist, 2) + Math.pow(objHeight, 2));
-                    int a = (int) Math.round(Math.sin(realObjHeight*0.8 / dist)*100) *100;
+                    int a = (int) Math.round(Math.sin(realObjHeight*0.7 / dist)*100) *100;
                     if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
                         int angle = currentTiltAngle - a;
                         if (setTiltAngle < 2200) {
@@ -324,30 +323,16 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                             setTiltAngle = angle;
                         }
                         serialPortModel.changeTiltAngle((setTiltAngle) /100);
+                        tiltTimer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                tiltTimerRunning = false;
+                            }
+                        }, timerDelay);
                         System.out.println("angle correction " + a);
                         getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(a)));
 
                     }
-/*
-                    // higher tilt angle == is more rotated towards floor
-                    // rotate up if head pos is high
-                    if(noseP.y < (middleY - maxDeviation)){
-                        // just to make sure currentTiltAngle value isn't fucked
-                        if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
-                            serialPortModel.changeTiltAngle((currentTiltAngle - correctionAngle ) /100);
-
-                        }
-                    }
-                    // rotate down if head pos is low
-                    else if(noseP.y > (middleY + maxDeviation)){
-                        if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
-                            serialPortModel.changeTiltAngle((currentTiltAngle + correctionAngle ) /100);
-
-                        }
-                    }
-
-
- */
                 }
             }
 

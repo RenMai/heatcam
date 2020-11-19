@@ -98,7 +98,11 @@ public class IntroFragment extends Fragment {
             cam.setMinFilter(sharedPrefs.getFloat(getString(R.string.preference_min_filter), -1));
             serialPortModel.setSioListener(cam);
             serialPortModel.scanDevices(context);
+            serialPortModel.changeTiltSpeed(7);
+        } else {
+            serialPortModel.changeTiltAngle(75);
         }
+
     }
 
     private void getCameraProperties() {
