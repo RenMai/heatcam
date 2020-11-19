@@ -145,6 +145,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         serialPortModel = SerialPortModel.getInstance();
         serialPortModel.setCamListener(this);
+        serialPortModel.changeTiltSpeed(7);
+        serialPortModel.changeTiltAngle(22);
 
         scanAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.scan_animation);
 
@@ -260,7 +262,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         float middleX = imgWidth / 2f;
         float middleY = imgHeight / 2.05f; // joutuu sit säätää tabletille tää ja deviation
         float maxDeviation = 25f; // eli max +- pixel heitto sijaintiin
-
+        float maxYdeviation = 10f;
         PointF noseP = face.getLandmark(FaceLandmark.NOSE_BASE).getPosition();
         PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
         PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
@@ -278,7 +280,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         //System.out.println(imgWidth+" "+imgWidth + " dist");
 
         boolean xOK = noseP.x > (middleX - maxDeviation) && noseP.x < (middleX + maxDeviation);
-        boolean yOK = noseP.y > (middleY - maxDeviation) && noseP.y < (middleY + maxDeviation);
+        boolean yOK = noseP.y > (middleY - maxYdeviation) && noseP.y < (middleY + maxYdeviation);
 
         int offset = 50;
         float et = dist;
