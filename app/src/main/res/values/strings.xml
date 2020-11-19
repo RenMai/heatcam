@@ -33,4 +33,9 @@
     <string name="vertical_temp_text">T\ne\nm\np\ne\nr\na\nt\nu\nr\ne</string>
 
     <string name="high_temp_line_text">High temp</string>
+    
+    <!-- ExitAutoDialogFragment text -->
+    <string name="wrong_password_msg">Wrongs password</string>
+    <string name="no_password_msg">Password was not entered</string>
+    <string name="enter_password_to_exit_msg">Enter password to exit auto mode.</string>
 </resources>
