@@ -37,4 +37,9 @@
     <string name="vertical_temp_text">L\nä\nm\np\nö\nt\ni\nl\na</string>
 
     <string name="high_temp_line_text">Korkean raja</string>
+    
+    <!-- ExitAutoDialogFragment text -->
+    <string name="wrong_password_msg">Väärä salasana</string>
+    <string name="no_password_msg">Salasanaa ei syötetty</string>
+    <string name="enter_password_to_exit_msg">Anna salasana poistuaksesi automaattitilasta.</string>
 </resources>
