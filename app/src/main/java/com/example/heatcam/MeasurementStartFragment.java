@@ -73,6 +73,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private Rect naamarajat;
 
     private double userTemp = 0;
+    private double avgUserTemp = 0;
     private List<Double> userTempList;
 
     private int laskuri = 0;
@@ -438,13 +439,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     private void changeToResultLayout() {
         hbb.setMsfNull();
-        double avgUserTemp = 0;
-        if (userTempList != null) {
-            avgUserTemp = userTempList.stream()
-                    .mapToDouble(v -> v)
-                    .average()
-                    .getAsDouble();
-        }
 
         Fragment f = new QR_code_fragment();
         Bundle args = new Bundle();
@@ -473,9 +467,15 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     private void saveMeasurementToJson() {
+        if (userTempList != null) {
+            avgUserTemp = userTempList.stream()
+                    .mapToDouble(v -> v)
+                    .average()
+                    .getAsDouble();
+        }
 
         try {
-            JSONObject obj = measurementAccessObject.newEntry(userTemp, new Date());
+            JSONObject obj = measurementAccessObject.newEntry(avgUserTemp, new Date());
             measurementAccessObject.write(getContext(), obj, true);
         } catch (JSONException | IOException e) {
             Log.e(TAG, "Something went wrong while saving measurement to JSON " + e);

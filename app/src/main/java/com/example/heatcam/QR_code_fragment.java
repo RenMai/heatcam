@@ -43,7 +43,7 @@ public class QR_code_fragment extends Fragment {
     private final int HIGH_TEMP_LINE_TEXT_COLOR = Color.rgb(129, 48, 48);
 
     // at which y coordinate to draw the horizontal line to indicate high temp
-    private float highTempLineValue = 38f;
+    private float highTempLineValue = 37.5f;
 
     private TextView text, text1, text2;
     private ImageView imgView;
@@ -58,6 +58,8 @@ public class QR_code_fragment extends Fragment {
 
     private ArrayList<Double> previouslyMeasuredTemps;
     private double userTemp;
+
+    private LineData graphData;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -109,8 +111,7 @@ public class QR_code_fragment extends Fragment {
 
         previouslyMeasuredTemps = new ArrayList<>();
         getPreviousMeasurements();
-        initChart();
-
+        graphData = initChartData();
         // uncomment in the future
         /*
         if (previouslyMeasuredTemps.size() > 0) {
@@ -123,6 +124,7 @@ public class QR_code_fragment extends Fragment {
             }
         }
          */
+        initChart();
 
 
         task_timer = new Timer();
@@ -164,13 +166,15 @@ public class QR_code_fragment extends Fragment {
     }
 
     private boolean checkForHighTemp() {
-        double avgFromPrevious = previouslyMeasuredTemps.stream()
-                .mapToDouble(v -> v)
-                .average()
-                .getAsDouble();
-
+        if (previouslyMeasuredTemps != null && previouslyMeasuredTemps.size() > 0) {
+            double avgFromPrevious = previouslyMeasuredTemps.stream()
+                    .mapToDouble(v -> v)
+                    .average()
+                    .getAsDouble();
+            highTempLineValue = (float) avgFromPrevious;
+        }
         // probably need to change this logic
-        return userTemp > avgFromPrevious;
+        return userTemp > highTempLineValue;
     }
 
     private void getPreviousMeasurements() {
@@ -202,11 +206,12 @@ public class QR_code_fragment extends Fragment {
         yAxis.setTextSize(20f);
         yAxis.setTextColor(Color.WHITE);
         //yAxis.setDrawLabels(false);
+        //yAxis.setLabelCount(3);
         yAxis.setValueFormatter(new YAxisValueFormatter());
         yAxis.setDrawGridLines(false);
 
         String highTempLineText = (String) getContext().getResources().getText(R.string.high_temp_line_text);
-        LimitLine limitLine = new LimitLine(highTempLineValue, highTempLineText);
+        LimitLine limitLine = new LimitLine(highTempLineValue);
         limitLine.setTextColor(HIGH_TEMP_LINE_TEXT_COLOR);
         limitLine.setTextSize(18f);
         limitLine.setLineWidth(3f);
@@ -224,13 +229,13 @@ public class QR_code_fragment extends Fragment {
         measuresChart.getAxisRight().setEnabled(false);
         measuresChart.getLegend().setTextSize(20f);
 
-        initChartData();
+        measuresChart.setData(graphData);
 
         measuresChart.getLegend().setTextColor(Color.WHITE);
-
+        measuresChart.setTouchEnabled(true);
     }
 
-    private void initChartData() {
+    private LineData initChartData() {
         ArrayList<Entry> measurements = new ArrayList<>();
         ArrayList<Entry> userMeasurement = new ArrayList<>();
         //Drawable testDrawable = new BitmapDrawable(getResources(), BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
@@ -270,7 +275,7 @@ public class QR_code_fragment extends Fragment {
         // so we can color the last dot in the graph with different color
         // TODO: use userTemp variable from bundle arguments instead of reading JSON
         try {
-            userMeasurement.add(new Entry(z, (float) measurementsJSON.getJSONObject(measurementsJSON.length()-1).getDouble("Measured")));
+            userMeasurement.add(new Entry(z, (float) measurementsJSON.getJSONObject(measurementsJSON.length()-1).getDouble("Measured") + 15));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -315,7 +320,7 @@ public class QR_code_fragment extends Fragment {
         dataSet.add(lineDataSet);
         dataSet.add(userDataSet);
         LineData data = new LineData(dataSet);
-        measuresChart.setData(data);
+        return data;
     }
 
     @Override
