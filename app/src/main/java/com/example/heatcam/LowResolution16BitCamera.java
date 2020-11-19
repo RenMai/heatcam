@@ -46,8 +46,6 @@ public class LowResolution16BitCamera extends LeptonCamera {
                 ((MeasurementStartFragment) getCameraListener()).updateData(td);
             }
 
-            getCameraListener().maxCelsiusValue(kelvinToCelsius(max));
-            getCameraListener().minCelsiusValue(kelvinToCelsius(min));
             int minFilterKelvin = min;
             int maxFilterKelvin = max;
             if(maxFilter > 0) {
@@ -63,7 +61,12 @@ public class LowResolution16BitCamera extends LeptonCamera {
             bMap = Bitmap.createBitmap(bMap, 0,0, bMap.getWidth(), bMap.getHeight(), m, true);
 
             Bitmap scaledBMap = ScaledHeatmap.scaleHeatmap(min, max, minFilterKelvin, maxFilterKelvin, getRawFrame());
-            getCameraListener().updateImage(scaledBMap);
+
+            if (getCameraListener() != null) {
+                getCameraListener().updateImage(scaledBMap);
+                getCameraListener().maxCelsiusValue(kelvinToCelsius(max));
+                getCameraListener().minCelsiusValue(kelvinToCelsius(min));
+            }
             //getCameraListener().updateText(""+ kelvinToCelsius(maxRaw));
             max = 0;
             min = 0;

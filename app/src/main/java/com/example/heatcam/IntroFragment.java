@@ -1,6 +1,7 @@
 package com.example.heatcam;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.PointF;
 import android.graphics.drawable.AnimationDrawable;
 import android.hardware.camera2.CameraAccessException;
@@ -24,6 +25,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
 
 import com.google.mlkit.common.MlKitException;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
@@ -43,7 +45,7 @@ public class IntroFragment extends Fragment {
 
     private final int AVERAGE_EYE_DISTANCE = 63; // in mm
 
-    private TextView txtV;
+    //private TextView txtV;
 
 
     @Nullable
@@ -53,7 +55,7 @@ public class IntroFragment extends Fragment {
 
         view.setKeepScreenOn(true);
 
-        txtV = view.findViewById(R.id.txtDist);
+       // txtV = view.findViewById(R.id.txtDist);
 
         //moving background
         ConstraintLayout constraintLayout = (ConstraintLayout) view.findViewById(R.id.ConstraintLayout);
@@ -77,8 +79,26 @@ public class IntroFragment extends Fragment {
                             bindAllCameraUseCases();
                         }
                 );
+        try {
+            checkCamera(view.getContext());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         return view;
+    }
+
+    private void checkCamera(Context context) {
+        SerialPortModel serialPortModel = SerialPortModel.getInstance();
+        if(!serialPortModel.hasCamera()) {
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+            LowResolution16BitCamera cam = new LowResolution16BitCamera();
+            cam.setMaxFilter(sharedPrefs.getFloat(getString(R.string.preference_max_filter), -1));
+            cam.setMinFilter(sharedPrefs.getFloat(getString(R.string.preference_min_filter), -1));
+            serialPortModel.setSioListener(cam);
+            serialPortModel.scanDevices(context);
+        }
     }
 
     private void getCameraProperties() {
@@ -194,8 +214,8 @@ public class IntroFragment extends Fragment {
             dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorY) * (imgHeight / deltaY) / 100;
         }
 
-        float finalDist = dist;
-        getActivity().runOnUiThread(() -> txtV.setText("D: " + finalDist));
+//        float finalDist = dist;
+//        getActivity().runOnUiThread(() -> txtV.setText("D: " + finalDist));
 
         if (dist > 0 && dist < 600) {
             switchToMeasurementStartFragment();

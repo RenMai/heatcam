@@ -67,6 +67,7 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
     private SeekBar sliderAngle;
     private SeekBar sliderSpeed;
     private SeekBar sliderCamMode;
+    private SeekBar transparency;
     private int sliderAngleMin = 22;
     private int sliderSpeedMin = 2;
     private TextView angleText;
@@ -102,11 +103,11 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
         kerroinTeksti = view.findViewById(R.id.kerroinText);
         resoTeksti = view.findViewById(R.id.resot);
         temperature = view.findViewById(R.id.temperature);
+        transparency = view.findViewById(R.id.transparency);
+        transparency.setProgress(HybridImageOptions.transparency);
         temperature.setChecked(HybridImageOptions.temperature);
         bounds = view.findViewById(R.id.facebounds);
         bounds.setChecked(HybridImageOptions.facebounds);
-        opacity = view.findViewById(R.id.opacity);
-        opacity.setChecked(HybridImageOptions.opacity);
         smooth = view.findViewById(R.id.smooth);
         smooth.setChecked(HybridImageOptions.smooth);
 
@@ -180,9 +181,19 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
             HybridImageOptions.smooth = ((CheckBox) v).isChecked();
             getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putBoolean("smooth", HybridImageOptions.smooth).apply();
         });
-        view.findViewById(R.id.opacity).setOnClickListener(v -> {
-            HybridImageOptions.opacity = ((CheckBox) v).isChecked();
-            getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putBoolean("opacity", HybridImageOptions.opacity).apply();
+        transparency.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                getContext().getSharedPreferences("heatmapPrefs", Context.MODE_PRIVATE).edit().putInt("transparency", HybridImageOptions.transparency).apply();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) { }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
+                HybridImageOptions.transparency = progress;
+            }
         });
         view.findViewById(R.id.temperature).setOnClickListener(v -> {
             HybridImageOptions.temperature = ((CheckBox) v).isChecked();

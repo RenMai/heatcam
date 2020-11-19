@@ -1,27 +1,22 @@
 package com.example.heatcam;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Shader;
-import android.graphics.drawable.GradientDrawable;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Size;
 import android.util.SizeF;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,21 +30,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageProxy;
-import androidx.camera.core.Preview;
-import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.PreviewView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 
-import com.google.mlkit.common.MlKitException;
 import com.google.mlkit.vision.face.Face;
-import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
 
 import org.json.JSONException;
@@ -63,7 +48,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class MeasurementStartFragment extends Fragment implements CameraListener, HybridImageListener {
 
@@ -331,7 +315,14 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                     //double c = Math.sqrt(Math.pow(dist, 2) + Math.pow(objHeight, 2));
                     int a = (int) Math.round(Math.sin(realObjHeight*0.8 / dist)*100) *100;
                     if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
-                        setTiltAngle = currentTiltAngle - a;
+                        int angle = currentTiltAngle - a;
+                        if (setTiltAngle < 2200) {
+                            setTiltAngle = 2200;
+                        } else if (setTiltAngle > 9500) {
+                            setTiltAngle = 9500;
+                        } else {
+                            setTiltAngle = angle;
+                        }
                         serialPortModel.changeTiltAngle((setTiltAngle) /100);
                         System.out.println("angle correction " + a);
                         getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(a)));
@@ -429,7 +420,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             idleExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    changeToMenuLayout();
+                    changeLayout();
                 }
             }, 60, TimeUnit.SECONDS);
         }
@@ -442,9 +433,9 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         }
     }
 
-    private void changeToMenuLayout() {
+    private void changeLayout() {
         hbb.setMsfNull();
-        Fragment f = new MenuFragment();
+        Fragment f = new IntroFragment();
         getActivity().getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
                 .replace(R.id.fragmentCamera, f, "menu").commit();

@@ -207,24 +207,14 @@
         app:layout_constraintTop_toBottomOf="@+id/kerroinText" />
 
     <CheckBox
-        android:id="@+id/opacity"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="12dp"
-        android:checked="true"
-        android:text="Opacity"
-        app:layout_constraintStart_toEndOf="@+id/oikea"
-        app:layout_constraintTop_toBottomOf="@+id/oikea" />
-
-    <CheckBox
         android:id="@+id/facebounds"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:checked="true"
         android:text="Face Bounds"
-        app:layout_constraintStart_toStartOf="@+id/opacity"
-        app:layout_constraintTop_toBottomOf="@+id/opacity" />
+        app:layout_constraintStart_toStartOf="@+id/transparency"
+        app:layout_constraintTop_toBottomOf="@+id/transparency" />
 
     <CheckBox
         android:id="@+id/temperature"
@@ -306,6 +296,25 @@
         android:text="Mode"
         app:layout_constraintEnd_toEndOf="@+id/seekBarCamMode"
         app:layout_constraintTop_toBottomOf="@+id/seekBarCamMode" />
+
+    <SeekBar
+        android:id="@+id/transparency"
+        android:layout_width="123dp"
+        android:layout_height="21dp"
+        android:layout_marginTop="8dp"
+        android:max="255"
+        android:progress="200"
+        app:layout_constraintStart_toEndOf="@+id/oikea"
+        app:layout_constraintTop_toBottomOf="@+id/oikea" />
+
+    <TextView
+        android:id="@+id/transparencyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="Transparency"
+        app:layout_constraintBottom_toTopOf="@+id/transparency"
+        app:layout_constraintEnd_toEndOf="@+id/transparency" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
