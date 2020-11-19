@@ -12,7 +12,7 @@
     <string name="start_layout_info_text">Peitä ovaalin alue naamallasi aloittaaksesi lämpötilasi arvioinnin.\n\nVideokuvaa ei tallenneta mihinkään.</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hei tyhjä fragmentti</string>
-    <string name="qr_instruction">Skannaa QR-koodi puhelimen kameralla antaaksesi palautetta kokemuksestasi</string>
+    <string name="qr_instruction">Skannaa QR-koodi puhelimen kameralla antaaksesi palautetta kokemuksestasi.</string>
     <string name="FeedBack">Kuulemme innolla kokemuksestanne tuotteemme parissa.</string>
 
     <!-- PREFERENCE KEYS -->
