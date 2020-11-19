@@ -108,8 +108,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.measurement_start_layout, container, false);
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
-        timerDelay = Integer.parseInt(sharedPrefs.getString("PREFERENCE_TILT_CORRECTION_DELAY", "200"));
+        SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+        timerDelay = Integer.parseInt(sharedPrefs.getString("PREFERENCE_TILT_CORRECTION_DELAY", "800"));
         // prevent app from dimming
         view.setKeepScreenOn(true);
         ConstraintLayout cl = (ConstraintLayout)view.findViewById(R.id.ConstraintLayout);

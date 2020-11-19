@@ -43,6 +43,14 @@
         android:defaultValue="1000"
         app:useSimpleSummaryProvider="true" />
 
+    <EditTextPreference
+        app:key="PREFERENCE_MEASURE_START_MIN_DISTANCE"
+        app:title="Distance requirement for measure start fragment"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="500"
+        app:useSimpleSummaryProvider="true" />
+
     <ListPreference
         app:key="list"
         app:title="List"
