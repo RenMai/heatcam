@@ -27,7 +27,7 @@ public class ExitAutoDialogFragment extends DialogFragment {
         View pView = inflater.inflate(R.layout.enter_password_dialog, null);
 
         builder.setView(pView);
-            builder.setMessage("Enter password to exit auto mode.");
+            builder.setMessage(R.string.enter_password_to_exit_msg);
             builder.setPositiveButton("OK", (dialog, id) -> {
                 editTextPassword = pView.findViewById(R.id.input_password);
                if (editTextPassword.getText().toString().equals("heatcam123")) {
@@ -38,9 +38,9 @@ public class ExitAutoDialogFragment extends DialogFragment {
                     MainActivity.setAutoMode(false);
                 } else if (editTextPassword.getText().toString().equals("")) {
                     //MainActivity.setAutoMode(true);
-                   Toast.makeText(getContext(), "Password was not entered", Toast.LENGTH_SHORT).show();
+                   Toast.makeText(getContext(), R.string.no_password_msg, Toast.LENGTH_SHORT).show();
                 } else {
-                   Toast.makeText(getContext(), "Wrong password", Toast.LENGTH_SHORT).show();
+                   Toast.makeText(getContext(), R.string.wrong_password_msg, Toast.LENGTH_SHORT).show();
                }
             });
         // User cancelled the dialog
