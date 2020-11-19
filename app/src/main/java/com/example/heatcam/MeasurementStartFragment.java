@@ -255,7 +255,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         return null;
     }
 
-    public void facePositionCheck(Face face, int imgWidth, int imgHeight) {
+    public float facePositionCheck(Face face, int imgWidth, int imgHeight) {
 
         float middleX = imgWidth / 2f;
         float middleY = imgHeight / 2.05f; // joutuu sit säätää tabletille tää ja deviation
@@ -360,7 +360,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         }
         updateProgress();
-
+        return et;
     }
 
     private void updateProgress() {
@@ -380,7 +380,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         if(live != null){
             width = live.getWidth(); height = live.getHeight();
         }
-        facePositionCheck(face, width, height);
+        float dist = facePositionCheck(face, width, height);
 
         // getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(laskuri)));
         if (ready) {
@@ -388,7 +388,10 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                 userTempList = new ArrayList<>();
             }
             if (laskuri < 35) {
-                userTempList.add(hbb.getHighestFaceTemperature());
+                float distDiff = (dist - 250)/100;
+                float correction = distDiff * 0.404f *(-1);
+                double correctedTemp = hbb.getHighestFaceTemperature() + correction - 0.8;
+                userTempList.add(correctedTemp);
 
                 if (hbb.getHighestFaceTemperature() > userTemp) {
                     userTemp = hbb.getHighestFaceTemperature();
