@@ -42,4 +42,5 @@
     <string name="wrong_password_msg">Väärä salasana</string>
     <string name="no_password_msg">Salasanaa ei syötetty</string>
     <string name="enter_password_to_exit_msg">Anna salasana poistuaksesi automaattitilasta.</string>
+    <string name="passwordHint">salasana</string>
 </resources>
