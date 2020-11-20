@@ -28,7 +28,7 @@
     <string name="information_about_App">Tietoa sovelluksesta</string>
     <string name="idea_of_App">Sovelluksen idea on arvioida käyttäjän lämpöä. Mittaustulos ei ole absoluuttinen vaan suuntaa-antava.</string>
     <string name="about_thermalCamera">Mittaukseen käytetään lämpökameraa, joka on sijoitettu tabletin yläosaan.</string>
-    <string name="who_developed">Sovelluskehittäjät:Toni Hämäläinen,\n Miika Ponkilainen, Eero Tuure,\nVadim Zubchenko, Jukka Övermark.\nSovellus on osa Metropolian innovaatioprojekteja ja on toteutettu yhteistyössä LeViteZer oy:n kanssa.</string>
+    <string name="who_developed">Sovelluskehittäjät:Toni Hämäläinen,\nMiika Ponkilainen, Eero Tuure,\nVadim Zubchenko, Jukka Övermark.\nSovellus on osa Metropolian innovaatioprojekteja ja on toteutettu yhteistyössä LeViteZer oy:n kanssa.</string>
     <string name="your_distance">Etäisyytesi</string>
 
     <!-- Graph text -->
