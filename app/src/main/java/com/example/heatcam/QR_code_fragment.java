@@ -275,7 +275,7 @@ public class QR_code_fragment extends Fragment {
         // so we can color the last dot in the graph with different color
         // TODO: use userTemp variable from bundle arguments instead of reading JSON
         try {
-            userMeasurement.add(new Entry(z, (float) measurementsJSON.getJSONObject(measurementsJSON.length()-1).getDouble("Measured") + 15));
+            userMeasurement.add(new Entry(z, (float) measurementsJSON.getJSONObject(measurementsJSON.length()-1).getDouble("Measured")));
         } catch (JSONException e) {
             e.printStackTrace();
         }
