@@ -19,13 +19,12 @@
     <string name="preference_oval_pos_from_top">PREFERENCE_OVAL_POS_FROM_TOP</string>
 
     <!-- Intro_fragment's text -->
-    <string name="instruction">If you have just come from outside, please wait for at least 10 minutes indoors before measuring.\n\nIf you want to start using the app, just step a little closer. Then follow the instructions on the screen.</string>
+    <string name="instruction">If you just came from outside, please wait for at least 10 minutes indoors before measuring.\n\nIf you want to get your temperature measured, just step a little closer. Then follow the instructions on the screen.</string>
     <string name="information_about_App">About the Application</string>
-    <string name="idea_of_App">The idea of ​​the app is to estimate the user\'s temperature. The measurement result is not absolute but indicative.</string>
-    <string name="about_thermalCamera">There\'s a thermal camera at the top of the tablet, which is used for the measurement.</string>
-    <string name="who_developed"> Developed by Toni Hämäläinen,\nMiika Ponkilainen, Eero Tuure,\nVadim Zubchenko, Jukka Övermark.\nThe application is a part of Metropolia\'s innovation projects and has been implemented in cooperation with \nLeViteZer oy.\n </string>
+    <string name="idea_of_App">The idea of the app is to estimate the user\'s temperature. The measured result is not absolute but indicative.</string>
+    <string name="about_thermalCamera">There\'s a thermal camera at the top of the tablet which is used for the measurement.</string>
+    <string name="who_developed"> Developed by Toni Hämäläinen,\nMiika Ponkilainen, Eero Tuure,\nVadim Zubchenko, Jukka Övermark.\nThe application is a part of Metropolia\'s innovation projects and has been implemented in cooperation with \nLeViteZer.\n </string>
     <string name="your_distance">Your Distance</string>
-    <string name="passwordHint">password</string>
 
     <!-- Graph text -->
     <string name="prev_measurements">Measurements</string>
@@ -33,4 +32,10 @@
     <string name="vertical_temp_text">T\ne\nm\np\ne\nr\na\nt\nu\nr\ne</string>
 
     <string name="high_temp_line_text">High temp</string>
+    
+    <!-- ExitAutoDialogFragment text -->
+    <string name="wrong_password_msg">Wrong password</string>
+    <string name="no_password_msg">Password was not entered</string>
+    <string name="enter_password_to_exit_msg">Enter password to exit auto mode.</string>
+    <string name="passwordHint">password</string>
 </resources>

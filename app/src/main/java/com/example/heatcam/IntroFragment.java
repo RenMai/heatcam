@@ -45,6 +45,7 @@ public class IntroFragment extends Fragment {
 
     private final int AVERAGE_EYE_DISTANCE = 63; // in mm
 
+    private int minDistanceToMeasure = 500;
     //private TextView txtV;
 
 
@@ -52,7 +53,8 @@ public class IntroFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.intro_fragment, container, false);
-
+        SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+        minDistanceToMeasure = Integer.parseInt(sharedPrefs.getString("PREFERENCE_MEASURE_START_MIN_DISTANCE", "500"));
         view.setKeepScreenOn(true);
 
        // txtV = view.findViewById(R.id.txtDist);
@@ -92,13 +94,17 @@ public class IntroFragment extends Fragment {
     private void checkCamera(Context context) {
         SerialPortModel serialPortModel = SerialPortModel.getInstance();
         if(!serialPortModel.hasCamera()) {
-            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
             LowResolution16BitCamera cam = new LowResolution16BitCamera();
             cam.setMaxFilter(sharedPrefs.getFloat(getString(R.string.preference_max_filter), -1));
             cam.setMinFilter(sharedPrefs.getFloat(getString(R.string.preference_min_filter), -1));
             serialPortModel.setSioListener(cam);
             serialPortModel.scanDevices(context);
+            serialPortModel.changeTiltSpeed(7);
+        } else {
+            serialPortModel.changeTiltAngle(75);
         }
+
     }
 
     private void getCameraProperties() {
@@ -217,7 +223,7 @@ public class IntroFragment extends Fragment {
 //        float finalDist = dist;
 //        getActivity().runOnUiThread(() -> txtV.setText("D: " + finalDist));
 
-        if (dist > 0 && dist < 600) {
+        if (dist > 0 && dist < minDistanceToMeasure) {
             switchToMeasurementStartFragment();
         }
     }

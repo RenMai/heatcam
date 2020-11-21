@@ -1,27 +1,22 @@
 package com.example.heatcam;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Shader;
-import android.graphics.drawable.GradientDrawable;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Size;
 import android.util.SizeF;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,21 +30,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageProxy;
-import androidx.camera.core.Preview;
-import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.PreviewView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 
-import com.google.mlkit.common.MlKitException;
 import com.google.mlkit.vision.face.Face;
-import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
 
 import org.json.JSONException;
@@ -63,7 +48,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class MeasurementStartFragment extends Fragment implements CameraListener, HybridImageListener {
 
@@ -89,6 +73,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private Rect naamarajat;
 
     private double userTemp = 0;
+    private double avgUserTemp = 0;
     private List<Double> userTempList;
 
     private int laskuri = 0;
@@ -124,8 +109,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.measurement_start_layout, container, false);
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
-        timerDelay = Integer.parseInt(sharedPrefs.getString("PREFERENCE_TILT_CORRECTION_DELAY", "200"));
+        SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+        timerDelay = Integer.parseInt(sharedPrefs.getString("PREFERENCE_TILT_CORRECTION_DELAY", "800"));
         // prevent app from dimming
         view.setKeepScreenOn(true);
         ConstraintLayout cl = (ConstraintLayout)view.findViewById(R.id.ConstraintLayout);
@@ -255,12 +240,12 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         return null;
     }
 
-    public void facePositionCheck(Face face, int imgWidth, int imgHeight) {
+    public float facePositionCheck(Face face, int imgWidth, int imgHeight) {
 
         float middleX = imgWidth / 2f;
-        float middleY = imgHeight / 2.05f; // joutuu sit säätää tabletille tää ja deviation
-        float maxDeviation = 25f; // eli max +- pixel heitto sijaintiin
-
+        float middleY =  imgHeight / 2.2f; //2.146f; //imgHeight / 2.05f; // joutuu sit säätää tabletille tää ja deviation
+        float maxDeviationX = 25f; // eli max +- pixel heitto sijaintiin
+        float maxDeviationY = 15f;
         PointF noseP = face.getLandmark(FaceLandmark.NOSE_BASE).getPosition();
         PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
         PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
@@ -277,8 +262,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         //System.out.println(imgWidth+" "+imgWidth + " dist");
 
-        boolean xOK = noseP.x > (middleX - maxDeviation) && noseP.x < (middleX + maxDeviation);
-        boolean yOK = noseP.y > (middleY - maxDeviation) && noseP.y < (middleY + maxDeviation);
+        boolean xOK = noseP.x > (middleX - maxDeviationX) && noseP.x < (middleX + maxDeviationX);
+        boolean yOK = noseP.y > (middleY - maxDeviationY) && noseP.y < (middleY + maxDeviationY);
 
         int offset = 50;
         float et = dist;
@@ -307,6 +292,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         if(dist < 500 && !yOK) {
             synchronized (this) {
 
+                /*
                 if(currentTiltAngle == setTiltAngle && tiltTimerRunning && !isAtSetAngle) {
                     isAtSetAngle = true;
                     tiltTimer.schedule(new TimerTask() {
@@ -315,9 +301,9 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                             tiltTimerRunning = false;
                         }
                     }, timerDelay);
-                }
+                }*/
 
-                if(!tiltTimerRunning && isAtSetAngle ) {
+                if(!tiltTimerRunning /*&&isAtSetAngle*/ ) {
                     tiltTimerRunning = true;
                     isAtSetAngle = false;
                     // single angle correction. e.g. value 200 == 2 degrees
@@ -327,7 +313,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                     float realObjHeight = (dist * objHeightSensor) / focalLength;
                     System.out.println("realObjHeight : " + realObjHeight);
                     //double c = Math.sqrt(Math.pow(dist, 2) + Math.pow(objHeight, 2));
-                    int a = (int) Math.round(Math.sin(realObjHeight*0.8 / dist)*100) *100;
+                    int a = (int) Math.round(Math.sin(realObjHeight*0.7 / dist)*100) *100;
                     if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
                         int angle = currentTiltAngle - a;
                         if (setTiltAngle < 2200) {
@@ -338,36 +324,22 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                             setTiltAngle = angle;
                         }
                         serialPortModel.changeTiltAngle((setTiltAngle) /100);
+                        tiltTimer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                tiltTimerRunning = false;
+                            }
+                        }, timerDelay);
                         System.out.println("angle correction " + a);
                         getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(a)));
 
                     }
-/*
-                    // higher tilt angle == is more rotated towards floor
-                    // rotate up if head pos is high
-                    if(noseP.y < (middleY - maxDeviation)){
-                        // just to make sure currentTiltAngle value isn't fucked
-                        if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
-                            serialPortModel.changeTiltAngle((currentTiltAngle - correctionAngle ) /100);
-
-                        }
-                    }
-                    // rotate down if head pos is low
-                    else if(noseP.y > (middleY + maxDeviation)){
-                        if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
-                            serialPortModel.changeTiltAngle((currentTiltAngle + correctionAngle ) /100);
-
-                        }
-                    }
-
-
- */
                 }
             }
 
         }
         updateProgress();
-
+        return et;
     }
 
     private void updateProgress() {
@@ -387,7 +359,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         if(live != null){
             width = live.getWidth(); height = live.getHeight();
         }
-        facePositionCheck(face, width, height);
+        float dist = facePositionCheck(face, width, height);
 
         // getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(laskuri)));
         if (ready) {
@@ -395,7 +367,10 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                 userTempList = new ArrayList<>();
             }
             if (laskuri < 35) {
-                userTempList.add(hbb.getHighestFaceTemperature());
+                float distDiff = (dist - 250)/100;
+                float correction = distDiff * 0.404f *(-1);
+                double correctedTemp = hbb.getHighestFaceTemperature() + correction - 0.8;
+                userTempList.add(correctedTemp);
 
                 if (hbb.getHighestFaceTemperature() > userTemp) {
                     userTemp = hbb.getHighestFaceTemperature();
@@ -431,7 +406,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             idleExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    changeToMenuLayout();
+                    changeLayout();
                 }
             }, 60, TimeUnit.SECONDS);
         }
@@ -444,9 +419,9 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         }
     }
 
-    private void changeToMenuLayout() {
+    private void changeLayout() {
         hbb.setMsfNull();
-        Fragment f = new MenuFragment();
+        Fragment f = new IntroFragment();
         getActivity().getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
                 .replace(R.id.fragmentCamera, f, "menu").commit();
@@ -454,13 +429,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     private void changeToResultLayout() {
         hbb.setMsfNull();
-        double avgUserTemp = 0;
-        if (userTempList != null) {
-            avgUserTemp = userTempList.stream()
-                    .mapToDouble(v -> v)
-                    .average()
-                    .getAsDouble();
-        }
 
         Fragment f = new QR_code_fragment();
         Bundle args = new Bundle();
@@ -489,9 +457,15 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     private void saveMeasurementToJson() {
+        if (userTempList != null) {
+            avgUserTemp = userTempList.stream()
+                    .mapToDouble(v -> v)
+                    .average()
+                    .getAsDouble();
+        }
 
         try {
-            JSONObject obj = measurementAccessObject.newEntry(userTemp, new Date());
+            JSONObject obj = measurementAccessObject.newEntry(avgUserTemp, new Date());
             measurementAccessObject.write(getContext(), obj, true);
         } catch (JSONException | IOException e) {
             Log.e(TAG, "Something went wrong while saving measurement to JSON " + e);

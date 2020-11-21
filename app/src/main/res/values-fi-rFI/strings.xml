@@ -12,7 +12,7 @@
     <string name="start_layout_info_text">Peitä ovaalin alue naamallasi aloittaaksesi lämpötilasi arvioinnin.\n\nVideokuvaa ei tallenneta mihinkään.</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hei tyhjä fragmentti</string>
-    <string name="qr_instruction">Skannaa QR-koodi puhelimen kameralla antaaksesi palautetta kokemuksestasi</string>
+    <string name="qr_instruction">Skannaa QR-koodi puhelimen kameralla antaaksesi palautetta kokemuksestasi.</string>
     <string name="FeedBack">Kuulemme innolla kokemuksestanne tuotteemme parissa.</string>
 
     <!-- PREFERENCE KEYS -->
@@ -28,7 +28,7 @@
     <string name="information_about_App">Tietoa sovelluksesta</string>
     <string name="idea_of_App">Sovelluksen idea on arvioida käyttäjän lämpöä. Mittaustulos ei ole absoluuttinen vaan suuntaa-antava.</string>
     <string name="about_thermalCamera">Mittaukseen käytetään lämpökameraa, joka on sijoitettu tabletin yläosaan.</string>
-    <string name="who_developed">Sovelluskehittäjät:Toni Hämäläinen,\n Miika Ponkilainen, Eero Tuure,\nVadim Zubchenko, Jukka Övermark.\nSovellus on osa Metropolian innovaatioprojekteja ja on toteutettu yhteistyössä LeViteZer oy:n kanssa.</string>
+    <string name="who_developed">Sovelluskehittäjät:Toni Hämäläinen,\nMiika Ponkilainen, Eero Tuure,\nVadim Zubchenko, Jukka Övermark.\nSovellus on osa Metropolian innovaatioprojekteja ja on toteutettu yhteistyössä LeViteZer oy:n kanssa.</string>
     <string name="your_distance">Etäisyytesi</string>
 
     <!-- Graph text -->
@@ -37,4 +37,10 @@
     <string name="vertical_temp_text">L\nä\nm\np\nö\nt\ni\nl\na</string>
 
     <string name="high_temp_line_text">Korkean raja</string>
+    
+    <!-- ExitAutoDialogFragment text -->
+    <string name="wrong_password_msg">Väärä salasana</string>
+    <string name="no_password_msg">Salasanaa ei syötetty</string>
+    <string name="enter_password_to_exit_msg">Anna salasana poistuaksesi automaattitilasta.</string>
+    <string name="passwordHint">Salasana</string>
 </resources>
