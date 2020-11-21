@@ -239,28 +239,20 @@ public class QR_code_fragment extends Fragment {
         ArrayList<Entry> measurements = new ArrayList<>();
         ArrayList<Entry> userMeasurement = new ArrayList<>();
         //Drawable testDrawable = new BitmapDrawable(getResources(), BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-        int y = -1;
         int z = 0;
         // we want to get only the last 11 measurements, the last will be the most recent measurement
         // meaning the last is what the user just measured
-        if (measurementsJSON.length() > 11) { // if there are more than 6 measurements
-            for (int x = 0; x < measurementsJSON.length(); x++) {
-                if (x + 11 == measurementsJSON.length()) { // to check if there are only 6 left in JSON
-                    y = x;
+        if (measurementsJSON.length() > 11) { // if there are more than 11 measurements
+            for (int x = measurementsJSON.length() - 11; x < measurementsJSON.length() - 1; x++) {
+                try {
+                    measurements.add(new Entry(z, (float) measurementsJSON.getJSONObject(x).getDouble("Measured")));
+                    previouslyMeasuredTemps.add(measurementsJSON.getJSONObject(x).getDouble("Measured"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                if (y != -1 && y < measurementsJSON.length() - 1) { // we loop through the last indexes
-                    try {
-                        measurements.add(new Entry(z, (float) measurementsJSON.getJSONObject(y).getDouble("Measured")/*, testDrawable*/));
-                        previouslyMeasuredTemps.add(measurementsJSON.getJSONObject(y).getDouble("Measured"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    y++;
-                    z++;
-                }
-
+                z++;
             }
-        } else { // there are less than 11 measurements so we can just loop the json without tricks
+        } else { // there are less than 11 measurements so we can just loop the json
             for (int x = 0; x < measurementsJSON.length() - 1; x++) {
                 try {
                     measurements.add(new Entry(z, (float) measurementsJSON.getJSONObject(x).getDouble("Measured")));
