@@ -2,11 +2,11 @@
 <resources>
     <string name="app_name">Lämpökamera</string>
 
-    <string name="msgLowTmprt">Näyttää siltä, että kehosi lämpötila on matalampi kuin keskimääräinen kehon lämpötila.\n\n\n
-        Tuloksen saamisesta huolimatta sinun ei pitäisi huolestua, koska sovellus on testitilassa eikä sen tulosta voida käyttää lääketieteellisenä raporttina.</string>
+    <string name="msgLowTmprt">Näyttää siltä että ihosi on kylmä, tulitko juuri ulkoa? \n
+        Suorita mittaus 10 minuutin oleskelun jälkeen sisätiloissa uudestaan.\n\n
+        Huomaa myös että tämä laite on vielä koekäytössä ja saattaa antaa vääriä mittaustuloksia.</string>
     <string name="msgNormTmprt">Näyttää siltä, että kehosi lämpötila on normaalissa rajoissa.\n\n\nSovellus on testitilassa eikä sen tulosta voida käyttää lääketieteellisenä raporttina.</string>
-    <string name="msgHightTmprt">Näyttää siltä, että kehosi lämpötila on korkeampi kuin keskimääräinen kehon lämpötila.\n\n\n
-        Tuloksen saamisesta huolimatta sinun ei pitäisi huolestua, koska sovellus on testitilassa eikä sen tulosta voida käyttää lääketieteellisenä raporttina.</string>
+    <string name="msgHightTmprt">Näyttää siltä että lämpötilasi saattaa olla kohonnut, huomaa kuitenkin että tämä laite on vielä koekäytössä ja saattaa antaa vääriä mittaustuloksia.</string>
 
     <string name="title">LÄMPÖKAMERA</string>
     <string name="start_layout_info_text">Peitä ovaalin alue naamallasi aloittaaksesi lämpötilasi arvioinnin.\n\nVideokuvaa ei tallenneta mihinkään.</string>
