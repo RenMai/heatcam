@@ -5,7 +5,7 @@
     <string name="msgLowTmprt">Näyttää siltä että ihosi on kylmä.\nTulitko juuri ulkoa?\n\n
         Suorita mittaus 10 minuutin oleskelun jälkeen sisätiloissa uudestaan.\n\n
         Huomaa myös että tämä laite on vielä koekäytössä ja saattaa antaa vääriä mittaustuloksia.</string>
-    <string name="msgNormTmprt">Näyttää siltä, että kehosi lämpötila on normaalissa rajoissa.\n\n\nSovellus on testitilassa eikä sen tulosta voida käyttää lääketieteellisenä raporttina.</string>
+    <string name="msgNormTmprt">Näyttää siltä, että kehosi lämpötila on normaaleissa rajoissa.\n\n\nSovellus on testitilassa eikä sen tulosta voida käyttää lääketieteellisenä raporttina.</string>
     <string name="msgHightTmprt">Näyttää siltä että lämpötilasi saattaa olla kohonnut.\n\nHuomaa kuitenkin että tämä laite on vielä koekäytössä ja saattaa antaa vääriä mittaustuloksia.</string>
 
     <string name="title">LÄMPÖKAMERA</string>

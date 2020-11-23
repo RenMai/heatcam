@@ -179,9 +179,9 @@ public class HybridBitmapBuilder{
     }
 
     int yla,vasen,oikea,ala = 0;
-    List<HuippuLukema> lukemat = new ArrayList<>();
+    //List<HuippuLukema> lukemat = new ArrayList<>();
     private HuippuLukema laskeAlue(){
-        lukemat.clear();
+        //lukemat.clear();
         int[][] scaledTempFrame = ScaledHeatmap.scaledTempFrame;
         //huiput = new HuippuLukema();
         if(scaledTempFrame == null)
@@ -212,9 +212,9 @@ public class HybridBitmapBuilder{
                             temp.y = (int)(y*HybridImageOptions.scale) + HybridImageOptions.yOffset;
                             temp.x = (int)(x*HybridImageOptions.scale) + HybridImageOptions.xOffset;
 
-                            lukemat.add(temp);
-                            if(lukemat.size() > 5)
-                                lukemat.remove(0);
+                            //lukemat.add(temp);
+                            //if(lukemat.size() > 5)
+                             //   lukemat.remove(0);
                         }
                     }
                 }
@@ -224,7 +224,7 @@ public class HybridBitmapBuilder{
             //System.out.println(e.getMessage());
         }
 
-        //tulosten keskiarvotus
+        /*tulosten keskiarvotus
         if(lukemat.size() > 0){
             int x = 0, y = 0;
             double keskilampo = 0;
@@ -238,8 +238,8 @@ public class HybridBitmapBuilder{
             temp.max = Math.round(keskilampo/lukemat.size()*100.0)/100.0;
         }
 
-        if(temp.max > huiput.max+0.2 || temp.max < huiput.max-0.2)
-            huiput = temp;
+        if(temp.max > huiput.max+0.2 || temp.max < huiput.max-0.2)*/
+        huiput = temp;
 
         return huiput;
     }
