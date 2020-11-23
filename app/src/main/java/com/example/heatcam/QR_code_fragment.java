@@ -34,8 +34,8 @@ import java.util.TimerTask;
 public class QR_code_fragment extends Fragment {
 
     // min and max values for graph's yaxis
-    private final float YAXIS_MIN = 33f;
-    private final float YAXIS_MAX = 40f;
+    private float YAXIS_MIN = 33f;
+    private float YAXIS_MAX = 40f;
 
     private final int PREV_MEASUREMENT_COLOR = Color.rgb(36, 252, 223);
     private final int USER_MEASUREMENT_COLOR = Color.rgb(25, 45, 223);
@@ -207,6 +207,9 @@ public class QR_code_fragment extends Fragment {
         yAxis.setTextColor(Color.WHITE);
         //yAxis.setDrawLabels(false);
         //yAxis.setLabelCount(3);
+        yAxis.setLabelCount((int) YAXIS_MAX);
+        yAxis.setGranularityEnabled(true);
+        yAxis.setGranularity(1.0f);
         yAxis.setValueFormatter(new YAxisValueFormatter());
         yAxis.setDrawGridLines(false);
 
@@ -232,7 +235,7 @@ public class QR_code_fragment extends Fragment {
         measuresChart.setData(graphData);
 
         measuresChart.getLegend().setTextColor(Color.WHITE);
-        measuresChart.setTouchEnabled(true);
+        measuresChart.setTouchEnabled(false);
     }
 
     private LineData initChartData() {
@@ -247,6 +250,15 @@ public class QR_code_fragment extends Fragment {
                 try {
                     measurements.add(new Entry(z, (float) measurementsJSON.getJSONObject(x).getDouble("Measured")));
                     previouslyMeasuredTemps.add(measurementsJSON.getJSONObject(x).getDouble("Measured"));
+
+                    // check if temps are lower/higher than what we've set in YAXIS_MIN and MAX
+                    // so we can adjust the graphs min and max accordingly
+                    if (measurementsJSON.getJSONObject(x).getDouble("Measured") < YAXIS_MIN) {
+                        YAXIS_MIN = (float) Math.floor(measurementsJSON.getJSONObject(x).getDouble("Measured"));
+                    }
+                    if (measurementsJSON.getJSONObject(x).getDouble("Measured") > YAXIS_MAX) {
+                        YAXIS_MAX = (float) Math.ceil(measurementsJSON.getJSONObject(x).getDouble("Measured"));
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -256,6 +268,15 @@ public class QR_code_fragment extends Fragment {
             for (int x = 0; x < measurementsJSON.length() - 1; x++) {
                 try {
                     measurements.add(new Entry(z, (float) measurementsJSON.getJSONObject(x).getDouble("Measured")));
+
+                    // check if temps are lower/higher than what we've set in YAXIS_MIN and MAX
+                    // so we can adjust the graphs min and max accordingly
+                    if (measurementsJSON.getJSONObject(x).getDouble("Measured") < YAXIS_MIN) {
+                        YAXIS_MIN = (float) Math.floor(measurementsJSON.getJSONObject(x).getDouble("Measured"));
+                    }
+                    if (measurementsJSON.getJSONObject(x).getDouble("Measured") > YAXIS_MAX) {
+                        YAXIS_MAX = (float) Math.ceil(measurementsJSON.getJSONObject(x).getDouble("Measured"));
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -268,6 +289,15 @@ public class QR_code_fragment extends Fragment {
         // TODO: use userTemp variable from bundle arguments instead of reading JSON
         try {
             userMeasurement.add(new Entry(z, (float) measurementsJSON.getJSONObject(measurementsJSON.length()-1).getDouble("Measured")));
+
+            // check if temps are lower/higher than what we've set in YAXIS_MIN and MAX
+            // so we can adjust the graphs min and max accordingly
+            if (measurementsJSON.getJSONObject(measurementsJSON.length()-1).getDouble("Measured") < YAXIS_MIN) {
+                YAXIS_MIN = (float) Math.floor(measurementsJSON.getJSONObject(measurementsJSON.length()-1).getDouble("Measured"));
+            }
+            if (measurementsJSON.getJSONObject(measurementsJSON.length()-1).getDouble("Measured") > YAXIS_MAX) {
+                YAXIS_MAX = (float) Math.ceil(measurementsJSON.getJSONObject(measurementsJSON.length()-1).getDouble("Measured"));
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
