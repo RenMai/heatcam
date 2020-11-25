@@ -17,6 +17,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Size;
 import android.util.SizeF;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -229,6 +230,26 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         float fromTop = Float.parseFloat(sp.getString(getString(R.string.preference_oval_pos_from_top), "200"));
         canvas.drawOval(x - width, fromTop, x + width, height, paint);
         ((ImageView) view.findViewById(R.id.start_layout_oval_overlay)).setImageBitmap(overlay);
+    }
+
+    private Bitmap createFaceOval(SharedPreferences sp) {
+        Paint paint = new Paint();
+        paint.setShader(new LinearGradient(0, 0, 600, 960, Color.parseColor("#871019FF"), Color.parseColor("#85FB3A1F"), Shader.TileMode.MIRROR));
+        paint.setShader(new LinearGradient(600, 960, 1200, 1920, Color.parseColor("#85FB3A1F"), Color.parseColor("#871019FF"), Shader.TileMode.MIRROR));
+        paint.setAlpha(230);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setAntiAlias(true);
+
+        int ovalWidth = Integer.parseInt(sp.getString(getString(R.string.preference_oval_width), "750")) / 2;
+        int ovalHeight = Integer.parseInt(sp.getString(getString(R.string.preference_oval_height), "1300"));
+        float fromTop = Integer.parseInt(sp.getString(getString(R.string.preference_oval_pos_from_top), "200"));
+
+        return FaceOvalBuilder.create()
+                .setOverlaySize(new Size(1200, 1920))
+                .setPaint(paint)
+                .setOvalSize(new Size(ovalWidth, ovalHeight))
+                .setOvalPosition(new PointF(600, 960 + fromTop))
+                .build();
     }
 
     String getFrontFacingCameraId(CameraManager cManager) throws CameraAccessException {
