@@ -27,6 +27,7 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -38,12 +39,14 @@ public class QR_code_fragment extends Fragment {
     private float YAXIS_MAX = 40f;
 
     private final int PREV_MEASUREMENT_COLOR = Color.rgb(36, 252, 223);
-    private final int USER_MEASUREMENT_COLOR = Color.rgb(25, 45, 223);
+    private final int USER_MEASUREMENT_COLOR =  Color.rgb(6, 95, 174);//Color.rgb(25, 45, 223);
     private final int HIGH_TEMP_LINE_COLOR = Color.rgb(175, 70, 70);
     private final int HIGH_TEMP_LINE_TEXT_COLOR = Color.rgb(129, 48, 48);
+    private final int RISING_TEMP_LINE_COLOR = Color.rgb(235, 235, 91);
 
-    // at which y coordinate to draw the horizontal line to indicate high temp
-    private float highTempLineValue = 37.5f;
+    // at which y coordinate to draw the horizontal line to indicate high/rising temp
+    private float highTempLineValue = 38.1f;
+    private float risingTempLineValue = 37.4f;
 
     private TextView text, text1, text2;
     private ImageView imgView;
@@ -93,10 +96,10 @@ public class QR_code_fragment extends Fragment {
             userTemp = avgTemp;
             //text1.setText("Your temp was: " + temp);
             //text1.append("\nYour avg temp was: " + avgTemp);
-            if (37.5 >= temp && temp >= 35.5) {
+            if (37.4 > temp && temp >= 35.5) {
                 text1.setText(R.string.msgNormTmprt);
 
-            } else if (temp > 37.5) {
+            } else if (temp >= 37.4) {
                 text1.setText(R.string.msgHightTmprt);
             } else {
                 text1.setText(R.string.msgLowTmprt);
@@ -214,12 +217,17 @@ public class QR_code_fragment extends Fragment {
         yAxis.setDrawGridLines(false);
 
         String highTempLineText = (String) getContext().getResources().getText(R.string.high_temp_line_text);
-        LimitLine limitLine = new LimitLine(highTempLineValue);
-        limitLine.setTextColor(HIGH_TEMP_LINE_TEXT_COLOR);
-        limitLine.setTextSize(18f);
-        limitLine.setLineWidth(3f);
-        limitLine.setLineColor(HIGH_TEMP_LINE_COLOR);
-        yAxis.addLimitLine(limitLine);
+        LimitLine highTempLine = new LimitLine(highTempLineValue);
+        highTempLine.setTextColor(HIGH_TEMP_LINE_TEXT_COLOR);
+        highTempLine.setTextSize(18f);
+        highTempLine.setLineWidth(3f);
+        highTempLine.setLineColor(HIGH_TEMP_LINE_COLOR);
+        yAxis.addLimitLine(highTempLine);
+
+        LimitLine risingTempLine = new LimitLine(risingTempLineValue);
+        risingTempLine.setLineWidth(3f);
+        risingTempLine.setLineColor(RISING_TEMP_LINE_COLOR);
+        yAxis.addLimitLine(risingTempLine);
 
 
         measuresChart.setVisibleXRangeMaximum(10);
@@ -241,6 +249,9 @@ public class QR_code_fragment extends Fragment {
     private LineData initChartData() {
         ArrayList<Entry> measurements = new ArrayList<>();
         ArrayList<Entry> userMeasurement = new ArrayList<>();
+        // colors for red green and blue, depending on y axis value for measurement
+        // so the graph draws different color circles for measurements
+        List<Integer> colors = new ArrayList<>();
         //Drawable testDrawable = new BitmapDrawable(getResources(), BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
         int z = 0;
         // we want to get only the last 11 measurements, the last will be the most recent measurement
@@ -302,6 +313,20 @@ public class QR_code_fragment extends Fragment {
             e.printStackTrace();
         }
 
+       // green circle: normal temp, 35.5–37.3°C
+       // yellow circle: rising temp, 37.4–38°C
+       // red circle: fever, 38.1–43.0°C
+        for (Entry e : measurements) {
+            if (e.getY() < 43.0f && e.getY() > 38.1f) {
+                colors.add(Color.RED);
+            } else if (e.getY() < 38.0f && e.getY() > 37.4f) {
+                colors.add(Color.YELLOW);
+            } else if (e.getY() < 37.3f && e.getY() > 35.5) {
+                colors.add(Color.GREEN);
+            } else {
+                colors.add(Color.BLUE);
+            }
+        }
 
         LineDataSet lineDataSet;
         LineDataSet userDataSet;
@@ -315,15 +340,17 @@ public class QR_code_fragment extends Fragment {
         } else {
             // change style for measurements before the user
             String prevMeasurementLocalized = (String) getContext().getResources().getText(R.string.prev_measurements);
-            lineDataSet = new LineDataSet(measurements, prevMeasurementLocalized);
+            lineDataSet = new LineDataSet(measurements, "");
+            lineDataSet.setCircleColors(colors);
             lineDataSet.setCircleRadius(8f);
-            lineDataSet.setColor(PREV_MEASUREMENT_COLOR);
-            lineDataSet.setCircleColor(PREV_MEASUREMENT_COLOR);
+            //lineDataSet.setColors(colors);
+            //lineDataSet.setCircleColor(PREV_MEASUREMENT_COLOR);
             lineDataSet.setValueTextSize(0f); // to draw only dots on the graph
             lineDataSet.setDrawCircleHole(false);
             lineDataSet.setDrawFilled(false);
+            lineDataSet.setDrawValues(false);
             lineDataSet.setFormLineWidth(4f);
-            lineDataSet.setFormSize(20f);
+            lineDataSet.setFormSize(0f);
             lineDataSet.enableDashedLine(0, 1, 0);
 
             //change style for the measurement the user got
