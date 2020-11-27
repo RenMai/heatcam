@@ -30,6 +30,7 @@ import com.example.heatcam.MeasurementApp.Fragments.CameraListener;
 import com.example.heatcam.MeasurementApp.Fragments.CameraTest.LogView;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.HighResolutionCamera;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LeptonCamera;
+import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LowResolution16BitCamera;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LowResolutionCamera;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialPort.SerialPortModel;
 import com.example.heatcam.R;
@@ -253,6 +254,11 @@ public class CameraActivity extends Fragment implements CameraListener {
 
     @Override
     public void minCelsiusValue(double min) {
+
+    }
+
+    @Override
+    public void updateData(LowResolution16BitCamera.TelemetryData data) {
 
     }
 

@@ -2,6 +2,8 @@ package com.example.heatcam.MeasurementApp.Fragments;
 
 import android.graphics.Bitmap;
 
+import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LowResolution16BitCamera;
+
 public interface CameraListener {
 
     void setConnectingImage();
@@ -11,6 +13,7 @@ public interface CameraListener {
     void disconnect();
     void maxCelsiusValue(double max);
     void minCelsiusValue(double min);
+    void updateData(LowResolution16BitCamera.TelemetryData data);
     void detectFace(Bitmap image);
     void writeToFile(byte[] data);
 

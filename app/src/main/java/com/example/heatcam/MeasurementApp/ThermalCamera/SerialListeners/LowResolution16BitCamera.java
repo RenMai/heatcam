@@ -38,13 +38,6 @@ public class LowResolution16BitCamera extends LeptonCamera {
             //int maxRaw = (rawTelemetry[0]&0xFF) + (rawTelemetry[1]&0xFF)*256;
             //int minRaw = (rawTelemetry[3]&0xFF) + (rawTelemetry[4]&0xFF)*256;
             td = new TelemetryData(rawTelemetry);
-            // todo: update camera listener interface instead of using this
-            if(getCameraListener() instanceof CameraTestFragment) {
-                ((CameraTestFragment) getCameraListener()).updateData(td);
-            }
-            if(getCameraListener() instanceof MeasurementStartFragment) {
-                ((MeasurementStartFragment) getCameraListener()).updateData(td);
-            }
 
             int minFilterKelvin = min;
             int maxFilterKelvin = max;
@@ -64,6 +57,7 @@ public class LowResolution16BitCamera extends LeptonCamera {
 
             if (getCameraListener() != null) {
                 getCameraListener().updateImage(scaledBMap);
+                getCameraListener().updateData(td);
                 getCameraListener().maxCelsiusValue(kelvinToCelsius(max));
                 getCameraListener().minCelsiusValue(kelvinToCelsius(min));
             }
