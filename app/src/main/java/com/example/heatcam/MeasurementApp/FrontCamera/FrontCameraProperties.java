@@ -13,6 +13,7 @@ public class FrontCameraProperties {
     public static final int AVERAGE_EYE_DISTANCE = 63; // in mm
 
     private float focalLength;
+    private SizeF sensorSize;
     private float sensorX;
     private float sensorY;
 
@@ -42,10 +43,10 @@ public class FrontCameraProperties {
     public FrontCameraProperties init(CameraManager manager) throws CameraAccessException {
         CameraCharacteristics c = manager.getCameraCharacteristics(getFrontFacingCameraId(manager));
         focalLength = c.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0];
-        SizeF sensor = c.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+        sensorSize = c.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
 
-        float angleX = (float) Math.atan(sensor.getWidth() / (2 * focalLength));
-        float angleY = (float) Math.atan(sensor.getHeight() / (2 * focalLength));
+        float angleX = (float) Math.atan(sensorSize.getWidth() / (2 * focalLength));
+        float angleY = (float) Math.atan(sensorSize.getHeight() / (2 * focalLength));
 
         sensorX = (float) (Math.tan(Math.toRadians(angleX / 2)) * 2 * focalLength);
         sensorY = (float) (Math.tan(Math.toRadians(angleY / 2)) * 2 * focalLength);
@@ -68,6 +69,10 @@ public class FrontCameraProperties {
         }
         
         return distance;
+    }
+
+    public SizeF getSensorPhysicalSize() {
+        return sensorSize;
     }
     
     public float getSensorY() {
