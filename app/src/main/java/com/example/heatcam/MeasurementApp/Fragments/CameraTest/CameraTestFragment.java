@@ -94,7 +94,7 @@ public class CameraTestFragment extends Fragment implements CameraListener, Hybr
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.camera_test_layout, container, false);
+        final View view = inflater.inflate(R.layout.heatcam_camera_test_layout, container, false);
 
         camFeed = view.findViewById(R.id.camera_test_view);
         hybridBitmap = new HybridBitmapBuilder(this, view);

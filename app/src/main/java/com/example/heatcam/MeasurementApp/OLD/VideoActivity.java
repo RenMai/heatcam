@@ -17,7 +17,7 @@ public class VideoActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_video);
+        setContentView(R.layout.old_activity_video);
         videoView = (VideoView) findViewById(R.id.videoView);
         videoView.setMediaController(new MediaController(this));
 

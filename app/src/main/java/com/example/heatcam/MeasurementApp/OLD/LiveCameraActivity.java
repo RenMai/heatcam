@@ -106,7 +106,7 @@ public class LiveCameraActivity extends AppCompatActivity implements HeadTiltLis
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_device_camera);
+        setContentView(R.layout.old_activity_device_camera);
 
         detectedFrames.setValue(50);
 

@@ -35,7 +35,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class QR_code_fragment extends Fragment {
+public class ResultFragment extends Fragment {
 
     // min and max values for graph's yaxis
     private float YAXIS_MIN = 33f;
@@ -70,7 +70,7 @@ public class QR_code_fragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.qr_code_fragment, container, false);
+        final View view = inflater.inflate(R.layout.heatcam_result_fragment, container, false);
 
 
 

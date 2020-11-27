@@ -76,7 +76,7 @@ public class CameraActivity extends Fragment implements CameraListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        final View view = inflater.inflate(R.layout.activity_camera_fragment, container, false);
+        final View view = inflater.inflate(R.layout.old_activity_camera_fragment, container, false);
         txtView = (TextView) view.findViewById(R.id.textView);
         scanBtn = (Button) view.findViewById(R.id.scanBtn);
         analysisBtn = (Button) view.findViewById(R.id.analysisBtn);

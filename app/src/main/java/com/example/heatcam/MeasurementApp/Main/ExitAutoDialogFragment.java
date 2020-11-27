@@ -14,7 +14,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import com.example.heatcam.MeasurementApp.Fragments.CameraTest.MenuFragment;
-import com.example.heatcam.MeasurementApp.Main.MainActivity;
 import com.example.heatcam.R;
 
 public class ExitAutoDialogFragment extends DialogFragment {
@@ -25,7 +24,7 @@ public class ExitAutoDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View pView = inflater.inflate(R.layout.enter_password_dialog, null);
+        View pView = inflater.inflate(R.layout.heatcam_enter_password_dialog, null);
 
         builder.setView(pView);
             builder.setMessage(R.string.enter_password_to_exit_msg);

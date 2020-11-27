@@ -25,5 +25,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout="@layout/activity_camera_fragment" />
+        tools:layout="@layout/old_activity_camera_fragment" />
 </androidx.constraintlayout.widget.ConstraintLayout>

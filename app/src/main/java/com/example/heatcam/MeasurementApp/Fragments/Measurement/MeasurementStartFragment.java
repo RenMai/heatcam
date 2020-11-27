@@ -40,7 +40,7 @@ import com.example.heatcam.MeasurementApp.Utils.HybridBitmapBuilder.HybridBitmap
 import com.example.heatcam.MeasurementApp.Utils.HybridBitmapBuilder.HybridImageListener;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LowResolution16BitCamera;
 import com.example.heatcam.MeasurementApp.Fragments.IntroFragment.IntroFragment;
-import com.example.heatcam.MeasurementApp.Fragments.Result.QR_code_fragment;
+import com.example.heatcam.MeasurementApp.Fragments.Result.ResultFragment;
 import com.example.heatcam.R;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialPort.SerialPortModel;
 import com.google.mlkit.vision.face.Face;
@@ -116,7 +116,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.measurement_start_layout, container, false);
+        final View view = inflater.inflate(R.layout.heatcam_measurement_start_layout, container, false);
 
         SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
         timerDelay = Integer.parseInt(sharedPrefs.getString("PREFERENCE_TILT_CORRECTION_DELAY", "800"));
@@ -459,7 +459,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private void changeToResultLayout() {
         hbb.setMsfNull();
 
-        Fragment f = new QR_code_fragment();
+        Fragment f = new ResultFragment();
         Bundle args = new Bundle();
         args.putDouble("user_temp", userTemp);
         args.putDouble("avg_user_temp", avgUserTemp);

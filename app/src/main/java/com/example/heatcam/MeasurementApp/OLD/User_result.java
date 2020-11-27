@@ -42,7 +42,7 @@ import com.example.heatcam.MeasurementApp.FaceDetector.CameraXViewModel;
 import com.example.heatcam.MeasurementApp.FaceDetector.VisionImageProcessor;
 import com.example.heatcam.MeasurementApp.Fragments.CameraListener;
 import com.example.heatcam.MeasurementApp.Fragments.CameraTest.MenuFragment;
-import com.example.heatcam.MeasurementApp.Fragments.Result.QR_code_fragment;
+import com.example.heatcam.MeasurementApp.Fragments.Result.ResultFragment;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LeptonCamera;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialPort.SerialPortModel;
 import com.example.heatcam.MeasurementApp.Utils.RenderScriptTools;
@@ -108,7 +108,7 @@ public class User_result extends Fragment implements CameraListener {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.activity_user_result, container, false);
+        final View view = inflater.inflate(R.layout.old_activity_user_result, container, false);
         // prevent app from dimming
         view.setKeepScreenOn(true);
 
@@ -171,7 +171,7 @@ public class User_result extends Fragment implements CameraListener {
             huiput = new HuippuLukema();
         });
         buttonQR.setOnClickListener(v -> {
-            Fragment qr = new QR_code_fragment();
+            Fragment qr = new ResultFragment();
             getActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragmentCamera, qr, "default").commit();
         });

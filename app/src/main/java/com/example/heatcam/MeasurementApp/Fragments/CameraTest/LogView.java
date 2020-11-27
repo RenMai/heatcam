@@ -29,7 +29,7 @@ public class LogView extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.logcat_layout);
+        setContentView(R.layout.heatcam_logcat_layout);
 
         log = findViewById(R.id.log_text);
         filter = findViewById(R.id.log_filter);

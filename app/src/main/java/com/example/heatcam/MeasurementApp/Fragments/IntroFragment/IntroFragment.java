@@ -58,7 +58,7 @@ public class IntroFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.intro_fragment, container, false);
+        final View view = inflater.inflate(R.layout.heatcam_intro_fragment, container, false);
         SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
         minDistanceToMeasure = Integer.parseInt(sharedPrefs.getString("PREFERENCE_MEASURE_START_MIN_DISTANCE", "500"));
         view.setKeepScreenOn(true);

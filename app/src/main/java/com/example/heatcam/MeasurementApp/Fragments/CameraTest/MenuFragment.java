@@ -22,7 +22,7 @@ public class MenuFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.menu_layout, container, false);
+        final View view = inflater.inflate(R.layout.heatcam_menu_layout, container, false);
         // prevent app from dimming
         view.setKeepScreenOn(true);
 
