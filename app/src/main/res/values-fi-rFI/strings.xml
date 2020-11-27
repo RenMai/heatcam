@@ -24,7 +24,7 @@
     <string name="preference_oval_pos_from_top">PREFERENCE_OVAL_POS_FROM_TOP</string>
 
     <!-- Intro_fragment's text -->
-    <string name="instruction">Jos olet juuri tullut ulkoa sisälle, odota vähintään 10 minuuttia sisätiloissa\nennen mittaamista.\n\nJos haluat aloittaa sovelluksen käytön, niin astu vain hieman lähemmäksi. Tämän jälkeen seuraa ruudulle ilmestyviä ohjeita.</string>
+    <string name="instruction">Jos haluat aloittaa sovelluksen käytön, niin astu vain hieman lähemmäksi. Tämän jälkeen seuraa ruudulle ilmestyviä ohjeita.\n\nJos olet juuri tullut ulkoa sisälle, odota vähintään 10 minuuttia sisätiloissa\nennen mittaamista.</string>
     <string name="information_about_App">Tietoa sovelluksesta</string>
     <string name="idea_of_App">Sovelluksen idea on arvioida käyttäjän lämpöä. Mittaustulos ei ole absoluuttinen vaan suuntaa-antava.</string>
     <string name="about_thermalCamera">Mittaukseen käytetään lämpökameraa, joka on sijoitettu tabletin yläosaan.</string>
