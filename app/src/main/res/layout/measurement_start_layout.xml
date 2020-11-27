@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:color/transparent" />
 
-    <com.example.heatcam.AnimatedOval
+    <com.example.heatcam.MeasurementApp.Fragments.Measurement.AnimatedOval
         android:id="@+id/animatedOval"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

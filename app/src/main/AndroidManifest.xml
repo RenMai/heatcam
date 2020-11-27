@@ -20,7 +20,7 @@
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
-            android:name=".OnBootReceiver">
+            android:name=".MeasurementApp.BroadcastReceivers.OnBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -28,7 +28,7 @@
         </receiver>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".MeasurementApp.Main.MainActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:directBootAware="true"
@@ -46,9 +46,9 @@
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
         </activity>
-        <activity android:name=".VideoActivity"></activity>
-        <activity android:name=".LiveCameraActivity" />
-        <activity android:name=".LogView" />
+        <activity android:name=".MeasurementApp.OLD.VideoActivity"></activity>
+        <activity android:name=".MeasurementApp.OLD.LiveCameraActivity" />
+        <activity android:name=".MeasurementApp.Fragments.CameraTest.LogView" />
     </application>
 
 </manifest>

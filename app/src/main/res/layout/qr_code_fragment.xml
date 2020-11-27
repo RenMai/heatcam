@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_red_to_blue_list"
-    tools:context=".QR_code_fragment">
+    tools:context=".MeasurementApp.Fragments.Result.QR_code_fragment">
 
 
     <ImageView

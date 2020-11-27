@@ -1,5 +1,9 @@
 package com.example.heatcam;
 
+import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.HighResolutionCamera;
+import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LeptonCamera;
+import com.example.heatcam.MeasurementApp.Utils.ImageUtils;
+
 import org.junit.Test;
 
 import java.util.Vector;
