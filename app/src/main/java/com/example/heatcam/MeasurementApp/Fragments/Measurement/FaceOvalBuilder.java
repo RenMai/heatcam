@@ -55,11 +55,11 @@ public class FaceOvalBuilder {
         Canvas canvas = new Canvas(bitmap);
         Rect rect = new Rect(0, 0, overlaySize.getWidth(), overlaySize.getHeight());
         canvas.drawRect(rect, paint);
-        Paint transparent = new Paint();
+        Paint transparent = paint;
         transparent.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         canvas.drawOval(
                 ovalPosition.x - ovalSize.getWidth(),
-                ovalPosition.y - ovalSize.getHeight() / 2f,
+                ovalPosition.y - overlaySize.getHeight()/2f,
                 ovalPosition.x + ovalSize.getWidth(),
                 ovalSize.getHeight(),
                 transparent
