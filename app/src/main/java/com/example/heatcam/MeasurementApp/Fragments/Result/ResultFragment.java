@@ -130,10 +130,10 @@ public class ResultFragment extends Fragment implements FaceDetectListener {
             userTemp = avgTemp;
             //text1.setText("Your temp was: " + temp);
             //text1.append("\nYour avg temp was: " + avgTemp);
-            if (37.4 > temp && temp >= 35.5) {
+            if (37.4 > userTemp && userTemp >= 35.5) {
                 text1.setText(R.string.msgNormTmprt);
 
-            } else if (temp >= 37.4) {
+            } else if (userTemp >= 37.4) {
                 text1.setText(R.string.msgHightTmprt);
             } else {
                 text1.setText(R.string.msgLowTmprt);
