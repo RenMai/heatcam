@@ -38,4 +38,5 @@
     <string name="no_password_msg">Password was not entered</string>
     <string name="enter_password_to_exit_msg">Enter password to exit auto mode.</string>
     <string name="passwordHint">password</string>
+    <string name="the_private_keyboard_qr_code">The Private Keyboard QR code</string>
 </resources>
