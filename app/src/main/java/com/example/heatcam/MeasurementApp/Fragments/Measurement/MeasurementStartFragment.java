@@ -118,7 +118,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.heatcam_measurement_start_layout, container, false);
 
-        SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
         timerDelay = Integer.parseInt(sharedPrefs.getString("PREFERENCE_TILT_CORRECTION_DELAY", "800"));
         // prevent app from dimming
         view.setKeepScreenOn(true);
@@ -127,7 +127,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         hbb = new HybridBitmapBuilder(this, view);
         animBtn = view.findViewById(R.id.animBtn);
         scanBar = view.findViewById(R.id.scanBar);
-        createFaceOval(view);
+        Bitmap ovalOverlay = createFaceOval(sharedPrefs);
+        ((ImageView) view.findViewById(R.id.start_layout_oval_overlay)).setImageBitmap(ovalOverlay);
 
         heatkuva = view.findViewById(R.id.heatkuva);
         animatedOval = view.findViewById(R.id.animatedOval);
@@ -218,28 +219,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         }
     }
 
-    private void createFaceOval(View view) {
-        Bitmap overlay = Bitmap.createBitmap(1200, 1920, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(overlay);
-        Paint paint = new Paint();
-        //paint.setColor(Color.parseColor("#871019FF"));
-        paint.setShader(new LinearGradient(0, 0, 600, 960, Color.parseColor("#871019FF"), Color.parseColor("#85FB3A1F"), Shader.TileMode.MIRROR));
-        paint.setShader(new LinearGradient(600, 960, 1200, 1920, Color.parseColor("#85FB3A1F"), Color.parseColor("#871019FF"), Shader.TileMode.MIRROR));
-        paint.setAlpha(230);
-        paint.setStyle(Paint.Style.FILL);
-        paint.setAntiAlias(true);
-        Rect rt = new Rect(0, 0, overlay.getWidth(), overlay.getHeight());
-        canvas.drawRect(rt, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        float x = overlay.getWidth() / 2.0f;
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(view.getContext());
-        float width = Float.parseFloat(sp.getString(getString(R.string.preference_oval_width), "750")) / 2;
-        float height = Float.parseFloat(sp.getString(getString(R.string.preference_oval_height), "1300"));
-        float fromTop = Float.parseFloat(sp.getString(getString(R.string.preference_oval_pos_from_top), "200"));
-        canvas.drawOval(x - width, fromTop, x + width, height, paint);
-        ((ImageView) view.findViewById(R.id.start_layout_oval_overlay)).setImageBitmap(overlay);
-    }
-
     private Bitmap createFaceOval(SharedPreferences sp) {
         Paint paint = new Paint();
         paint.setShader(new LinearGradient(0, 0, 600, 960, Color.parseColor("#871019FF"), Color.parseColor("#85FB3A1F"), Shader.TileMode.MIRROR));
@@ -250,7 +229,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
         int ovalWidth = Integer.parseInt(sp.getString(getString(R.string.preference_oval_width), "750")) / 2;
         int ovalHeight = Integer.parseInt(sp.getString(getString(R.string.preference_oval_height), "1300"));
-        float fromTop = Integer.parseInt(sp.getString(getString(R.string.preference_oval_pos_from_top), "200"));
+        int fromTop = Integer.parseInt(sp.getString(getString(R.string.preference_oval_pos_from_top), "200"));
 
         return FaceOvalBuilder.create()
                 .setOverlaySize(new Size(1200, 1920))
