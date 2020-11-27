@@ -1,6 +1,9 @@
 package com.example.heatcam.MeasurementApp.Main;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +22,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 
 import com.example.heatcam.MeasurementApp.Fragments.IntroFragment.IntroFragment;
+import com.example.heatcam.MeasurementApp.FrontCamera.FrontCameraProperties;
 import com.example.heatcam.R;
 import com.example.heatcam.MeasurementApp.Fragments.CameraTest.SetupFragment;
 
@@ -45,36 +49,10 @@ public class MainActivity extends AppCompatActivity {
 
         checkPermissions();
 
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
         setContentView(R.layout.activity_main);
         btn = findViewById(R.id.devBtn);
         btn.setOnClickListener(v -> changeLayout());
-
-        // kommentoi tästä
-/*
-        Fragment cameraActivity = new CameraActivity();
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragmentCamera, cameraActivity, "default").commit();
-        initLogger();
-        // tähän ja poista seuraava kommentti
-
- */
-         btn.setVisibility(View.INVISIBLE);
-        Fragment f = new IntroFragment();
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragmentCamera, f, "intro").commit();
-        MainActivity.setAutoMode(true);
-
-
-        /*
-        FragmentManager fManager = getSupportFragmentManager();
-        FragmentTransaction fTransaction = fManager.beginTransaction();
-
-        CameraActivity fragment = new CameraActivity();
-        fTransaction.add(R.id.fragmentCamera, fragment);
-        fTransaction.commit();
-        */
+        btn.setVisibility(View.INVISIBLE);
 
         //Status & Navigation bars hiding using decorView 1/2
         decorView = getWindow().getDecorView();
@@ -84,6 +62,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         initLogger();
+    }
+
+    private void start() {
+        try {
+            FrontCameraProperties.getProperties()
+                    .init((CameraManager) getBaseContext().getSystemService(Context.CAMERA_SERVICE));
+
+            PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+            Fragment f = new IntroFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentCamera, f, "intro").commit();
+            MainActivity.setAutoMode(true);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     //Status & Navigation bars hiding 2/3
@@ -139,6 +132,8 @@ public class MainActivity extends AppCompatActivity {
     private void checkPermissions() {
             if (ContextCompat.checkSelfPermission(this, CAMERA_PERMISSION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{CAMERA_PERMISSION}, REQUEST_CODE_PERMISSIONS);
+            } else {
+                start();
             }
     }
 
@@ -148,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_PERMISSIONS && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
             Toast.makeText(this, "No permissions granted, app closing", Toast.LENGTH_LONG).show();
             finishAffinity();
+        } else if (requestCode == REQUEST_CODE_PERMISSIONS && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            start();
         }
     }
 

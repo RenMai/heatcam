@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.InitializationException;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -27,6 +28,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.heatcam.MeasurementApp.FaceDetector.CameraXViewModel;
 import com.example.heatcam.MeasurementApp.FaceDetector.IntroFaceDetectorProcessor;
+import com.example.heatcam.MeasurementApp.FrontCamera.FrontCameraProperties;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LowResolution16BitCamera;
 import com.example.heatcam.MeasurementApp.Main.MainActivity;
 import com.example.heatcam.MeasurementApp.Fragments.Measurement.MeasurementStartFragment;
@@ -44,12 +46,6 @@ public class IntroFragment extends Fragment {
     private ProcessCameraProvider cameraProvider;
     private CameraSelector cameraSelector;
     private ImageAnalysis analysisCase;
-
-    private float focalLength;
-    private float sensorX;
-    private float sensorY;
-
-    private final int AVERAGE_EYE_DISTANCE = 63; // in mm
 
     private int minDistanceToMeasure = 500;
     //private TextView txtV;
@@ -72,7 +68,6 @@ public class IntroFragment extends Fragment {
         animationDrawable.setExitFadeDuration(4000);
         animationDrawable.start();
 
-        getCameraProperties();
         cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
                 .build();
@@ -111,33 +106,6 @@ public class IntroFragment extends Fragment {
             serialPortModel.changeTiltAngle(75);
         }
 
-    }
-
-    private void getCameraProperties() {
-        CameraManager manager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
-        try {
-            CameraCharacteristics c = manager.getCameraCharacteristics(getFrontFacingCameraId(manager));
-            focalLength = c.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0];
-            SizeF sensor = c.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
-            float angleX = (float) Math.atan(sensor.getWidth() / (2*focalLength));
-            float angleY = (float) Math.atan(sensor.getHeight() / (2*focalLength));
-            System.out.println("fov" + angleX + angleY);
-            sensorX = (float) (Math.tan(Math.toRadians(angleX / 2)) * 2 * focalLength);
-            sensorY = (float) (Math.tan(Math.toRadians(angleY / 2)) * 2 * focalLength);
-            System.out.println("leng" + focalLength);
-
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    String getFrontFacingCameraId(CameraManager cManager) throws CameraAccessException {
-        for(final String cameraId : cManager.getCameraIdList()){
-            CameraCharacteristics characteristics = cManager.getCameraCharacteristics(cameraId);
-            int cOrientation = characteristics.get(CameraCharacteristics.LENS_FACING);
-            if(cOrientation == CameraCharacteristics.LENS_FACING_FRONT) return cameraId;
-        }
-        return null;
     }
 
     @Override
@@ -216,18 +184,13 @@ public class IntroFragment extends Fragment {
     }
 
     public void checkFaceDistance(PointF leftEye, PointF rightEye, int imgWidth, int imgHeight) {
-        float deltaX = Math.abs(leftEye.x - rightEye.x);
-        float deltaY = Math.abs(leftEye.y - rightEye.y);
-
-        float dist = 0f;
-        if (deltaX >= deltaY) {
-            dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorX) * (imgWidth / deltaX) / 100;
-        } else {
-            dist = focalLength * (AVERAGE_EYE_DISTANCE / sensorY) * (imgHeight / deltaY) / 100;
+        float dist = 0;
+        try {
+            dist = FrontCameraProperties.getProperties()
+                    .getDistance(new Size(imgWidth, imgHeight), leftEye, rightEye);
+        } catch (InitializationException e) {
+            e.printStackTrace();
         }
-
-//        float finalDist = dist;
-//        getActivity().runOnUiThread(() -> txtV.setText("D: " + finalDist));
 
         if (dist > 0 && dist < minDistanceToMeasure) {
             switchToMeasurementStartFragment();
