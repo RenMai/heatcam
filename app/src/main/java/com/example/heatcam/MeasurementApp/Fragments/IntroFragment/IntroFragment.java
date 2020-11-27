@@ -2,15 +2,12 @@ package com.example.heatcam.MeasurementApp.Fragments.IntroFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.graphics.drawable.AnimationDrawable;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
-import android.util.SizeF;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +24,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.heatcam.MeasurementApp.FaceDetector.CameraXViewModel;
-import com.example.heatcam.MeasurementApp.FaceDetector.IntroFaceDetectorProcessor;
+import com.example.heatcam.MeasurementApp.FaceDetector.FaceDetectListener;
+import com.example.heatcam.MeasurementApp.FaceDetector.FaceDetectorProcessor;
 import com.example.heatcam.MeasurementApp.FrontCamera.FrontCameraProperties;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LowResolution16BitCamera;
 import com.example.heatcam.MeasurementApp.Main.MainActivity;
@@ -36,9 +34,11 @@ import com.example.heatcam.R;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialPort.SerialPortModel;
 import com.example.heatcam.MeasurementApp.FaceDetector.VisionImageProcessor;
 import com.google.mlkit.common.MlKitException;
+import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
+import com.google.mlkit.vision.face.FaceLandmark;
 
-public class IntroFragment extends Fragment {
+public class IntroFragment extends Fragment implements FaceDetectListener {
 
     private final String TAG = "IntroFragment";
 
@@ -158,7 +158,7 @@ public class IntroFragment extends Fragment {
                     .enableTracking()
                     .build();
 
-            imageProcessor = new IntroFaceDetectorProcessor(getContext(), faceDetectOptions, this);
+            imageProcessor = new FaceDetectorProcessor(getContext(), faceDetectOptions, this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -180,6 +180,18 @@ public class IntroFragment extends Fragment {
         );
 
         cameraProvider.bindToLifecycle(/* lifecycleOwner= */ this, cameraSelector, analysisCase);
+
+    }
+
+    @Override
+    public void faceDetected(Face face, Bitmap originalCameraImage) {
+        PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
+        PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
+        checkFaceDistance(leftEyeP, rightEyeP, originalCameraImage.getWidth(), originalCameraImage.getHeight());
+    }
+
+    @Override
+    public void faceNotDetected() {
 
     }
 
@@ -206,4 +218,5 @@ public class IntroFragment extends Fragment {
                 .commit();
         MainActivity.setAutoMode(true);
     }
+
 }
