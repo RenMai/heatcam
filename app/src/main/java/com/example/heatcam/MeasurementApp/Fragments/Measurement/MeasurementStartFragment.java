@@ -3,13 +3,10 @@ package com.example.heatcam.MeasurementApp.Fragments.Measurement;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.hardware.camera2.CameraAccessException;
@@ -41,6 +38,7 @@ import com.example.heatcam.MeasurementApp.Utils.HybridBitmapBuilder.HybridImageL
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LowResolution16BitCamera;
 import com.example.heatcam.MeasurementApp.Fragments.IntroFragment.IntroFragment;
 import com.example.heatcam.MeasurementApp.Fragments.Result.ResultFragment;
+import com.example.heatcam.MeasurementApp.Utils.TiltAngleHandler;
 import com.example.heatcam.R;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialPort.SerialPortModel;
 import com.google.mlkit.vision.face.Face;
@@ -54,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -93,12 +90,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     SerialPortModel serialPortModel;
 
     private MeasurementAccessObject measurementAccessObject;
-    private Timer tiltTimer = new Timer();
-    private int currentTiltAngle;
-    private int setTiltAngle = 0;
-    private boolean isAtSetAngle = true;
-    private boolean tiltTimerRunning = false;
-    private int timerDelay = 200;
+    private TiltAngleHandler angleHandler = new TiltAngleHandler();
 
     private ScheduledThreadPoolExecutor idleExecutor;
 
@@ -119,7 +111,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         final View view = inflater.inflate(R.layout.heatcam_measurement_start_layout, container, false);
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
-        timerDelay = Integer.parseInt(sharedPrefs.getString("PREFERENCE_TILT_CORRECTION_DELAY", "800"));
+        int timerDelay = Integer.parseInt(sharedPrefs.getString("PREFERENCE_TILT_CORRECTION_DELAY", "800"));
+        angleHandler.setTimerDelay(timerDelay);
         // prevent app from dimming
         view.setKeepScreenOn(true);
         ConstraintLayout cl = (ConstraintLayout)view.findViewById(R.id.ConstraintLayout);
@@ -191,7 +184,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
 
     @Override
     public void onPause() {
-        tiltTimer.cancel();
+        angleHandler.stop();
         stopIdleExecutor();
         super.onPause();
     }
@@ -299,53 +292,12 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         // angle correction if target is in specified distance and y position is not OK.
         if(dist < 500 && !yOK) {
             synchronized (this) {
-
-                /*
-                if(currentTiltAngle == setTiltAngle && tiltTimerRunning && !isAtSetAngle) {
-                    isAtSetAngle = true;
-                    tiltTimer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            tiltTimerRunning = false;
-                        }
-                    }, timerDelay);
-                }*/
-
-                if(!tiltTimerRunning /*&&isAtSetAngle*/ ) {
-                    tiltTimerRunning = true;
-                    isAtSetAngle = false;
-                    // single angle correction. e.g. value 200 == 2 degrees
-                    int correctionAngle = 0;
-                    float objHeightPix = middleY - noseP.y;
-                    float objHeightSensor = (sensor.getHeight() * objHeightPix) / imgHeight;
-                    float realObjHeight = (dist * objHeightSensor) / focalLength;
-                    System.out.println("realObjHeight : " + realObjHeight);
-                    //double c = Math.sqrt(Math.pow(dist, 2) + Math.pow(objHeight, 2));
-                    int a = (int) Math.round(Math.sin(realObjHeight*0.7 / dist)*100) *100;
-                    if(currentTiltAngle >= 2200 && currentTiltAngle <= 9500) {
-                        int angle = currentTiltAngle - a;
-                        if (setTiltAngle < 2200) {
-                            setTiltAngle = 2200;
-                        } else if (setTiltAngle > 9500) {
-                            setTiltAngle = 9500;
-                        } else {
-                            setTiltAngle = angle;
-                        }
-                        serialPortModel.changeTiltAngle((setTiltAngle) /100);
-                        tiltTimer.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                tiltTimerRunning = false;
-                            }
-                        }, timerDelay);
-                        System.out.println("angle correction " + a);
-                        getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(a)));
-
-                    }
-                }
+                int newAngle = angleHandler.newCorrection(dist, imgHeight, middleY, noseP.y);
+                System.out.println("tilted "+ newAngle);
+                if (newAngle != -1) serialPortModel.changeTiltAngle(newAngle);
             }
-
         }
+
         updateProgress();
         return et;
     }
@@ -523,10 +475,11 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     }
 
     public void updateData(LowResolution16BitCamera.TelemetryData data) {
-        currentTiltAngle = data.tiltAngle;
-        if(setTiltAngle == 0) {
-            setTiltAngle = currentTiltAngle;
+        if (angleHandler.getTargetTiltAngle() == 0) {
+            angleHandler.setTargetTiltAngle(data.tiltAngle);
+            angleHandler.setIsAtTargetAngle(true);
         }
+        angleHandler.setCurrentTiltAngle(data.tiltAngle);
     }
 
 
