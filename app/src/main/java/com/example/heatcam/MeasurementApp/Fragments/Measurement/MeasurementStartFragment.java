@@ -368,7 +368,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                 public void run() {
                     changeLayout();
                 }
-            }, 60, TimeUnit.SECONDS);
+            }, 10, TimeUnit.SECONDS);
         }
     }
 

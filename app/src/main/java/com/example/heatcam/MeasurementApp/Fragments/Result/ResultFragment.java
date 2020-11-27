@@ -1,19 +1,34 @@
 package com.example.heatcam.MeasurementApp.Fragments.Result;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PointF;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.InitializationException;
+import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.example.heatcam.MeasurementApp.FaceDetector.CameraXViewModel;
+import com.example.heatcam.MeasurementApp.FaceDetector.FaceDetectListener;
+import com.example.heatcam.MeasurementApp.FaceDetector.FaceDetectorProcessor;
+import com.example.heatcam.MeasurementApp.FaceDetector.VisionImageProcessor;
 import com.example.heatcam.MeasurementApp.Fragments.Measurement.MeasurementAccessObject;
 import com.example.heatcam.MeasurementApp.Fragments.IntroFragment.IntroFragment;
+import com.example.heatcam.MeasurementApp.FrontCamera.FrontCameraProperties;
 import com.example.heatcam.R;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.LimitLine;
@@ -24,6 +39,10 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.google.mlkit.common.MlKitException;
+import com.google.mlkit.vision.face.Face;
+import com.google.mlkit.vision.face.FaceDetectorOptions;
+import com.google.mlkit.vision.face.FaceLandmark;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,16 +52,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
-public class ResultFragment extends Fragment {
+public class ResultFragment extends Fragment implements FaceDetectListener {
+
+    private final String TAG = "ResultFragment";
+
 
     // min and max values for graph's yaxis
     private float YAXIS_MIN = 33f;
     private float YAXIS_MAX = 40f;
 
     private final int PREV_MEASUREMENT_COLOR = Color.rgb(36, 252, 223);
-    private final int USER_MEASUREMENT_COLOR =  Color.rgb(6, 95, 174);//Color.rgb(25, 45, 223);
+    private final int USER_MEASUREMENT_COLOR =  Color.rgb(36, 252, 223); //(25, 45, 223) (6, 95, 174)
     private final int HIGH_TEMP_LINE_COLOR = Color.rgb(175, 70, 70);
     private final int HIGH_TEMP_LINE_TEXT_COLOR = Color.rgb(129, 48, 48);
     private final int RISING_TEMP_LINE_COLOR = Color.rgb(235, 235, 91);
@@ -66,6 +90,13 @@ public class ResultFragment extends Fragment {
     private double userTemp;
 
     private LineData graphData;
+
+    private VisionImageProcessor imageProcessor;
+    private ProcessCameraProvider cameraProvider;
+    private CameraSelector cameraSelector;
+    private ImageAnalysis analysisCase;
+
+    private ScheduledThreadPoolExecutor idleExecutor;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -132,7 +163,23 @@ public class ResultFragment extends Fragment {
          */
         initChart();
 
+        cameraSelector = new CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+                .build();
 
+        new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getActivity().getApplication()))
+                .get(CameraXViewModel.class)
+                .getProcessCameraProvider()
+                .observe(
+                        getViewLifecycleOwner(),
+                        provider -> {
+                            cameraProvider = provider;
+                            bindAllCameraUseCases();
+                        }
+                );
+
+
+        /*
         task_timer = new Timer();
         task_timer.schedule(new TimerTask() {
             @Override
@@ -189,6 +236,83 @@ public class ResultFragment extends Fragment {
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        bindAllCameraUseCases();
+    }
+
+    @Override
+    public void onPause() {
+        if(task_timer != null) {
+            task_timer.cancel();
+        }
+        super.onPause();
+        if (imageProcessor != null) {
+            imageProcessor.stop();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (imageProcessor != null) {
+            imageProcessor.stop();
+        }
+    }
+
+    private void bindAllCameraUseCases() {
+        if (cameraProvider != null) {
+            // As required by CameraX API, unbinds all use cases before trying to re-bind any of them.
+            cameraProvider.unbindAll();
+            bindFaceAnalysisUseCase();
+        }
+    }
+
+    private void bindFaceAnalysisUseCase() {
+        if (cameraProvider == null) {
+            return;
+        }
+        if (analysisCase != null) {
+            cameraProvider.unbind(analysisCase);
+        }
+        if (imageProcessor != null) {
+            imageProcessor.stop();
+        }
+
+        try {
+            FaceDetectorOptions faceDetectOptions = new FaceDetectorOptions.Builder()
+                    .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+                    .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+                    .setMinFaceSize(0.40f)
+                    .enableTracking()
+                    .build();
+
+            imageProcessor = new FaceDetectorProcessor(getContext(), faceDetectOptions, this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        analysisCase = new ImageAnalysis.Builder()
+                .setTargetResolution(new Size(1, 1))
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build();
+
+        analysisCase.setAnalyzer(
+                ContextCompat.getMainExecutor(getContext()),
+                imageProxy -> {
+                    try {
+                        imageProcessor.processImageProxy(imageProxy);
+                    } catch (MlKitException e) {
+                        Log.e(TAG, "Failed to process image. Error: " + e.getLocalizedMessage());
+                    }
+                }
+        );
+
+        cameraProvider.bindToLifecycle(/* lifecycleOwner= */ this, cameraSelector, analysisCase);
     }
 
     private void initChart() {
@@ -376,11 +500,57 @@ public class ResultFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {
-        if(task_timer != null) {
-            task_timer.cancel();
+    public void faceDetected(Face face, Bitmap originalCameraImage) {
+        Size imgSize = new Size(originalCameraImage.getWidth(), originalCameraImage.getHeight());
+        PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
+        PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
+        face.getTrackingId();
+        try {
+            float dist = FrontCameraProperties.getProperties().getDistance(imgSize, leftEyeP, rightEyeP);
+           // System.out.println(dist + " jees");
+            // TODO: try with different values
+            if (dist < 600) {
+                stopIdleExecutor();
+            } else {
+                startIdleExecutor();
+            }
+        } catch (InitializationException e) {
+            e.printStackTrace();
         }
-        super.onPause();
+    }
+
+    @Override
+    public void faceNotDetected() {
+        startIdleExecutor();
+    }
+
+    private void startIdleExecutor() {
+        if (idleExecutor == null) {
+            idleExecutor = new ScheduledThreadPoolExecutor(1);
+        }
+        // schedule the layout change if there isn't already a task going for it
+        if (idleExecutor.getTaskCount() == 0) {
+            idleExecutor.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    changeLayout();
+                }
+            }, 10, TimeUnit.SECONDS); // could probably use like 5 second delay
+        }
+    }
+
+    private void stopIdleExecutor() {
+        if (idleExecutor != null) {
+            idleExecutor.shutdownNow();
+            idleExecutor = null;
+        }
+    }
+
+    private void changeLayout() {
+        Fragment f = new IntroFragment();
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                .replace(R.id.fragmentCamera, f, "menu").commit();
     }
 
     class YAxisValueFormatter extends ValueFormatter {
