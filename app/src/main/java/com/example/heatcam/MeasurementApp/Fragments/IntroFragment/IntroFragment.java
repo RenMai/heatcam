@@ -289,6 +289,11 @@ public class IntroFragment extends Fragment implements FaceDetectListener, Camer
     }
 
     @Override
+    public void updateData(LowResolution16BitCamera.TelemetryData data) {
+
+    }
+
+    @Override
     public void detectFace(Bitmap image) {
 
     }
