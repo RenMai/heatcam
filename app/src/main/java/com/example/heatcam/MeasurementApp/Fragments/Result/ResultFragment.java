@@ -70,10 +70,12 @@ public class ResultFragment extends Fragment implements FaceDetectListener {
     private final int HIGH_TEMP_LINE_COLOR = Color.rgb(175, 70, 70);
     private final int HIGH_TEMP_LINE_TEXT_COLOR = Color.rgb(129, 48, 48);
     private final int RISING_TEMP_LINE_COLOR = Color.rgb(235, 235, 91);
+    private final int NORMAL_TEMP_LINE_COLOR = Color.rgb(30, 189, 24);
 
     // at which y coordinate to draw the horizontal line to indicate high/rising temp
     private float highTempLineValue = 38.1f;
     private float risingTempLineValue = 37.4f;
+    private float normalTempLineValue = 35.5f;
 
     private TextView text, text1, text2;
     private ImageView imgView;
@@ -130,10 +132,10 @@ public class ResultFragment extends Fragment implements FaceDetectListener {
             userTemp = avgTemp;
             //text1.setText("Your temp was: " + temp);
             //text1.append("\nYour avg temp was: " + avgTemp);
-            if (37.4 > temp && temp >= 35.5) {
+            if (37.4 > userTemp && userTemp >= 35.5) {
                 text1.setText(R.string.msgNormTmprt);
 
-            } else if (temp >= 37.4) {
+            } else if (userTemp >= 37.4) {
                 text1.setText(R.string.msgHightTmprt);
             } else {
                 text1.setText(R.string.msgLowTmprt);
@@ -355,6 +357,11 @@ public class ResultFragment extends Fragment implements FaceDetectListener {
         risingTempLine.setLineWidth(3f);
         risingTempLine.setLineColor(RISING_TEMP_LINE_COLOR);
         yAxis.addLimitLine(risingTempLine);
+
+        LimitLine normalTempLine = new LimitLine(normalTempLineValue);
+        normalTempLine.setLineWidth(3f);
+        normalTempLine.setLineColor(NORMAL_TEMP_LINE_COLOR);
+        yAxis.addLimitLine(normalTempLine);
 
 
         measuresChart.setVisibleXRangeMaximum(10);
