@@ -1,5 +1,6 @@
 package com.example.heatcam.MeasurementApp.Fragments.DeviceCheck;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -8,6 +9,7 @@ import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,32 +17,66 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.heatcam.MeasurementApp.Fragments.CameraListener;
+import com.example.heatcam.MeasurementApp.Fragments.IntroFragment.IntroFragment;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LowResolution16BitCamera;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialPort.SerialPortModel;
 import com.example.heatcam.R;
 
+import java.util.concurrent.TimeUnit;
+
 
 public class DeviceCheckFragment extends Fragment implements CameraListener {
+
+    private final long timerMillis = TimeUnit.MINUTES.toMillis(30);
+    private CountDownTimer timer;
+
+    @SuppressLint("DefaultLocale")
+    private String millisToMMSS(long millis) {
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+        return String.format(
+                "%02d:%02d",
+                minutes,
+                seconds - TimeUnit.MINUTES.toSeconds(minutes)
+        );
+    }
+
+    private float getMillisProgress(long target, long current) {
+        return (1 - ((float) current / target)) * 100;
+    }
+
+    private void changeToIntroLayout() {
+        Fragment f = new IntroFragment();
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_left, R.animator.slide_in_right, 0, 0)
+                .replace(R.id.fragmentCamera, f, "intro").commit();
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.device_check_layout, container, false);
-
         TextView mTextField = view.findViewById(R.id.mTextField);
+        CircularProgressBar progressBar = view.findViewById(R.id.timeProgressBar);
+
+        timer = new CountDownTimer(timerMillis, 1000) {
+            public void onTick(long millisUntilFinished) {
+                mTextField.setText(millisToMMSS(millisUntilFinished));
+                progressBar.setProgress(getMillisProgress(timerMillis, millisUntilFinished));
+            }
+            public void onFinish() {
+                changeToIntroLayout();
+            }
+        };
+        timer.start();
+
+        Button b = view.findViewById(R.id.skipButton);
+        b.setOnClickListener((View v) -> {
+            timer.cancel();
+            timer.onFinish();
+        });
 
         checkCamera(view.getContext());
-        new CountDownTimer(30000, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-                mTextField.setText("seconds remaining: " + millisUntilFinished / 1000);
-            }
-
-            public void onFinish() {
-                mTextField.setText("done!");
-            }
-        }.start();
-
 
         return view;
     }

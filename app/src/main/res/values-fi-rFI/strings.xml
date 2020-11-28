@@ -43,4 +43,6 @@
     <string name="no_password_msg">Salasanaa ei syötetty</string>
     <string name="enter_password_to_exit_msg">Anna salasana poistuaksesi automaattitilasta.</string>
     <string name="passwordHint">Salasana</string>
+
+    <string name="device_start_info">Odotetaan lämpökameran vakautumista</string>
 </resources>

@@ -21,6 +21,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 
+import com.example.heatcam.MeasurementApp.Fragments.DeviceCheck.DeviceCheckFragment;
 import com.example.heatcam.MeasurementApp.Fragments.IntroFragment.IntroFragment;
 import com.example.heatcam.MeasurementApp.FrontCamera.FrontCameraProperties;
 import com.example.heatcam.R;
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                     .init((CameraManager) getBaseContext().getSystemService(Context.CAMERA_SERVICE));
 
             PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-            Fragment f = new IntroFragment();
+            Fragment f = new DeviceCheckFragment();
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragmentCamera, f, "intro").commit();
             MainActivity.setAutoMode(true);

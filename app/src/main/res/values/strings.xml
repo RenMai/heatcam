@@ -39,4 +39,6 @@
     <string name="enter_password_to_exit_msg">Enter password to exit auto mode.</string>
     <string name="passwordHint">password</string>
     <string name="the_private_keyboard_qr_code">The Private Keyboard QR code</string>
+
+    <string name="device_start_info">Waiting for heat sensor to stabilize</string>
 </resources>
