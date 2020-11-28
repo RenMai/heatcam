@@ -13,6 +13,7 @@ public class HybridImageOptions {
     public static int scaledWidth = LeptonCamera.getWidth();
     public static int scaledHeight = LeptonCamera.getHeight();
     public static float scale = 8.79f;
+    public static int resolutionMultiplier = 1;
 
     public static int getScaledWidth() {
         if(scaledWidth == 0)

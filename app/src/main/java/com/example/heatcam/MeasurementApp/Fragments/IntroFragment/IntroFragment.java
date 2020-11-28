@@ -3,14 +3,20 @@ package com.example.heatcam.MeasurementApp.Fragments.IntroFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.util.Log;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,10 +32,13 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.heatcam.MeasurementApp.FaceDetector.CameraXViewModel;
 import com.example.heatcam.MeasurementApp.FaceDetector.FaceDetectListener;
 import com.example.heatcam.MeasurementApp.FaceDetector.FaceDetectorProcessor;
+import com.example.heatcam.MeasurementApp.Fragments.CameraListener;
 import com.example.heatcam.MeasurementApp.FrontCamera.FrontCameraProperties;
+import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LeptonCamera;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LowResolution16BitCamera;
 import com.example.heatcam.MeasurementApp.Main.MainActivity;
 import com.example.heatcam.MeasurementApp.Fragments.Measurement.MeasurementStartFragment;
+import com.example.heatcam.MeasurementApp.Utils.HybridBitmapBuilder.HybridImageOptions;
 import com.example.heatcam.R;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialPort.SerialPortModel;
 import com.example.heatcam.MeasurementApp.FaceDetector.VisionImageProcessor;
@@ -38,7 +47,7 @@ import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
 
-public class IntroFragment extends Fragment implements FaceDetectListener {
+public class IntroFragment extends Fragment implements FaceDetectListener, CameraListener {
 
     private final String TAG = "IntroFragment";
 
@@ -46,10 +55,14 @@ public class IntroFragment extends Fragment implements FaceDetectListener {
     private ProcessCameraProvider cameraProvider;
     private CameraSelector cameraSelector;
     private ImageAnalysis analysisCase;
-
+    private ImageView heatkuva;
     private int minDistanceToMeasure = 500;
     //private TextView txtV;
-
+    SerialPortModel serialPortModel;
+    private static final float BITMAP_SCALE = 3.0f;
+    private static final float BLUR_RADIUS = 25f;
+    RenderScript rs;
+    ScriptIntrinsicBlur theIntrinsic;
 
     @Nullable
     @Override
@@ -58,15 +71,19 @@ public class IntroFragment extends Fragment implements FaceDetectListener {
         SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
         minDistanceToMeasure = Integer.parseInt(sharedPrefs.getString("PREFERENCE_MEASURE_START_MIN_DISTANCE", "500"));
         view.setKeepScreenOn(true);
-
+        rs = RenderScript.create(getContext());
+        theIntrinsic = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
        // txtV = view.findViewById(R.id.txtDist);
+        heatkuva = view.findViewById(R.id.heatkuva);
+        HybridImageOptions.resolutionMultiplier = 4;
 
         //moving background
-        ConstraintLayout constraintLayout = (ConstraintLayout) view.findViewById(R.id.ConstraintLayout);
+        //ConstraintLayout constraintLayout = (ConstraintLayout) view.findViewById(R.id.ConstraintLayout);
+        /*constraintLayout.setBackgroundColor(Color.BLACK);/*
         AnimationDrawable animationDrawable = (AnimationDrawable) constraintLayout.getBackground();
         animationDrawable.setEnterFadeDuration(2000);
         animationDrawable.setExitFadeDuration(4000);
-        animationDrawable.start();
+        animationDrawable.start();*/
 
         cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
@@ -88,7 +105,8 @@ public class IntroFragment extends Fragment implements FaceDetectListener {
             e.printStackTrace();
         }
 
-
+        serialPortModel = SerialPortModel.getInstance();
+        serialPortModel.setCamListener(this);
         return view;
     }
 
@@ -124,6 +142,7 @@ public class IntroFragment extends Fragment implements FaceDetectListener {
 
     @Override
     public void onDestroy() {
+        HybridImageOptions.resolutionMultiplier = 1;
         super.onDestroy();
         if (imageProcessor != null) {
             imageProcessor.stop();
@@ -218,5 +237,64 @@ public class IntroFragment extends Fragment implements FaceDetectListener {
                 .commit();
         MainActivity.setAutoMode(true);
     }
+    public Bitmap blur(Bitmap image) {
+        int width = Math.round(image.getWidth() * BITMAP_SCALE);
+        int height = Math.round(image.getHeight() * BITMAP_SCALE);
 
+        Bitmap inputBitmap = Bitmap.createScaledBitmap(image, width, height, false);
+        Bitmap outputBitmap = Bitmap.createBitmap(inputBitmap);
+
+        Allocation tmpIn = Allocation.createFromBitmap(rs, inputBitmap);
+        Allocation tmpOut = Allocation.createFromBitmap(rs, outputBitmap);
+        theIntrinsic.setRadius(BLUR_RADIUS);
+        theIntrinsic.setInput(tmpIn);
+        theIntrinsic.forEach(tmpOut);
+        tmpOut.copyTo(outputBitmap);
+
+        return outputBitmap;
+    }
+    @Override
+    public void setConnectingImage() {
+
+    }
+
+    @Override
+    public void setNoFeedImage() {
+
+    }
+
+    @Override
+    public void updateImage(Bitmap image) {
+        getActivity().runOnUiThread(() -> heatkuva.setImageBitmap(blur(image)));
+    }
+
+    @Override
+    public void updateText(String text) {
+
+    }
+
+    @Override
+    public void disconnect() {
+
+    }
+
+    @Override
+    public void maxCelsiusValue(double max) {
+
+    }
+
+    @Override
+    public void minCelsiusValue(double min) {
+
+    }
+
+    @Override
+    public void detectFace(Bitmap image) {
+
+    }
+
+    @Override
+    public void writeToFile(byte[] data) {
+
+    }
 }
