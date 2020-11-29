@@ -320,17 +320,14 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             width = live.getWidth(); height = live.getHeight();
         }
         float dist = facePositionCheck(face, width, height);
-
+        hbb.setDistance(dist);
         // getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(laskuri)));
         if (ready) {
             if (userTempList == null) {
                 userTempList = new ArrayList<>();
             }
             if (laskuri < 35) {
-                float distDiff = (dist - 250)/100;
-                float correction = distDiff * 0.404f *(-1);
-                double correctedTemp = hbb.getHighestFaceTemperature() + correction - 0.8;
-                userTempList.add(correctedTemp);
+                userTempList.add(hbb.getHighestFaceTemperature());
 
                 if (hbb.getHighestFaceTemperature() > userTemp) {
                     userTemp = hbb.getHighestFaceTemperature();
