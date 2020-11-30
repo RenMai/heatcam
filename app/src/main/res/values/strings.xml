@@ -30,8 +30,8 @@
     <string name="prev_measurements">Measurements</string>
     <string name="user_measurement">You</string>
     <string name="vertical_temp_text">T\ne\nm\np\ne\nr\na\nt\nu\nr\ne</string>
-
     <string name="high_temp_line_text">High temp</string>
+    <string name="graph_title_text"><u>Previous measurements</u></string>
     
     <!-- ExitAutoDialogFragment text -->
     <string name="wrong_password_msg">Wrong password</string>

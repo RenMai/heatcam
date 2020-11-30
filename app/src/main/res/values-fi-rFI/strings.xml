@@ -35,8 +35,8 @@
     <string name="prev_measurements">Mittaukset</string>
     <string name="user_measurement">Sinä</string>
     <string name="vertical_temp_text">L\nä\nm\np\nö\nt\ni\nl\na</string>
-
     <string name="high_temp_line_text">Korkean raja</string>
+    <string name="graph_title_text"><u>Aiemmat mittaukset</u></string>
     
     <!-- ExitAutoDialogFragment text -->
     <string name="wrong_password_msg">Väärä salasana</string>
