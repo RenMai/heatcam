@@ -55,6 +55,12 @@ dependencies {
     implementation 'commons-io:commons-io:2.8.0'
     implementation 'com.takisoft.preferencex:preferencex:1.1.0'
 
+    // Private Keyboard dependencies
+    implementation 'androidmads.library.qrgenearator:QRGenearator:1.0.3'
+    implementation 'com.microsoft.signalr:signalr:3.0.0'
+    implementation files('libs/activation.jar', 'libs/mail.jar', 'libs/additionnal.jar')
+    implementation "commons-net:commons-net:3.0.1"
+
 }
 
 allprojects {
