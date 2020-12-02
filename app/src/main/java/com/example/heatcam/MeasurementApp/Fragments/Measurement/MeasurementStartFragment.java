@@ -98,6 +98,8 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private ImageView heatkuva;
     private HybridBitmapBuilder hbb;
 
+    private SharedPreferences sharedPrefs;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,7 +112,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.heatcam_measurement_start_layout, container, false);
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
+        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
         int timerDelay = Integer.parseInt(sharedPrefs.getString("PREFERENCE_TILT_CORRECTION_DELAY", "800"));
         angleHandler.setTimerDelay(timerDelay);
         // prevent app from dimming
@@ -370,12 +372,13 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         }
         // schedule the layout change if there isn't already a task going for it
         if (idleExecutor.getTaskCount() == 0) {
+            int seconds = Integer.parseInt(sharedPrefs.getString("PREFERENCE_SECONDS_TO_SWITCH_INTRO_MEASUREMENT", "10"));
             idleExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
                     changeLayout();
                 }
-            }, 10, TimeUnit.SECONDS);
+            }, seconds, TimeUnit.SECONDS);
         }
     }
 
@@ -408,7 +411,6 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
                 .replace(R.id.fragmentCamera, f, "default").commit();
         System.out.println("commited");
     }
-
 
     private void startScanAnimation() {
 

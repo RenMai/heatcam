@@ -540,12 +540,13 @@ public class ResultFragment extends Fragment implements FaceDetectListener {
         }
         // schedule the layout change if there isn't already a task going for it
         if (idleExecutor.getTaskCount() == 0) {
+            int seconds = Integer.parseInt(sharedPrefs.getString("PREFERENCE_SECONDS_TO_SWITCH_INTRO_RESULT", "10"));
             idleExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
                     changeLayout();
                 }
-            }, 10, TimeUnit.SECONDS); // could probably use like 5 second delay
+            }, seconds, TimeUnit.SECONDS);
         }
     }
 
