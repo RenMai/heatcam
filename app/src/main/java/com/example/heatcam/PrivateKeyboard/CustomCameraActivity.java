@@ -29,6 +29,8 @@ import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -36,7 +38,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.example.heatcam.PrivateKeyboard.Data.TakingPicture;
+import com.example.heatcam.PrivateKeyboard.Helpers.QRUtils;
 import com.example.heatcam.R;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -53,8 +59,6 @@ public class CustomCameraActivity extends AppCompatActivity {
     //Check state orientation of output image
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     private static final int REQUEST_CAMERA_PERMISSION = 200;
-    private static final int MAX_PREVIEW_WIDTH = 1920;
-    private static final int MAX_PREVIEW_HEIGHT = 1080;
 
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, -90);
@@ -64,12 +68,13 @@ public class CustomCameraActivity extends AppCompatActivity {
     }
 
     private Button btnCapture;
+    private Button btnRetake;
     private TextureView textureView;
-    private String cameraId;
     private CameraDevice cameraDevice;
     private CameraCaptureSession cameraCaptureSessions;
     private CaptureRequest.Builder captureRequestBuilder;
     private Size imageDimension;
+    private boolean isCapturing = true;
     TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
@@ -88,9 +93,9 @@ public class CustomCameraActivity extends AppCompatActivity {
 
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-
         }
     };
+
     //Save to FILE
     private File file;
     private Handler mBackgroundHandler;
@@ -111,32 +116,67 @@ public class CustomCameraActivity extends AppCompatActivity {
             cameraDevice.close();
         }
     };
+
     private HandlerThread mBackgroundThread;
+    private final String functionUrl = "https://privatekeyboard.azurewebsites.net/api";
+    HubConnection hubConnection = HubConnectionBuilder.create(functionUrl).build();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pkb_activity_custom_camera);
+        hubConnection.on("pressButton", (message) -> {
+            if (!message.sender.equals(QRUtils.connectedUuid)) return;
+            Log.d("pressButton", String.valueOf(message.value));
+            if (message.value.equals("retake")) {
+                runOnUiThread(() -> btnRetake.callOnClick());
+            }
+            if (message.value.equals("capture") || message.value.equals("confirm")) {
+                runOnUiThread(() -> btnCapture.callOnClick());
+            }
+            if (message.value.equals("cancel")) {
+                finish();
+            }
 
+        }, TakingPicture.class);
+
+        hubConnection.start().blockingAwait();
         textureView = findViewById(R.id.textureView);
         //From Java 1.4 , you can use keyword 'assert' to check expression true or false
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
         btnCapture = findViewById(R.id.btnCapture);
-        btnCapture.setOnClickListener(view -> takePicture());
+        btnCapture.setOnClickListener(view -> {
+            btnRetake.setVisibility(View.VISIBLE);
+            ViewGroup.LayoutParams params = btnCapture.getLayoutParams();
+            params.width = 330;
+            btnCapture.setLayoutParams(params);
+            btnCapture.setText("Confirm");
+            takePicture();
+        });
+        btnRetake = findViewById(R.id.btnRetake);
+        btnRetake.setOnClickListener(view -> {
+            btnRetake.setVisibility(View.INVISIBLE);
+            ViewGroup.LayoutParams params = btnCapture.getLayoutParams();
+            params.width = -1;
+            btnCapture.setLayoutParams(params);
+            isCapturing = true;
+            createCameraPreview();
+        });
     }
 
     private void takePicture() {
         if (cameraDevice == null)
             return;
+
         CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+
         try {
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraDevice.getId());
             Size[] jpegSizes = null;
             if (characteristics != null)
                 jpegSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
                         .getOutputSizes(ImageFormat.JPEG);
-
             //Capture image with custom size
             int width = 640;
             int height = 480;
@@ -144,11 +184,11 @@ public class CustomCameraActivity extends AppCompatActivity {
                 width = jpegSizes[0].getWidth();
                 height = jpegSizes[0].getHeight();
             }
+
             ImageReader imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 2);
             List<Surface> outputSurface = new ArrayList<>(2);
             outputSurface.add(imageReader.getSurface());
             outputSurface.add(new Surface(textureView.getSurfaceTexture()));
-
             final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             captureBuilder.addTarget(imageReader.getSurface());
             captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
@@ -160,24 +200,34 @@ public class CustomCameraActivity extends AppCompatActivity {
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader imageReader) {
-                    try (Image image = imageReader.acquireLatestImage()) {
-                        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-                        byte[] bytes = new byte[buffer.capacity()];
-                        buffer.get(bytes);
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, null);
-                        Bitmap rotatedBitmap = rotateImageToUpright(bitmap);
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        rotatedBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                        byte[] byteArray = stream.toByteArray();
-                        createFile(byteArray);
-                        Intent intent = new Intent(CustomCameraActivity.this, MainActivity.class);
-                        intent.putExtra("image_path", file.getPath());
-                        startActivity(intent);
+                    if (isCapturing) {
+                        isCapturing = false;
+                        try (Image image = imageReader.acquireNextImage()) {
+                            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+                            byte[] bytes = new byte[buffer.remaining()];
+                            buffer.get(bytes);
+                        }
+                    } else {
+                        try (Image image = imageReader.acquireLatestImage()) {
+                            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+                            byte[] bytes = new byte[buffer.capacity()];
+                            buffer.get(bytes);
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, null);
+                            Bitmap rotatedBitmap = rotateImageToUpright(bitmap);
+                            createFile(rotatedBitmap);
+                            Intent intent = new Intent(CustomCameraActivity.this, MainActivity.class);
+                            hubConnection.stop();
+                            intent.putExtra("image_path", file.getPath());
+                            startActivity(intent);
+                        }
                     }
                 }
 
-                private void createFile(byte[] fileData) {
+                private void createFile(Bitmap imageBitmap) {
                     try {
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] fileData = stream.toByteArray();
                         File path = new File(getApplicationContext().getFilesDir(), "Images");
                         if (!path.exists()) {
                             path.mkdirs();
@@ -214,11 +264,8 @@ public class CustomCameraActivity extends AppCompatActivity {
 
                 @Override
                 public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
-
                 }
             }, mBackgroundHandler);
-
-
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -268,14 +315,12 @@ public class CustomCameraActivity extends AppCompatActivity {
             String[] cameraIdList = manager.getCameraIdList();
             for (String testCameraId : cameraIdList) {
                 CameraCharacteristics characteristics = manager.getCameraCharacteristics(testCameraId);
-
                 // We don't use a front facing camera in this sample.
                 Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
                 if (facing != null && facing == CameraCharacteristics.LENS_FACING_BACK) {
                     continue;
                 }
 
-                cameraId = testCameraId;
                 StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
                 assert map != null;
                 imageDimension = map.getOutputSizes(SurfaceTexture.class)[0];
@@ -288,7 +333,7 @@ public class CustomCameraActivity extends AppCompatActivity {
                     return;
                 }
                 configureTransform(width, height);
-                manager.openCamera(cameraId, stateCallback, null);
+                manager.openCamera(testCameraId, stateCallback, null);
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();

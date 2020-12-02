@@ -44,8 +44,8 @@
 
 
     <!-- Private Keyboard  -->
-    <string name="first_name">First name</string>
-    <string name="last_name">Last name</string>
+    <string name="first_name">Full name</string>
+    <string name="last_name">Company name</string>
     <string name="phone_number">Phone number</string>
     <string name="email_address">Email Address</string>
     <string name="gender">Gender</string>
