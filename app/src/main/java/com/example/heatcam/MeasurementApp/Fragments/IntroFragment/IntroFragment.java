@@ -1,6 +1,7 @@
 package com.example.heatcam.MeasurementApp.Fragments.IntroFragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -39,6 +40,13 @@ import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LowResol
 import com.example.heatcam.MeasurementApp.Main.MainActivity;
 import com.example.heatcam.MeasurementApp.Fragments.Measurement.MeasurementStartFragment;
 import com.example.heatcam.MeasurementApp.Utils.HybridBitmapBuilder.HybridImageOptions;
+import com.example.heatcam.PrivateKeyboard.ConnectionHandler;
+import com.example.heatcam.PrivateKeyboard.ConnectionListener;
+import com.example.heatcam.PrivateKeyboard.Data.ConfirmQRScan;
+import com.example.heatcam.PrivateKeyboard.Data.NewMessage;
+import com.example.heatcam.PrivateKeyboard.Data.TakingPicture;
+import com.example.heatcam.PrivateKeyboard.Data.TiltAngle;
+import com.example.heatcam.PrivateKeyboard.Helpers.QRUtils;
 import com.example.heatcam.R;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialPort.SerialPortModel;
 import com.example.heatcam.MeasurementApp.FaceDetector.VisionImageProcessor;
@@ -47,7 +55,7 @@ import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
 
-public class IntroFragment extends Fragment implements FaceDetectListener, CameraListener {
+public class IntroFragment extends Fragment implements FaceDetectListener, CameraListener, ConnectionListener {
 
     private final String TAG = "IntroFragment";
 
@@ -107,6 +115,13 @@ public class IntroFragment extends Fragment implements FaceDetectListener, Camer
 
         serialPortModel = SerialPortModel.getInstance();
         serialPortModel.setCamListener(this);
+
+        ConnectionHandler cHandle = ConnectionHandler.getInstance();
+        cHandle.setListener(this);
+        cHandle.initConnection();
+
+        ImageView qr = view.findViewById(R.id.qr_code);
+        qr.setImageBitmap(QRUtils.create());
         return view;
     }
 
@@ -129,6 +144,7 @@ public class IntroFragment extends Fragment implements FaceDetectListener, Camer
     @Override
     public void onResume() {
         super.onResume();
+        ConnectionHandler.getInstance().setListener(this);
         bindAllCameraUseCases();
     }
 
@@ -301,5 +317,26 @@ public class IntroFragment extends Fragment implements FaceDetectListener, Camer
     @Override
     public void writeToFile(byte[] data) {
 
+    }
+
+    @Override
+    public void onSendInputField(NewMessage message) {
+        // not used
+    }
+
+    @Override
+    public void onUpdateTiltAngle(TiltAngle message) {
+        // not used
+    }
+
+    @Override
+    public void onPressButton(TakingPicture message) {
+        // not used
+    }
+
+    @Override
+    public void onConfirmQRScan(ConfirmQRScan message) {
+        QRUtils.connectedUuid = message.uuid;
+        startActivity(new Intent(getContext(), com.example.heatcam.PrivateKeyboard.MainActivity.class));
     }
 }

@@ -126,7 +126,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionListene
             getInstance(saveInstance);
         }
 
-        cHandler = new ConnectionHandler(this);
+        cHandler = ConnectionHandler.getInstance();
+        cHandler.setListener(this);
 
         /*
         String functionUrl = "https://privatekeyboard.azurewebsites.net/api";
@@ -183,11 +184,15 @@ public class MainActivity extends AppCompatActivity implements ConnectionListene
         hubConnection.start().blockingAwait();
 */
         //Check if is there already a connection when go back from other activity
-        QRUtils.SetNewQRBitmap(findViewById(R.id.qrImage), linearLayout);
+        //QRUtils.SetNewQRBitmap(findViewById(R.id.qrImage), linearLayout);
+        /*
+        Bitmap qrBitmap = QRUtils.create();
+        qrImage.setImageBitmap(qrBitmap);
         if (QRUtils.connectedUuid != null) {
             qrImage.setVisibility(View.INVISIBLE);
 
-        }
+        }*/
+        qrImage.setVisibility(View.INVISIBLE);
     }
 
     private void saveInstance() {
@@ -331,10 +336,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionListene
     @Override
     public void onConfirmQRScan(ConfirmQRScan message) {
         // Set new QR bitmap to avoid duplicate connection
-        QRUtils.SetNewQRBitmap(findViewById(R.id.qrImage), linearLayout);
+       // QRUtils.SetNewQRBitmap(findViewById(R.id.qrImage), linearLayout);
         // hide the QR view after connecting successfully
-        qrImage.setVisibility(View.INVISIBLE);
+        //qrImage.setVisibility(View.INVISIBLE);
         // Set connection ID
-        QRUtils.connectedUuid = message.uuid;
+       // QRUtils.connectedUuid = message.uuid;
     }
 }

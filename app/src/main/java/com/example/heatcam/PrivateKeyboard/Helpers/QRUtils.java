@@ -39,6 +39,25 @@ public class QRUtils {
         }
     }
 
+    public static Bitmap create() {
+        newUuid = UUID.randomUUID().toString();
+
+        String settings = "[{\"position\":\"1\",\"type\":\"text\",\"label\":\"Full name\",\"placeholder\":\"Full name\"}," +
+                "{\"position\":\"2\",\"type\":\"text\",\"label\":\"Company name\",\"placeholder\":\"Company name\"}," +
+                "{\"position\":\"3\",\"type\":\"text\",\"label\":\"Host name\",\"placeholder\":\"Host name\"}," +
+                "{\"position\":\"4\",\"type\":\"email\",\"label\":\"Email Address\",\"placeholder\":\"Email Address\"}]";
+        settings = CipherDecrypt.Encrypt(settings);
+        QRGEncoder qrgEncoder = new QRGEncoder(baseWebAppUrl + "?settings=" + settings + "&uuid=" + newUuid, null, QRGContents.Type.TEXT, 450);
+        Bitmap bitmap = null;
+        try {
+            bitmap = qrgEncoder.encodeAsBitmap();
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+        return bitmap;
+
+    }
+
     private static String GenerateQRQuery(LinearLayout layout) {
         StringBuilder query = new StringBuilder("[");
         for (int i = 0; i < layout.getChildCount(); i++) {

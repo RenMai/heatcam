@@ -17,7 +17,17 @@ public class ConnectionHandler {
 
     private ConnectionListener listener;
 
-    private void initConnection() {
+    private static ConnectionHandler INSTANCE;
+
+    public static ConnectionHandler getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ConnectionHandler();
+        }
+
+        return INSTANCE;
+    }
+
+    public void initConnection() {
         hubConnection = HubConnectionBuilder
                 .create(functionUrl)
                 .build();
@@ -68,16 +78,15 @@ public class ConnectionHandler {
         this("https://privatekeyboard.azurewebsites.net/api");
     }
 
-    public ConnectionHandler(ConnectionListener listener) {
+    private ConnectionHandler(ConnectionListener listener) {
         this();
         this.listener = listener;
         initConnection();
     }
 
-    public ConnectionHandler(ConnectionListener listener, String functionUrl) {
+    private ConnectionHandler(ConnectionListener listener, String functionUrl) {
         this(functionUrl);
         this.listener = listener;
-        initConnection();
     }
 
 }
