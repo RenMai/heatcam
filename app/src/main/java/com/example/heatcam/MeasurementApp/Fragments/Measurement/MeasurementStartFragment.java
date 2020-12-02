@@ -280,7 +280,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             animatedOval.setVisibility(View.INVISIBLE);
             scanBar.clearAnimation();
             scanBar.setVisibility(View.INVISIBLE);
-           // indicateOvalDistance(dist);
+            indicateOvalDistance(dist); // makes oval's borders thicker if user is far away
             ready = false;
             laskuri = 0;
             userTempList = null;
@@ -306,7 +306,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private void indicateOvalDistance(float dist) {
         if (dist > preferred_measure_distance && dist < 600) {
             float pWidth = ((60 - 12) * (dist - 250) / (600 - 250)) + 12;
-            animatedOval.init((float) pWidth, false);
+            animatedOval.init(pWidth, false);
             animatedOval.setVisibility(View.VISIBLE);
             animatedOval.invalidate();
         }
