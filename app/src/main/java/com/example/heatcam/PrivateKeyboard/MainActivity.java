@@ -48,7 +48,7 @@ import java.util.UUID;
 
 import static com.example.heatcam.PrivateKeyboard.Data.EmailConfig.saveInstance;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ConnectionListener {
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
     static {
@@ -65,6 +65,11 @@ public class MainActivity extends AppCompatActivity {
     // Deployment function URL: https://privatekeyboard.azurewebsites.net/api
     // Development function URL (example): http://192.168.1.149:7071/api
 
+    ConnectionHandler cHandler;
+    Button sendEmailButton;
+    Button openCustomCameraButton;
+    ImageView qrImage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         linearLayout = findViewById(R.id.input_layout);
-        ImageView qrImage = findViewById(R.id.qrImage);
+        qrImage = findViewById(R.id.qrImage);
         profileImageView = findViewById(R.id.takenImage);
 
         Bundle bundle = getIntent().getExtras();
@@ -103,14 +108,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        Button sendEmailButton = findViewById(R.id.sendEmailButton);
+        sendEmailButton = findViewById(R.id.sendEmailButton);
         sendEmailButton.setOnClickListener(view -> {
             updateVisitorCardFields();
             saveVisitorCard();
             sendEmail();
         });
 
-        Button openCustomCameraButton = findViewById(R.id.buttonCam);
+        openCustomCameraButton = findViewById(R.id.buttonCam);
         openCustomCameraButton.setOnClickListener(v -> {
             saveInstance();
             Intent intent = new Intent(MainActivity.this, CustomCameraActivity.class);
@@ -120,6 +125,10 @@ public class MainActivity extends AppCompatActivity {
         if (!saveInstance.isEmpty()) {
             getInstance(saveInstance);
         }
+
+        cHandler = new ConnectionHandler(this);
+
+        /*
         String functionUrl = "https://privatekeyboard.azurewebsites.net/api";
         HubConnection hubConnection = HubConnectionBuilder.create(functionUrl).build();
 
@@ -172,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
         }, ConfirmQRScan.class);
         //Start the connection
         hubConnection.start().blockingAwait();
-
+*/
         //Check if is there already a connection when go back from other activity
         QRUtils.SetNewQRBitmap(findViewById(R.id.qrImage), linearLayout);
         if (QRUtils.connectedUuid != null) {
@@ -293,5 +302,39 @@ public class MainActivity extends AppCompatActivity {
         //Getting content for clientEmail
         SendMail sm = new SendMail(this, ((EditText) findViewById(R.id.emailText)).getText().toString(), "Personal Information", visitorCardImageFile.getPath());
         sm.execute();
+    }
+
+    @Override
+    public void onSendInputField(NewMessage message) {
+        LinearLayout inputField = (LinearLayout) linearLayout.getChildAt(message.targetInput);
+        runOnUiThread(() -> ((EditText) inputField.getChildAt(1)).setText(message.text));
+    }
+
+    @Override
+    public void onUpdateTiltAngle(TiltAngle message) {
+        saveInstance.put("TextViewField-Tilt", String.valueOf(message.value));
+        TextView tiltTextView = findViewById(R.id.tiltValue);
+        runOnUiThread(() -> tiltTextView.setText("Angle:" + message.value));
+    }
+
+    @Override
+    public void onPressButton(TakingPicture message) {
+        if (message.value.equals("on")) {
+            openCustomCameraButton.callOnClick();
+            cHandler.stop();
+        }else if (message.value.equals("sendEmail")) {
+            Log.d("call", "calllled");
+            runOnUiThread(() -> sendEmailButton.callOnClick());
+        }
+    }
+
+    @Override
+    public void onConfirmQRScan(ConfirmQRScan message) {
+        // Set new QR bitmap to avoid duplicate connection
+        QRUtils.SetNewQRBitmap(findViewById(R.id.qrImage), linearLayout);
+        // hide the QR view after connecting successfully
+        qrImage.setVisibility(View.INVISIBLE);
+        // Set connection ID
+        QRUtils.connectedUuid = message.uuid;
     }
 }
