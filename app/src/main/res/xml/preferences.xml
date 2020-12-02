@@ -60,6 +60,22 @@
         android:defaultValue="600"
         app:useSimpleSummaryProvider="true" />
 
+    <EditTextPreference
+        app:key="PREFERENCE_SECONDS_TO_SWITCH_INTRO_MEASUREMENT"
+        app:title="Time in seconds after when to change to IntroFrag from MeasurementFrag"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="10"
+        app:useSimpleSummaryProvider="true" />
+
+    <EditTextPreference
+        app:key="PREFERENCE_SECONDS_TO_SWITCH_INTRO_RESULT"
+        app:title="Time in seconds after when to change to IntroFrag from ResultFrag"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="10"
+        app:useSimpleSummaryProvider="true" />
+
     <ListPreference
         app:key="list"
         app:title="List"
