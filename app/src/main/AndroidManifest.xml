@@ -8,6 +8,10 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- private keyboard required persmisions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.hardware.camera2.full" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -49,6 +53,8 @@
         <activity android:name=".MeasurementApp.OLD.VideoActivity"></activity>
         <activity android:name=".MeasurementApp.OLD.LiveCameraActivity" />
         <activity android:name=".MeasurementApp.Fragments.CameraTest.LogView" />
+        <activity android:name=".PrivateKeyboard.CustomCameraActivity" />
+        <activity android:name=".PrivateKeyboard.MainActivity" />
     </application>
 
 </manifest>

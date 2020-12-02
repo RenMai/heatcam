@@ -51,6 +51,15 @@
         android:defaultValue="500"
         app:useSimpleSummaryProvider="true" />
 
+    <!-- how close the user's face has to be to cancel the switch from ResultFragment to IntroFragment -->
+    <EditTextPreference
+        app:key="PREFERENCE_RESULT_IDLE_CANCEL_DISTANCE"
+        app:title="Dist to stop idle executor in result fragment"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="600"
+        app:useSimpleSummaryProvider="true" />
+
     <ListPreference
         app:key="list"
         app:title="List"

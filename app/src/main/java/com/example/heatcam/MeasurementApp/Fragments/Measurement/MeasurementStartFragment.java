@@ -280,6 +280,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             animatedOval.setVisibility(View.INVISIBLE);
             scanBar.clearAnimation();
             scanBar.setVisibility(View.INVISIBLE);
+           // indicateOvalDistance(dist);
             ready = false;
             laskuri = 0;
             userTempList = null;
@@ -302,6 +303,15 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
         return et;
     }
 
+    private void indicateOvalDistance(float dist) {
+        if (dist > preferred_measure_distance && dist < 600) {
+            float pWidth = ((60 - 12) * (dist - 250) / (600 - 250)) + 12;
+            animatedOval.init((float) pWidth, false);
+            animatedOval.setVisibility(View.VISIBLE);
+            animatedOval.invalidate();
+        }
+    }
+
     private void updateProgress() {
         try {
             ProgressBar bar = getActivity().findViewById(R.id.face_check_prog);
@@ -320,17 +330,14 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
             width = live.getWidth(); height = live.getHeight();
         }
         float dist = facePositionCheck(face, width, height);
-
+        hbb.setDistance(dist);
         // getActivity().runOnUiThread(() -> txtDebug.setText(String.valueOf(laskuri)));
         if (ready) {
             if (userTempList == null) {
                 userTempList = new ArrayList<>();
             }
             if (laskuri < 35) {
-                float distDiff = (dist - 250)/100;
-                float correction = distDiff * 0.404f *(-1);
-                double correctedTemp = hbb.getHighestFaceTemperature() + correction - 0.8;
-                userTempList.add(correctedTemp);
+                userTempList.add(hbb.getHighestFaceTemperature());
 
                 if (hbb.getHighestFaceTemperature() > userTemp) {
                     userTemp = hbb.getHighestFaceTemperature();
@@ -406,7 +413,7 @@ public class MeasurementStartFragment extends Fragment implements CameraListener
     private void startScanAnimation() {
 
         if (!ready) {
-            animatedOval.init();
+            animatedOval.init(12, true);
             animatedOval.setVisibility(View.VISIBLE);
 
             scanBar.setVisibility(View.VISIBLE);

@@ -1,5 +1,6 @@
 package com.example.heatcam.MeasurementApp.Fragments.Result;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PointF;
@@ -21,6 +22,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
 
 import com.example.heatcam.MeasurementApp.FaceDetector.CameraXViewModel;
 import com.example.heatcam.MeasurementApp.FaceDetector.FaceDetectListener;
@@ -100,12 +102,14 @@ public class ResultFragment extends Fragment implements FaceDetectListener {
 
     private ScheduledThreadPoolExecutor idleExecutor;
 
+    private SharedPreferences sharedPrefs;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.heatcam_result_fragment, container, false);
 
-
+        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
 
         //moving background
         ConstraintLayout constraintLayout = (ConstraintLayout) view.findViewById(R.id.ConstraintLayout);
@@ -511,12 +515,11 @@ public class ResultFragment extends Fragment implements FaceDetectListener {
         Size imgSize = new Size(originalCameraImage.getWidth(), originalCameraImage.getHeight());
         PointF leftEyeP = face.getLandmark(FaceLandmark.LEFT_EYE).getPosition();
         PointF rightEyeP = face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition();
-        face.getTrackingId();
+        int minFaceDist = Integer.parseInt(sharedPrefs.getString("PREFERENCE_RESULT_IDLE_CANCEL_DISTANCE", "600"));
         try {
             float dist = FrontCameraProperties.getProperties().getDistance(imgSize, leftEyeP, rightEyeP);
-           // System.out.println(dist + " jees");
-            // TODO: try with different values
-            if (dist < 600) {
+            // TODO: try with different minFaceDist values
+            if (dist < minFaceDist) {
                 stopIdleExecutor();
             } else {
                 startIdleExecutor();

@@ -30,8 +30,8 @@
     <string name="prev_measurements">Measurements</string>
     <string name="user_measurement">You</string>
     <string name="vertical_temp_text">T\ne\nm\np\ne\nr\na\nt\nu\nr\ne</string>
-
     <string name="high_temp_line_text">High temp</string>
+    <string name="graph_title_text"><u>Previous measurements</u></string>
     
     <!-- ExitAutoDialogFragment text -->
     <string name="wrong_password_msg">Wrong password</string>
@@ -41,4 +41,19 @@
     <string name="the_private_keyboard_qr_code">The Private Keyboard QR code</string>
 
     <string name="device_start_info">Waiting for heat sensor to stabilize</string>
+
+
+    <!-- Private Keyboard  -->
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="phone_number">Phone number</string>
+    <string name="email_address">Email Address</string>
+    <string name="gender">Gender</string>
+    <string name="radio_male">Male</string>
+    <string name="radio_female">Female</string>
+    <string name="qr_code">QR code</string>
+    <string name="tilt_adjustment">Tilt adjustment</string>
+    <string name="angle">Angle: 0</string>
+    <string name="take_picture">TAKE PICTURE</string>
+    <string name="inform">Allow only ONE connection at a time </string>
 </resources>

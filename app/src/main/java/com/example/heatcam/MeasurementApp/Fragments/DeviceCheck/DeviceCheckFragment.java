@@ -2,6 +2,7 @@ package com.example.heatcam.MeasurementApp.Fragments.DeviceCheck;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import com.example.heatcam.MeasurementApp.Fragments.CameraListener;
 import com.example.heatcam.MeasurementApp.Fragments.IntroFragment.IntroFragment;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialListeners.LowResolution16BitCamera;
 import com.example.heatcam.MeasurementApp.ThermalCamera.SerialPort.SerialPortModel;
+import com.example.heatcam.PrivateKeyboard.MainActivity;
 import com.example.heatcam.R;
 
 import java.util.concurrent.TimeUnit;
@@ -74,6 +76,11 @@ public class DeviceCheckFragment extends Fragment implements CameraListener {
         b.setOnClickListener((View v) -> {
             timer.cancel();
             timer.onFinish();
+        });
+
+        Button pkbTest = view.findViewById(R.id.pkbTest);
+        pkbTest.setOnClickListener((View v) -> {
+            startActivity(new Intent(getContext(), MainActivity.class));
         });
 
         checkCamera(view.getContext());

@@ -43,7 +43,7 @@ public class HybridBitmapBuilder{
         HybridImageOptions.temperature = sp.getBoolean("temperature", true);
         HybridImageOptions.transparency = sp.getInt("transparency", 200);
         HybridImageOptions.smooth = sp.getBoolean("smooth", true);
-        HybridImageOptions.facebounds = sp.getBoolean("facebounds", true);
+        HybridImageOptions.facebounds = sp.getBoolean("facebounds", false);
 
         HybridImageOptions.scale = sp.getFloat("scale", 8.97f);
         HybridImageOptions.xOffset = sp.getInt("offsetx", -32);
@@ -125,7 +125,10 @@ public class HybridBitmapBuilder{
 
         return live;
     }
-
+    double distance = 0;
+    public void setDistance(double distance){
+        this.distance = distance;
+    }
     private void updateLiveImage(Bitmap img){
         // copy image to make it mutable
         Bitmap image = img.copy(Bitmap.Config.ARGB_8888, true);
@@ -194,6 +197,7 @@ public class HybridBitmapBuilder{
                 for(int y = yla; y < ala; y++){
                     for(int x = vasen; x < oikea; x++){
                         double lampo = (scaledTempFrame[y][x]- 27315)/100.0;
+                        lampo = pyoristys(lampo+distance*0.0034);
                         if(lampo > temp.max){
 
                             temp.max = lampo;
@@ -225,13 +229,16 @@ public class HybridBitmapBuilder{
             temp.y = y/lukemat.size();
             temp.max = Math.round(keskilampo/lukemat.size()*100.0)/100.0;
         }
-
-        if(temp.max > huiput.max+0.2 || temp.max < huiput.max-0.2)*/
-        huiput = temp;
+*/
+        if(temp.max >= huiput.max+0.1 || temp.max <= huiput.max-0.1)
+            huiput = temp;
 
         return huiput;
     }
 
+    public double pyoristys(double luku){
+        return Math.round(luku*10.0)/10.0;
+    }
     public double getHighestFaceTemperature(){
         return huiput.max;
     }
