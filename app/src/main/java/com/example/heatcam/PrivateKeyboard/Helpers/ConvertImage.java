@@ -67,7 +67,7 @@ public class ConvertImage {
         try {
             LocalDateTime now = LocalDateTime.now();
             String filename = now.toString() + ".png";
-            outputStream = new FileOutputStream("/data/data/com.example.privatekeyboard/files/" + filename);
+            outputStream = new FileOutputStream("/data/data/com.example.heatcam/files/" + filename);
 
             outputStream.write(imageInByteArray);
         } catch (IOException e) {

@@ -18,8 +18,9 @@ import androidmads.library.qrgenearator.QRGContents;
 import androidmads.library.qrgenearator.QRGEncoder;
 
 public class QRUtils {
-    public static String connectedUuid;
-    public static String newUuid;
+
+    public static String connectedUuid = null;
+    public static String newUuid = null;
     private static final String baseWebAppUrl = "https://lively-stone-01c8fc003.azurestaticapps.net/";
     // Deployment web app URL: https://lively-stone-01c8fc003.azurestaticapps.net/
     // Development web app URL (example): http://192.168.1.149:3000/
@@ -29,7 +30,7 @@ public class QRUtils {
         Log.d("NewUUID", newUuid);
         String settings = GenerateQRQuery(formLinearLayout);
         Log.d("InputSettings", settings);
-        QRGEncoder qrgEncoder = new QRGEncoder(baseWebAppUrl + "?settings=" + settings + "&uuid=" + newUuid, null, QRGContents.Type.TEXT, 800);
+        QRGEncoder qrgEncoder = new QRGEncoder(baseWebAppUrl + "?settings=" + settings + "&uuid=" + newUuid, null, QRGContents.Type.TEXT, 450);
         try {
             Bitmap bitmap = qrgEncoder.encodeAsBitmap();
             qrImage.setImageBitmap(bitmap);
@@ -60,7 +61,7 @@ public class QRUtils {
                 }
             }
         }
-        if(query.length() > 0){
+        if (query.length() > 0) {
             query.deleteCharAt(query.length() - 1);
         }
         query.append("]");
