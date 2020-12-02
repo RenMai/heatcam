@@ -82,6 +82,7 @@ public class DeviceCheckFragment extends Fragment implements CameraListener {
         pkbTest.setOnClickListener((View v) -> {
             startActivity(new Intent(getContext(), MainActivity.class));
         });
+        pkbTest.setVisibility(View.INVISIBLE);
 
         checkCamera(view.getContext());
 
