@@ -1,6 +1,7 @@
 package com.example.heatcam.PrivateKeyboard;
 
 import android.util.Log;
+
 import com.example.heatcam.PrivateKeyboard.Data.ConfirmQRScan;
 import com.example.heatcam.PrivateKeyboard.Data.NewMessage;
 import com.example.heatcam.PrivateKeyboard.Data.TakingPicture;
