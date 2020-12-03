@@ -31,3 +31,31 @@ MPAndroidChart library used for displaying charts by PhilJay (https://github.com
 implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 ```
 
+## Project structure
+
+Project containts two folders Measuerement and PrivateKeyboard to seperate these. However resources such as strings etc. are stored in same files. Layouts are named **heatcam_** and **pkb_** based on wich one of the previously mentioned projects they are used.
+
+
+##### 1 Heatcam Measurement App
+Structure:
+
+- BroadcastReceivers `Contains intent recievers`
+- FaceDetector `Contains classes used for detecting faces`
+- Fragments `UI` `Contains Fragment classes that are changed during the application`
+- FrontCamera `Currently contains property class for front camera that are called once in app lifecycle.`
+- Main `Contains root activity.`
+- ThermalCamera
+  - SerialListeners
+  	- `Listeners that listens SerialPortModels IO Manager onNewData method.`
+  	- `These classes handles the thermal image feed and temperature.`
+  	- `Only 16Bit version is currently in use.`
+  - SerialPort
+    - SerialPortModel.java `Singleton class that handles IO with serial USB`
+- Utils
+
+##### 2 PrivateKeyboard
+Structure:
+- Data
+- Helpers
+
+
