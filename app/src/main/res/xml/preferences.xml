@@ -76,6 +76,15 @@
         android:defaultValue="10"
         app:useSimpleSummaryProvider="true" />
 
+    <EditTextPreference
+        app:key="PREFERENCE_SECONDS_TO_SWITCH_INTRO_PKBMAIN"
+        app:title="Time in seconds after when to change to IntroFrag from PrivateKBMain"
+        android:inputType="number"
+        android:digits="0123456789"
+        android:defaultValue="10"
+        app:useSimpleSummaryProvider="true" />
+
+    <!--
     <ListPreference
         app:key="list"
         app:title="List"
@@ -92,5 +101,6 @@
     <CheckBoxPreference
         app:key="check"
         app:title="CheckBox" />
+        -->
 
 </androidx.preference.PreferenceScreen>

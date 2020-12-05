@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:textAlignment="center"
+    android:background="@drawable/bg_red_to_blue_list"
     tools:context=".PrivateKeyboard.MainActivity">
 
     <LinearLayout
@@ -49,7 +50,8 @@
                     android:id="@+id/textView8"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Name:" />
+                    android:text="Name:"
+                    android:textColor="#FAFAFA" />
 
                 <TextView
                     android:id="@+id/visitorName"
@@ -57,19 +59,22 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:inputType="textPersonName"
-                    android:text="Name" />
+                    android:text="Name"
+                    android:textColor="#FAFAFA" />
 
                 <TextView
                     android:id="@+id/textView9"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Valid thru:" />
+                    android:text="Valid thru:"
+                    android:textColor="#FAFAFA" />
 
                 <TextView
                     android:id="@+id/visitDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="22/11/2020" />
+                    android:text="22/11/2020"
+                    android:textColor="#FAFAFA" />
             </LinearLayout>
 
         </LinearLayout>
@@ -83,7 +88,7 @@
             android:text="VISITOR"
             android:textAlignment="center"
             android:textAllCaps="true"
-            android:textColor="#FFFFFF"
+            android:textColor="#FAFAFA"
             android:textSize="36sp"
             android:textStyle="bold" />
 
@@ -119,13 +124,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="LEVITEZER"
-                        android:textAllCaps="true" />
+                        android:textAllCaps="true"
+                        android:textColor="#FAFAFA" />
 
                     <TextView
                         android:id="@+id/textView14"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Smooths the movement" />
+                        android:text="Smooths the movement"
+                        android:textColor="#FAFAFA" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -191,7 +198,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/first_name" />
+                    android:text="@string/first_name"
+                    android:textColor="#FAFAFA" />
 
                 <EditText
                     android:id="@+id/fullNameText"
@@ -201,7 +209,8 @@
                     android:autofillHints="@string/first_name"
                     android:ems="10"
                     android:hint="@string/first_name"
-                    android:inputType="textPersonName" />
+                    android:inputType="textPersonName"
+                    android:textColor="#FAFAFA" />
             </LinearLayout>
 
             <LinearLayout
@@ -215,7 +224,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/last_name" />
+                    android:text="@string/last_name"
+                    android:textColor="#FAFAFA" />
 
                 <EditText
                     android:id="@+id/companyNameText"
@@ -225,7 +235,8 @@
                     android:autofillHints="@string/last_name"
                     android:ems="10"
                     android:hint="@string/last_name"
-                    android:inputType="textPersonName" />
+                    android:inputType="textPersonName"
+                    android:textColor="#FAFAFA" />
             </LinearLayout>
 
             <LinearLayout
@@ -239,7 +250,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Host name" />
+                    android:text="Host name"
+                    android:textColor="#FAFAFA" />
 
                 <EditText
                     android:id="@+id/hostNameText"
@@ -249,7 +261,8 @@
                     android:autofillHints="@string/last_name"
                     android:ems="10"
                     android:hint="Host name"
-                    android:inputType="textPersonName" />
+                    android:inputType="textPersonName"
+                    android:textColor="#FAFAFA" />
             </LinearLayout>
 
             <!--            <LinearLayout-->
@@ -287,7 +300,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/email_address" />
+                    android:text="@string/email_address"
+                    android:textColor="#FAFAFA" />
 
                 <EditText
                     android:id="@+id/emailText"
@@ -297,7 +311,8 @@
                     android:autofillHints="@string/email_address"
                     android:ems="10"
                     android:hint="@string/email_address"
-                    android:inputType="textEmailAddress" />
+                    android:inputType="textEmailAddress"
+                    android:textColor="#FAFAFA" />
             </LinearLayout>
 
             <!--            <LinearLayout-->
@@ -347,7 +362,8 @@
                     android:layout_height="0dp"
                     android:layout_marginBottom="20dp"
                     android:layout_weight="1"
-                    android:text="@string/tilt_adjustment" />
+                    android:text="@string/tilt_adjustment"
+                    android:textColor="#FAFAFA" />
 
 
                 <TextView
@@ -355,7 +371,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
-                    android:text="@string/angle" />
+                    android:text="@string/angle"
+                    android:textColor="#FAFAFA" />
             </LinearLayout>
 
             <LinearLayout

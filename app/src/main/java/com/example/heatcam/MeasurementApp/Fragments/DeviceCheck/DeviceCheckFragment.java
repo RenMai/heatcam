@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.example.heatcam.MeasurementApp.Fragments.CameraListener;
@@ -60,6 +62,13 @@ public class DeviceCheckFragment extends Fragment implements CameraListener {
         View view = inflater.inflate(R.layout.device_check_layout, container, false);
         TextView mTextField = view.findViewById(R.id.mTextField);
         CircularProgressBar progressBar = view.findViewById(R.id.timeProgressBar);
+
+        //moving background
+        ConstraintLayout constraintLayout = (ConstraintLayout) view.findViewById(R.id.device_check_constraint_layout);
+        AnimationDrawable animationDrawable = (AnimationDrawable) constraintLayout.getBackground();
+        animationDrawable.setEnterFadeDuration(2000);
+        animationDrawable.setExitFadeDuration(4000);
+        animationDrawable.start();
 
         timer = new CountDownTimer(timerMillis, 1000) {
             public void onTick(long millisUntilFinished) {

@@ -44,9 +44,16 @@ public class MainActivity extends AppCompatActivity {
     private static boolean AUTO_MODE = false;
     private static boolean SETTINGS_OPEN = false;
 
+    private boolean skipDeviceCheck = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            skipDeviceCheck = bundle.getBoolean("skip_device_check");
+        }
 
         checkPermissions();
 
@@ -71,9 +78,15 @@ public class MainActivity extends AppCompatActivity {
                     .init((CameraManager) getBaseContext().getSystemService(Context.CAMERA_SERVICE));
 
             PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-            Fragment f = new DeviceCheckFragment();
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentCamera, f, "intro").commit();
+            Fragment f;
+            if (!skipDeviceCheck) { // first time running app
+                f = new DeviceCheckFragment();
+            } else { // we are coming from private keyboard so skip device check
+                f = new IntroFragment();
+            }
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragmentCamera, f, "intro").commit();
+
             MainActivity.setAutoMode(true);
         } catch (CameraAccessException e) {
             e.printStackTrace();
