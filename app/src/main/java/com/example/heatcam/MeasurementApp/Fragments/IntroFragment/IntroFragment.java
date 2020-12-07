@@ -118,10 +118,11 @@ public class IntroFragment extends Fragment implements FaceDetectListener, Camer
 
         ConnectionHandler cHandle = ConnectionHandler.getInstance();
         cHandle.setListener(this);
-        cHandle.initConnection();
-
-        ImageView qr = view.findViewById(R.id.qr_code);
-        qr.setImageBitmap(QRUtils.create());
+        try {
+            cHandle.initConnection();
+            ImageView qr = view.findViewById(R.id.qr_code);
+            qr.setImageBitmap(QRUtils.create());
+        } catch (Exception ignored) {/* couldn't connect to server */}
         return view;
     }
 
