@@ -56,4 +56,6 @@
     <string name="angle">Angle: 0</string>
     <string name="take_picture">TAKE PICTURE</string>
     <string name="inform">Allow only ONE connection at a time </string>
+    <string name="host_name">Host_name</string>
+
 </resources>

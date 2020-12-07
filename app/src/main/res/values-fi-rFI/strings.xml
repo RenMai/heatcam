@@ -51,7 +51,7 @@
     <string name="first_name">Kokonimi</string>
     <string name="last_name">Yrityksen nimi</string>
     <string name="phone_number">Puh. numero</string>
-    <string name="email_address">Email</string>
+    <string name="email_address">Sähköposti</string>
     <string name="gender">Sukupuoli</string>
     <string name="radio_male">Mies</string>
     <string name="radio_female">Nainen</string>
@@ -60,4 +60,6 @@
     <string name="angle">Kulma: 0</string>
     <string name="take_picture">OTA KUVA</string>
     <string name="inform">Vain YKSI yhteys kerrallaan</string>
+    <string name="host_name" translatable="false">Isännän nimi</string>
+
 </resources>
