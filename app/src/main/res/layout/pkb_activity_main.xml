@@ -125,7 +125,8 @@
                         android:layout_height="wrap_content"
                         android:text="LEVITEZER"
                         android:textAllCaps="true"
-                        android:textColor="#FAFAFA" />
+                        android:textColor="#FAFAFA"
+                        android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/textView14"
@@ -183,8 +184,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:text="@string/inform"
-                    android:textColor="#EA0707" />
+                    android:textColor="#EA0707"
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -199,7 +202,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/first_name"
-                    android:textColor="#FAFAFA" />
+                    android:textColor="#FAFAFA"
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/fullNameText"
@@ -225,7 +229,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/last_name"
-                    android:textColor="#FAFAFA" />
+                    android:textColor="#FAFAFA"
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/companyNameText"
@@ -250,8 +255,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Host name"
-                    android:textColor="#FAFAFA" />
+                    android:text="@string/host_name"
+                    android:textColor="#FAFAFA"
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/hostNameText"
@@ -260,7 +266,7 @@
                     android:layout_weight="1"
                     android:autofillHints="@string/last_name"
                     android:ems="10"
-                    android:hint="Host name"
+                    android:hint="@string/host_name"
                     android:inputType="textPersonName"
                     android:textColor="#FAFAFA" />
             </LinearLayout>
@@ -301,7 +307,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/email_address"
-                    android:textColor="#FAFAFA" />
+                    android:textColor="#FAFAFA"
+                    android:textSize="18sp" />
 
                 <EditText
                     android:id="@+id/emailText"
@@ -363,7 +370,8 @@
                     android:layout_marginBottom="20dp"
                     android:layout_weight="1"
                     android:text="@string/tilt_adjustment"
-                    android:textColor="#FAFAFA" />
+                    android:textColor="#FAFAFA"
+                    android:textSize="18sp" />
 
 
                 <TextView
@@ -372,7 +380,8 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:text="@string/angle"
-                    android:textColor="#FAFAFA" />
+                    android:textColor="#FAFAFA"
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -389,7 +398,8 @@
                     android:layout_marginStart="0dp"
                     android:layout_marginEnd="0dp"
                     android:layout_marginBottom="0dp"
-                    android:text="@string/take_picture" />
+                    android:text="@string/take_picture"
+                    android:textSize="18sp" />
             </LinearLayout>
 
         </LinearLayout>
@@ -439,6 +449,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Send form"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
