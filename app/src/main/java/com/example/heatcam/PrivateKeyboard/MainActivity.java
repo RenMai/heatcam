@@ -193,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionListene
 
         cHandler = ConnectionHandler.getInstance();
         cHandler.setListener(this);
+        cHandler.initConnection();
 
         /*
         String functionUrl = "https://privatekeyboard.azurewebsites.net/api";
@@ -504,7 +505,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionListene
         }
         // schedule the layout change if there isn't already a task going for it
         if (idleExecutor.getTaskCount() == 0) {
-            int seconds = Integer.parseInt(sharedPrefs.getString("PREFERENCE_SECONDS_TO_SWITCH_INTRO_PKBMAIN", "10"));
+            int seconds = 100000; //Integer.parseInt(sharedPrefs.getString("PREFERENCE_SECONDS_TO_SWITCH_INTRO_PKBMAIN", "10"));
             idleExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
